@@ -17,7 +17,7 @@
 #include <set>
 
 #define BUFFER_SIZE 10
-
+#define _GNU_SOURCE
 namespace ft
 {
 
@@ -43,8 +43,8 @@ namespace ft
 
 		std::set<int> used_fd_set_;
 
-		std::string ft_socket::recieve_msg_from_new_client_(struct pollfd poll_fd);
-		std::string ft_socket::recieve_msg_from_connected_client_(struct pollfd poll_fd);
+		std::string recieve_msg_from_connected_client_(int connection);
+		void	register_new_client_(int sock_fd);
 
 		void initialize_();
 		void tmp_();

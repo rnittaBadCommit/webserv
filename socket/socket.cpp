@@ -64,51 +64,58 @@ namespace ft
 	std::string	ft_socket::recieve_msg()
 	{
 		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), -1);
-		for (size_t i = 0; i < port_num_; ++i)
+		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
 		{
 			if (poll_fd_vec_[i].revents & POLLIN)
 			{
+				poll_fd_vec_[i].revents = 0;
 				if (used_fd_set_.count(poll_fd_vec_[i].fd))
-					return (recieve_msg_from_connected_client_());
+				{
+					return (recieve_msg_from_connected_client_(poll_fd_vec_[i].fd));
+				}
 				else
-					return (recieve_msg_from_new_client_());
-				
+				{
+					std::cout << "register" << std::endl;
+					register_new_client_(poll_fd_vec_[i].fd);
+					poll_fd_vec_[i].revents = 0;
+					poll_fd_vec_[i].events = POLLIN;
+					throw std::exception();
+				}
+			}
+			else if (poll_fd_vec_[i].revents & POLLRDHUP)
+			{
+				std::cout << "here!!" << std::endl;
+				throw std::exception();
 			}
 		}
+		std::cout << "Error: recieve_msg(), poll_fd_vec.size(): " << poll_fd_vec_.size() << std::endl;
 		throw std::exception();
 	}
 
-	std::string ft_socket::recieve_msg_from_new_client_(struct pollfd poll_fd)
+	void ft_socket::register_new_client_(int sock_fd)
 	{
-		char buf[BUFFER_SIZE + 1];
-		struct sockaddr_in client_sockaddr;
-		socklen_t client_sockaddr_len;
-
-		int connection = accept(poll_fd.fd, 
-								(struct sockaddr *)&client_sockaddr,
-								&client_sockaddr_len);
+		int connection = accept(sock_fd, NULL, NULL);
 		if (connection < 0)
 		{
 			std::cout << "Error: accept()" << std::endl;
 			exit(1);
 			throw std::exception();
 		}
-
 		struct pollfd poll_fd;
 		poll_fd.fd = connection;
 		poll_fd.events = POLLIN;
 		poll_fd.revents = 0;
 		poll_fd_vec_.push_back(poll_fd);
 		used_fd_set_.insert(connection);
-		int recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
-		buf[recv_ret] = '\0';
-		std::cout << buf;
-		return (std::string(buf));
 	}
 
-	std::string ft_socket::recieve_msg_from_connected_client_()
+	std::string ft_socket::recieve_msg_from_connected_client_(int connection)
 	{
-
+		char buf[BUFFER_SIZE + 1];
+		
+		int recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
+		buf[recv_ret] = '\0';
+		return (std::string(buf));
 	}
 
 // 	void ft_socket::tmp_()
