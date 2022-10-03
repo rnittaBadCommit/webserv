@@ -22,6 +22,7 @@ namespace ft
 		
 		for (size_t i = 0; i < port_num_; ++i)
 		{
+			// std::cout << "here" << std::endl;
 			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
 			if (sockfd_vec_.back() < 0)
 			{
@@ -52,11 +53,6 @@ namespace ft
 			poll_fd.revents = 0;
 			poll_fd_vec_.push_back(poll_fd);
 		}
-		std::cout << "sockfd_vec_.size(): " << sockfd_vec_.size() <<  std::endl;
-		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() <<  std::endl;
-		std::cout << "poll_fd_vec_[0]: " << poll_fd_vec_[0].fd << std::endl;
-		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), -1);
-		std::cout << "poll done" << std::endl;
 	}
 
 	void ft_socket::initialize_()
@@ -67,32 +63,52 @@ namespace ft
 
 	std::string	ft_socket::recieve_msg()
 	{
+		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), -1);
 		for (size_t i = 0; i < port_num_; ++i)
 		{
 			if (poll_fd_vec_[i].revents & POLLIN)
 			{
-				std::cout << "msg recieved" << std::endl;
-				#define BUFFER_SIZE 10
-				char buf[BUFFER_SIZE + 1];
-				struct sockaddr_in client_sockaddr;
-				socklen_t client_sockaddr_len;
-
-				int recieve_fd = accept(poll_fd_vec_[i].fd, 
-										(struct sockaddr *)&client_sockaddr,
-										&client_sockaddr_len);
-				if (recieve_fd < 0)
-				{
-					std::cout << "Error: accept()" << std::endl;
-					exit(1);
-					throw std::exception();
-				}
-
-				int recv_ret = recv(recieve_fd, buf, BUFFER_SIZE, 0);
-				buf[recv_ret] = '\0';
-				return (std::string(buf));
+				if (used_fd_set_.count(poll_fd_vec_[i].fd))
+					return (recieve_msg_from_connected_client_());
+				else
+					return (recieve_msg_from_new_client_());
+				
 			}
 		}
 		throw std::exception();
+	}
+
+	std::string ft_socket::recieve_msg_from_new_client_(struct pollfd poll_fd)
+	{
+		char buf[BUFFER_SIZE + 1];
+		struct sockaddr_in client_sockaddr;
+		socklen_t client_sockaddr_len;
+
+		int connection = accept(poll_fd.fd, 
+								(struct sockaddr *)&client_sockaddr,
+								&client_sockaddr_len);
+		if (connection < 0)
+		{
+			std::cout << "Error: accept()" << std::endl;
+			exit(1);
+			throw std::exception();
+		}
+
+		struct pollfd poll_fd;
+		poll_fd.fd = connection;
+		poll_fd.events = POLLIN;
+		poll_fd.revents = 0;
+		poll_fd_vec_.push_back(poll_fd);
+		used_fd_set_.insert(connection);
+		int recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
+		buf[recv_ret] = '\0';
+		std::cout << buf;
+		return (std::string(buf));
+	}
+
+	std::string ft_socket::recieve_msg_from_connected_client_()
+	{
+
 	}
 
 // 	void ft_socket::tmp_()

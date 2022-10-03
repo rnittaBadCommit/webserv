@@ -14,6 +14,9 @@
 #include <stdio.h>
 
 #include <vector>
+#include <set>
+
+#define BUFFER_SIZE 10
 
 namespace ft
 {
@@ -37,6 +40,11 @@ namespace ft
 		std::vector<struct pollfd> poll_fd_vec_;
 		std::vector<int> recieve_fd_vec_;
 		const size_t port_num_;
+
+		std::set<int> used_fd_set_;
+
+		std::string ft_socket::recieve_msg_from_new_client_(struct pollfd poll_fd);
+		std::string ft_socket::recieve_msg_from_connected_client_(struct pollfd poll_fd);
 
 		void initialize_();
 		void tmp_();
