@@ -23,22 +23,26 @@ namespace ft
 	public:
 		// canonical
 		ft_socket();
-		// socket(const socket &other);
 		virtual ~ft_socket();
-		// socket &operator=(const socket &other);
 
 		// other constructors
-		ft_socket(const char *ip_address, const in_port_t port);
+		// ft_socket(const char *ip_address, const in_port_t port);
+		ft_socket(const char *ip_address, const std::vector<in_port_t> portvec);
+
+		std::string	recieve_msg();
 
 	private:
-		int sockfd_;
+		std::vector<int> sockfd_vec_;
 		struct sockaddr_in server_sockaddr_;
-		std::vector<struct pollfd> poll_fd_vec;
+		std::vector<struct pollfd> poll_fd_vec_;
+		std::vector<int> recieve_fd_vec_;
+		const size_t port_num_;
 
+		void initialize_();
 		void tmp_();
 
-		void closeSocket_();
-		void set_sockaddr_(const char *ip, const in_port_t port);
+		void closeAllSocket_();
+		void set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port);
 	};
 
 }
