@@ -17,6 +17,9 @@ namespace ft
 	{
 		// initialize_();
 
+		struct sockaddr_in server_sockaddr;
+		struct pollfd poll_fd;
+		
 		for (size_t i = 0; i < port_num_; ++i)
 		{
 			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
@@ -27,8 +30,8 @@ namespace ft
 				throw std::exception();
 			}
 			
-			struct sockaddr_in server_sockaddr;
 			set_sockaddr_(server_sockaddr, ip_address, port_vec[i]);
+			std::cout << ip_address << " " << port_vec[i] << std::endl;
 			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr, 
 						sizeof(server_sockaddr)) < 0)
 			{
@@ -44,14 +47,14 @@ namespace ft
 				throw std::exception();
 			}
 
-			struct pollfd poll_fd;
 			poll_fd.fd = sockfd_vec_.back();
 			poll_fd.events = POLLIN;
 			poll_fd.revents = 0;
 			poll_fd_vec_.push_back(poll_fd);
 		}
+		std::cout << "sockfd_vec_.size(): " << sockfd_vec_.size() <<  std::endl;
 		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() <<  std::endl;
-		
+		std::cout << "poll_fd_vec_[0]: " << poll_fd_vec_[0].fd << std::endl;
 		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), -1);
 		std::cout << "poll done" << std::endl;
 	}
