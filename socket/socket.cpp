@@ -15,15 +15,14 @@ namespace ft
 	ft_socket::ft_socket(const char *ip_address, const std::vector<in_port_t>  port_vec)
 	: port_num_(port_vec.size())
 	{
-		std::cout << "port_num: " << port_num_ << std::endl;
-		initialize_();
+		// initialize_();
 
 		for (size_t i = 0; i < port_num_; ++i)
 		{
 			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
 			if (sockfd_vec_.back() < 0)
 			{
-				std::cout << "Error: socket()" << std::endl;
+				std::cout << "Error: socket(), i: " << i << std::endl;
 				exit(1);
 				throw std::exception();
 			}
@@ -33,14 +32,14 @@ namespace ft
 			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr, 
 						sizeof(server_sockaddr)) < 0)
 			{
-				std::cout << "Error: bind()" << std::endl;
+				std::cout << "Error: bind(), i: " << i << std::endl;
 				exit(1);		
 				throw std::exception();
 			}
 
 			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)
 			{
-				std::cout << "Error: listen()" << std::endl;
+				std::cout << "Error: listen(), i: " << i << std::endl;
 				exit(1);
 				throw std::exception();
 			}
@@ -69,6 +68,7 @@ namespace ft
 		{
 			if (poll_fd_vec_[i].revents & POLLIN)
 			{
+				std::cout << "msg recieved" << std::endl;
 				#define BUFFER_SIZE 10
 				char buf[BUFFER_SIZE + 1];
 				struct sockaddr_in client_sockaddr;
@@ -78,7 +78,11 @@ namespace ft
 										(struct sockaddr *)&client_sockaddr,
 										&client_sockaddr_len);
 				if (recieve_fd < 0)
+				{
+					std::cout << "Error: accept()" << std::endl;
+					exit(1);
 					throw std::exception();
+				}
 
 				int recv_ret = recv(recieve_fd, buf, BUFFER_SIZE, 0);
 				buf[recv_ret] = '\0';
@@ -150,9 +154,9 @@ namespace ft
 
 	void ft_socket::set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port)
 	{
-		memset(&server_sockaddr_, 0, sizeof(struct sockaddr_in));
-		server_sockaddr_.sin_family = AF_INET;
-		server_sockaddr_.sin_port = htons(port);
-		server_sockaddr_.sin_addr.s_addr = inet_addr(ip);
+		memset(&server_sockaddr, 0, sizeof(struct sockaddr_in));
+		server_sockaddr.sin_family = AF_INET;
+		server_sockaddr.sin_port = htons(port);
+		server_sockaddr.sin_addr.s_addr = inet_addr(ip);
 	}
 }

@@ -33,7 +33,7 @@ namespace ft
 
 	private:
 		std::vector<int> sockfd_vec_;
-		struct sockaddr_in server_sockaddr_;
+		// struct sockaddr_in server_sockaddr_;
 		std::vector<struct pollfd> poll_fd_vec_;
 		std::vector<int> recieve_fd_vec_;
 		const size_t port_num_;
