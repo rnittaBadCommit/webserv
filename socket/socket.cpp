@@ -20,21 +20,33 @@ namespace ft
 
 		for (size_t i = 0; i < port_num_; ++i)
 		{
-			int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-			if (sockfd < 0)
+			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
+			if (sockfd_vec_.back() < 0)
+			{
+				std::cout << "Error: socket()" << std::endl;
+				exit(1);
 				throw std::exception();
+			}
 			
 			struct sockaddr_in server_sockaddr;
 			set_sockaddr_(server_sockaddr, ip_address, port_vec[i]);
-			if (bind(sockfd, (struct sockaddr *)&server_sockaddr, 
-						sizeof(server_sockaddr_)) < 0)
+			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr, 
+						sizeof(server_sockaddr)) < 0)
+			{
+				std::cout << "Error: bind()" << std::endl;
+				exit(1);		
 				throw std::exception();
+			}
 
-			if (listen(sockfd, SOMAXCONN) < 0)
+			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)
+			{
+				std::cout << "Error: listen()" << std::endl;
+				exit(1);
 				throw std::exception();
+			}
 
 			struct pollfd poll_fd;
-			poll_fd.fd = sockfd;
+			poll_fd.fd = sockfd_vec_.back();
 			poll_fd.events = POLLIN;
 			poll_fd.revents = 0;
 			poll_fd_vec_.push_back(poll_fd);
