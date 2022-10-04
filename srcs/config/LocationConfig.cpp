@@ -31,7 +31,7 @@ void LocationConfig::setAutoindex(const bool autoindex)
 void LocationConfig::addAllowMethod(const std::string &allow_method)
 {
 	this->is_set.insert(ALLOW_METHOD);
-	this->allow_method.push_back(allow_method);
+	this->allow_method.insert(allow_method);
 }
 
 void LocationConfig::addIndex(const std::string &index)
@@ -73,7 +73,7 @@ const bool &LocationConfig::getAutoIndex() const
 	return this->autoindex;
 }
 
-const std::vector<std::string> &LocationConfig::getAllowMethod() const
+const std::set<std::string> &LocationConfig::getAllowMethod() const
 {
 	return this->allow_method;
 }
