@@ -1,7 +1,7 @@
 #ifndef CONFIG_CONSTANT_HPP
 #define CONFIG_CONSTANT_HPP
 
-enum class E_DirectiveType
+enum E_DirectiveType
 {
 	SERVER_NAME,
 	LISTEN,
@@ -16,7 +16,7 @@ enum class E_DirectiveType
 	UPLOAD_FILEPATH,
 };
 
-enum class E_BlockType
+enum E_BlockType
 {
 	ROOT,
 	SERVER,

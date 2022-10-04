@@ -36,7 +36,7 @@ public:
 	const std::map<int, std::string> &getErrorPage() const;
 	const std::map<std::string, LocationConfig> &getLocationConfig() const;
 
-	const bool isSet(E_DirectiveType type);
+	bool isSet(E_DirectiveType type);
 };
 
 #endif

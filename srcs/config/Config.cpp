@@ -1,6 +1,6 @@
 #include "Config.hpp"
 
-Config::Config()
+Config::Config() : server_config()
 {
 }
 

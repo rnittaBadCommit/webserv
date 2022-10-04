@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
 
 ConfigParser::ConfigParser()
 {
@@ -13,11 +14,11 @@ ConfigParser::~ConfigParser()
 
 void ConfigParser::printParserLine()
 {
-	for (int i = 0; i < this->parser_line.size(); i++)
+	for (size_t i = 0; i < this->parser_line.size(); i++)
 	{
-		for (const auto &e : this->parser_line[i])
+		for (size_t j = 0; j < this->parser_line[i].size(); j++)
 		{
-			std::cout << e << " ";
+			std::cout << this->parser_line[i][j] << " ";
 		}
 		std::cout << std::endl;
 	}
@@ -25,7 +26,7 @@ void ConfigParser::printParserLine()
 
 Config ConfigParser::readFile(const std::string &filepath)
 {
-	std::ifstream ifs(filepath);
+	std::ifstream ifs(filepath.c_str());
 
 	std::string line;
 	while (std::getline(ifs, line))
@@ -43,19 +44,19 @@ Config ConfigParser::readFile(const std::string &filepath)
 
 void ConfigParser::setConfigFromParseLine()
 {
-	this->nowBlock = E_BlockType::ROOT;
-	for (std::vector<std::string> line : this->parser_line)
+	this->nowBlock = ROOT;
+	for (size_t i = 0; i < this->parser_line.size(); i++)
 	{
 		switch (this->nowBlock)
 		{
-		case E_BlockType::ROOT:
-			this->setConfigRoot(line);
+		case ROOT:
+			this->setConfigRoot(this->parser_line[i]);
 			break;
-		case E_BlockType::SERVER:
-			this->setConfigServer(line);
+		case SERVER:
+			this->setConfigServer(this->parser_line[i]);
 			break;
-		case E_BlockType::LOCATION:
-			this->setConfigLocation(line);
+		case LOCATION:
+			this->setConfigLocation(this->parser_line[i]);
 			break;
 		}
 	}
@@ -65,7 +66,7 @@ void ConfigParser::setConfigRoot(std::vector<std::string> line)
 {
 	if (line[0] == "server" && line[1] == "{")
 	{
-		this->nowBlock = E_BlockType::SERVER;
+		this->nowBlock = SERVER;
 	}
 	else
 	{
@@ -77,23 +78,23 @@ void ConfigParser::setConfigRoot(std::vector<std::string> line)
 void ConfigParser::setConfigServer(std::vector<std::string> line)
 {
 	if (line[0] == "server_name")
-		this->setConfigServerName(E_BlockType::SERVER, line);
+		this->setConfigServerName(SERVER, line);
 	else if (line[0] == "listen")
-		this->setConfigListen(E_BlockType::SERVER, line);
+		this->setConfigListen(SERVER, line);
 	else if (line[0] == "client_max_body_size")
-		this->setConfigClientMaxBodySize(E_BlockType::SERVER, line);
+		this->setConfigClientMaxBodySize(SERVER, line);
 	else if (line[0] == "error_page")
-		this->setConfigErrorPage(E_BlockType::SERVER, line);
+		this->setConfigErrorPage(SERVER, line);
 	else if (line[0] == "location" && line[2] == "{")
 	{
-		this->nowBlock = E_BlockType::LOCATION;
+		this->nowBlock = LOCATION;
 		this->location_config.setUri(line[1]);
 	}
 	else if (line[0] == "}")
 	{
 		this->config.addServerConfig(this->server_config);
 		this->server_config = ServerConfig();
-		this->nowBlock = E_BlockType::ROOT;
+		this->nowBlock = ROOT;
 	}
 	else
 	{
@@ -105,24 +106,24 @@ void ConfigParser::setConfigServer(std::vector<std::string> line)
 void ConfigParser::setConfigLocation(std::vector<std::string> line)
 {
 	if (line[0] == "index")
-		this->setConfigIndex(E_BlockType::LOCATION, line);
+		this->setConfigIndex(LOCATION, line);
 	else if (line[0] == "alias")
-		this->setConfigAlias(E_BlockType::LOCATION, line);
+		this->setConfigAlias(LOCATION, line);
 	else if (line[0] == "return")
-		this->setConfigRedirect(E_BlockType::LOCATION, line);
+		this->setConfigRedirect(LOCATION, line);
 	else if (line[0] == "autoindex")
-		this->setConfigAutoIndex(E_BlockType::LOCATION, line);
+		this->setConfigAutoIndex(LOCATION, line);
 	else if (line[0] == "allow_method")
-		this->setConfigAllowMethod(E_BlockType::LOCATION, line);
+		this->setConfigAllowMethod(LOCATION, line);
 	else if (line[0] == "cgi_extension")
-		this->setConfigCgiExtension(E_BlockType::LOCATION, line);
+		this->setConfigCgiExtension(LOCATION, line);
 	else if (line[0] == "upload_filepath")
-		this->setConfigUploadFilepath(E_BlockType::LOCATION, line);
+		this->setConfigUploadFilepath(LOCATION, line);
 	else if (line[0] == "}")
 	{
 		this->server_config.addLocationConfig(this->location_config.getUri(), this->location_config);
 		this->location_config = LocationConfig();
-		this->nowBlock = E_BlockType::SERVER;
+		this->nowBlock = SERVER;
 	}
 	else
 	{
@@ -135,13 +136,13 @@ void ConfigParser::setConfigServerName(E_BlockType block_type, std::vector<std::
 {
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		this->server_config.setServerName(line[1]);
 		break;
-	case E_BlockType::LOCATION:
+	case LOCATION:
 		throw std::exception();
 		break;
 	}
@@ -151,13 +152,13 @@ void ConfigParser::setConfigListen(E_BlockType block_type, std::vector<std::stri
 {
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		this->server_config.setListen(std::atoi(line[1].c_str()));
 		break;
-	case E_BlockType::LOCATION:
+	case LOCATION:
 		throw std::exception();
 		break;
 	}
@@ -167,14 +168,14 @@ void ConfigParser::setConfigErrorPage(E_BlockType block_type, std::vector<std::s
 {
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		throw std::exception();
 		break;
-	case E_BlockType::LOCATION:
-		for (int i = 1; i < line.size() - 1; i++)
+	case LOCATION:
+		for (size_t i = 1; i < line.size() - 1; i++)
 		{
 			this->location_config.addRedirect(atoi(line[1].c_str()), line[2]);
 		}
@@ -186,13 +187,13 @@ void ConfigParser::setConfigClientMaxBodySize(E_BlockType block_type, std::vecto
 {
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		this->server_config.setClientMaxBodySize(line[1]);
 		break;
-	case E_BlockType::LOCATION:
+	case LOCATION:
 		throw std::exception();
 		break;
 	}
@@ -202,14 +203,14 @@ void ConfigParser::setConfigAllowMethod(E_BlockType block_type, std::vector<std:
 {
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		throw std::exception();
 		break;
-	case E_BlockType::LOCATION:
-		for (int i = 1; i < line.size() - 1; i++)
+	case LOCATION:
+		for (size_t i = 1; i < line.size() - 1; i++)
 		{
 			this->location_config.addAllowMethod(line[i]);
 		}
@@ -221,14 +222,14 @@ void ConfigParser::setConfigRedirect(E_BlockType block_type, std::vector<std::st
 {
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		throw std::exception();
 		break;
-	case E_BlockType::LOCATION:
-		for (int i = 1; i < line.size() - 1; i++)
+	case LOCATION:
+		for (size_t i = 1; i < line.size() - 1; i++)
 		{
 			this->location_config.addRedirect(atoi(line[1].c_str()), line[2]);
 		}
@@ -240,13 +241,13 @@ void ConfigParser::setConfigAlias(E_BlockType block_type, std::vector<std::strin
 {
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		throw std::exception();
 		break;
-	case E_BlockType::LOCATION:
+	case LOCATION:
 		this->location_config.setAlias(line[1]);
 		break;
 	}
@@ -264,13 +265,13 @@ void ConfigParser::setConfigAutoIndex(E_BlockType block_type, std::vector<std::s
 
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		throw std::exception();
 		break;
-	case E_BlockType::LOCATION:
+	case LOCATION:
 		this->location_config.setAutoindex(autoindex);
 		break;
 	}
@@ -280,14 +281,14 @@ void ConfigParser::setConfigIndex(E_BlockType block_type, std::vector<std::strin
 {
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		throw std::exception();
 		break;
-	case E_BlockType::LOCATION:
-		for (int i = 1; i < line.size() - 1; i++)
+	case LOCATION:
+		for (size_t i = 1; i < line.size() - 1; i++)
 		{
 			this->location_config.addIndex(line[i]);
 		}
@@ -299,14 +300,14 @@ void ConfigParser::setConfigCgiExtension(E_BlockType block_type, std::vector<std
 {
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		throw std::exception();
 		break;
-	case E_BlockType::LOCATION:
-		for (int i = 1; i < line.size() - 1; i++)
+	case LOCATION:
+		for (size_t i = 1; i < line.size() - 1; i++)
 		{
 			this->location_config.addCgiExtension(line[i]);
 		}
@@ -318,13 +319,13 @@ void ConfigParser::setConfigUploadFilepath(E_BlockType block_type, std::vector<s
 {
 	switch (block_type)
 	{
-	case E_BlockType::ROOT:
+	case ROOT:
 		throw std::exception();
 		break;
-	case E_BlockType::SERVER:
+	case SERVER:
 		throw std::exception();
 		break;
-	case E_BlockType::LOCATION:
+	case LOCATION:
 		this->location_config.setUploadFilepath(line[1]);
 		break;
 	}

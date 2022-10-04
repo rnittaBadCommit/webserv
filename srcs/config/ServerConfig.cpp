@@ -12,25 +12,25 @@ ServerConfig::~ServerConfig()
 
 void ServerConfig::setServerName(const std::string &server_name)
 {
-	this->is_set.insert(E_DirectiveType::SERVER_NAME);
+	this->is_set.insert(SERVER_NAME);
 	this->server_name = server_name;
 }
 
 void ServerConfig::setListen(const int port)
 {
-	this->is_set.insert(E_DirectiveType::LISTEN);
+	this->is_set.insert(LISTEN);
 	this->listen = port;
 }
 
 void ServerConfig::setClientMaxBodySize(const std::string &client_max_body_size)
 {
-	this->is_set.insert(E_DirectiveType::CLIENT_MAX_BODY_SIZE);
+	this->is_set.insert(CLIENT_MAX_BODY_SIZE);
 	this->client_max_body_size = client_max_body_size;
 }
 
 void ServerConfig::addErrorPage(const int error_status, const std::string &uri)
 {
-	this->is_set.insert(E_DirectiveType::ERROR_PAGE);
+	this->is_set.insert(ERROR_PAGE);
 	this->error_page.insert(std::make_pair(error_status, uri));
 }
 
@@ -64,7 +64,7 @@ const std::map<std::string, LocationConfig> &ServerConfig::getLocationConfig() c
 	return this->location_config;
 }
 
-const bool ServerConfig::isSet(E_DirectiveType type)
+bool ServerConfig::isSet(E_DirectiveType type)
 {
 	return (this->is_set.find(type) != this->is_set.end());
 }
