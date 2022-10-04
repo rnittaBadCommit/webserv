@@ -5,7 +5,7 @@
 namespace ft
 {
 	ft_socket::ft_socket()
-	: port_num_(1)
+	: port_num_(1), keep_connect_time_len_(0)
 	{
 	}
 
@@ -14,47 +14,60 @@ namespace ft
 		closeAllSocket_();
 	}
 
-	ft_socket::ft_socket(const char *ip_address, const std::vector<in_port_t>  port_vec)
-	: port_num_(port_vec.size())
+	ft_socket::ft_socket(const char *ip_address, 
+							const std::vector<in_port_t> port_vec,
+							time_t keep_connect_time_len)
+	: port_num_(port_vec.size()), keep_connect_time_len_(keep_connect_time_len)
 	{
 		// initialize_();
-
+		std::cout << "keep connection time sec: " << keep_connect_time_len_ << std::endl;
 		struct sockaddr_in server_sockaddr;
 		struct pollfd poll_fd;
 		
 		for (size_t i = 0; i < port_num_; ++i)
 		{
-			// std::cout << "here" << std::endl;
 			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
 			if (sockfd_vec_.back() < 0)
-			{
-				std::cout << "Error: socket(), i: " << i << std::endl;
-				exit(1);
-				throw std::exception();
-			}
+				throw SetUpFailException("Error: socket()");
 			
 			set_sockaddr_(server_sockaddr, ip_address, port_vec[i]);
 			std::cout << ip_address << " " << port_vec[i] << std::endl;
 			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr, 
-						sizeof(server_sockaddr)) < 0)
-			{
-				std::cout << "Error: bind(), i: " << i << std::endl;
-				exit(1);		
-				throw std::exception();
-			}
+						sizeof(server_sockaddr)) < 0)		
+				throw SetUpFailException("Error: bind()");
 
 			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)
-			{
-				std::cout << "Error: listen(), i: " << i << std::endl;
-				exit(1);
-				throw std::exception();
-			}
+				throw SetUpFailException("Error: listen()");
 
 			poll_fd.fd = sockfd_vec_.back();
 			poll_fd.events = POLLIN;
 			poll_fd.revents = 0;
 			poll_fd_vec_.push_back(poll_fd);
+
+			last_recieve_time_map_[sockfd_vec_.back()] = -1;
 		}
+	}
+
+	ft_socket::RecievedMsg::RecievedMsg()
+	: content(""), client_id(0)
+	{
+
+	}
+
+	ft_socket::RecievedMsg::RecievedMsg(const std::string content, const int client_id)
+	: content(content), client_id(client_id)
+	{
+
+	}
+
+	ft_socket::RecievedMsg	ft_socket::RecievedMsg::operator=(const ft_socket::RecievedMsg &other)
+	{
+		if (this == &other)
+			return (*this);
+
+		content = other.content;
+		client_id = other.client_id;
+		return (*this);
 	}
 
 	void ft_socket::initialize_()
@@ -63,31 +76,32 @@ namespace ft
 		recieve_fd_vec_.reserve(port_num_);
 	}
 
-	std::string	ft_socket::recieve_msg()
+	ft_socket::RecievedMsg ft_socket::recieve_msg()
 	{
 		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
-		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), -1);
+		check_keep_time_and_close_fd();
+		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), 1000);
 		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
 		{
 			if (poll_fd_vec_[i].revents & POLLERR)
 			{
-				close_fd_(poll_fd_vec_[i].fd);
+				close_fd_(poll_fd_vec_[i].fd, i);
 				poll_fd_vec_.erase(poll_fd_vec_.begin() + i);
-				throw std::exception();
+				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
 			else if (poll_fd_vec_[i].revents & POLLHUP)
 			{
-				close_fd_(poll_fd_vec_[i].fd);
+				close_fd_(poll_fd_vec_[i].fd, i);
 				poll_fd_vec_.erase(poll_fd_vec_.begin() + i);
-				throw std::exception();
+				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}			
 			else if (poll_fd_vec_[i].revents & POLLRDHUP)
 			{
-				close_fd_(poll_fd_vec_[i].fd);
+				close_fd_(poll_fd_vec_[i].fd, i);
 				poll_fd_vec_.erase(poll_fd_vec_.begin() + i);
-				throw std::exception();
+				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
-			if (poll_fd_vec_[i].revents & POLLIN)
+			else if (poll_fd_vec_[i].revents & POLLIN)
 			{
 				poll_fd_vec_[i].revents = 0;
 				if (used_fd_set_.count(poll_fd_vec_[i].fd))
@@ -100,99 +114,63 @@ namespace ft
 					register_new_client_(poll_fd_vec_[i].fd);
 					poll_fd_vec_[i].revents = 0;
 					poll_fd_vec_[i].events = POLLIN | POLLERR;
-					throw std::exception();
+					throw recieveMsgFromNewClient(poll_fd_vec_[i].fd);
 				}
 			}
 		}
-		exit(1);
-		// std::cout << "Error: recieve_msg(), poll_fd_vec.size(): " << poll_fd_vec_.size() << std::endl;
-		throw std::exception();
+		// throw recieveMsgException();	// pollにタイムアウトを設定するので除外
+		throw NoRecieveMsg();
+	}
+
+
+	void	ft_socket::check_keep_time_and_close_fd()
+	{
+		time_t	current_time = time(NULL);
+		time_t	tmp_last_recieve_time;
+
+		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
+		{
+			tmp_last_recieve_time = last_recieve_time_map_[poll_fd_vec_[i].fd];
+			if (tmp_last_recieve_time != (time_t)-1)
+			{	// fd made by accept(), not sockfd
+				if (current_time - tmp_last_recieve_time > keep_connect_time_len_)
+					close_fd_(poll_fd_vec_[i].fd, i);
+			}
+		}
 	}
 
 	void ft_socket::register_new_client_(int sock_fd)
 	{
 		int connection = accept(sock_fd, NULL, NULL);
 		if (connection < 0)
-		{
-			std::cout << "Error: accept()" << std::endl;
-			exit(1);
-			throw std::exception();
-		}
+			throw SetUpFailException("Error: accept()");
+
 		struct pollfd poll_fd;
 		poll_fd.fd = connection;
 		poll_fd.events = POLLIN | POLLRDHUP;
 		poll_fd.revents = 0;
 		poll_fd_vec_.push_back(poll_fd);
 		used_fd_set_.insert(connection);
+
+		last_recieve_time_map_[connection] = time(NULL);
 	}
 
-	std::string ft_socket::recieve_msg_from_connected_client_(int connection)
+	ft_socket::RecievedMsg	ft_socket::recieve_msg_from_connected_client_(int connection)
 	{
 		char buf[BUFFER_SIZE + 1];
 		
+		last_recieve_time_map_[connection] = time(NULL);
 		int recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
 		buf[recv_ret] = '\0';
-		return (std::string(buf));
+		return (RecievedMsg(std::string(buf), connection));
 	}
 
-// 	void ft_socket::tmp_()
-// 	{
-// 		struct pollfd poll_fd;
-
-// 		poll_fd.fd = sockfd_;
-// 		poll_fd.events = POLLIN;
-// 		poll_fd.revents = 0;
-// 		poll_fd_vec.push_back(poll_fd);
-
-// #define BUFFER_SIZE 10
-// 		char buf[BUFFER_SIZE + 1];
-// 		struct sockaddr_in client_sockaddr;
-// 		socklen_t client_sockaddr_len;
-// 		while (1)
-// 		{
-// 			poll(&poll_fd_vec[0], poll_fd_vec.size(), -1);
-// 			if (poll_fd_vec[0].revents & POLLIN)
-// 			{
-// 				std::cout << "request recieved" << std::endl;
-// 				int connect = accept(sockfd_, (struct sockaddr *)&client_sockaddr, &client_sockaddr_len);
-// 				if (connect < 0)
-// 				{
-// 					std::cout << "Error: accept()" << std::endl;
-// 					exit(1);
-// 				}
-// 				int recv_ret = recv(connect, buf, BUFFER_SIZE, 0);
-// 				buf[recv_ret] = '\0';
-// 				std::cout << "====================" << std::endl
-// 						  << buf;
-
-// 				int read_sum = recv_ret;
-// 				while (recv_ret == BUFFER_SIZE)
-// 				{
-// 					recv_ret = recv(connect, buf, BUFFER_SIZE, MSG_DONTWAIT);
-// 					if (recv_ret > 0)
-// 						read_sum += recv_ret;
-// 					else
-// 					{
-// 						perror(NULL);
-// 					}
-// 					buf[recv_ret] = '\0';
-// 					// std::cout << buf;
-// 					printf("%s", buf);
-// 				}
-// 				std::cout << std::endl
-// 						  << "====================" << std::endl
-// 						  << "read: " << read_sum << "byte, done" << std::endl;
-// 				send(connect, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World", 71, 0);
-// 				usleep(1000);
-// 				close(connect);
-// 			}
-// 		}
-// 	}
-
-	void ft_socket::close_fd_(const int fd)
+	void ft_socket::close_fd_(const int fd, const int i_poll_fd)
 	{
 		close(fd);
+		poll_fd_vec_.erase(poll_fd_vec_.begin() + i_poll_fd);
 		used_fd_set_.erase(fd);
+		throw connectionHangUp(fd);
 	}
 
 	void ft_socket::closeAllSocket_()
@@ -208,5 +186,38 @@ namespace ft
 		server_sockaddr.sin_family = AF_INET;
 		server_sockaddr.sin_port = htons(port);
 		server_sockaddr.sin_addr.s_addr = inet_addr(ip);
+	}
+
+	ft_socket::SetUpFailException::SetUpFailException(const std::string err_msg)
+	: err_msg(err_msg)
+	{
+
+	}
+	
+	ft_socket::SetUpFailException::~SetUpFailException() throw()
+	{
+
+	}
+
+	const char *ft_socket::SetUpFailException::what() const throw()
+	{
+		return (err_msg.c_str());
+	}
+
+	const char *ft_socket::RecieveMsgException::what() const throw()
+	{
+		return ("Error: recieve msg fail, shouldn't happen");
+	}
+
+	ft_socket::recieveMsgFromNewClient::recieveMsgFromNewClient(const int client_id)
+	: client_id(client_id)
+	{
+
+	}
+
+	ft_socket::connectionHangUp::connectionHangUp(const int client_id)
+	: client_id(client_id)
+	{
+
 	}
 }
