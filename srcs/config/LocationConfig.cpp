@@ -1,7 +1,7 @@
 #include "LocationConfig.hpp"
 
 LocationConfig::LocationConfig()
-	: alias(), autoindex(), allow_method(),
+	: alias(), uri(), autoindex(), allow_method(),
 	  index(), cgi_extension(), redirect(),
 	  error_page(), upload_filepath()
 {
@@ -9,6 +9,11 @@ LocationConfig::LocationConfig()
 
 LocationConfig::~LocationConfig()
 {
+}
+
+void LocationConfig::setUri(const std::string &uri)
+{
+	this->uri = uri;
 }
 
 void LocationConfig::setAlias(const std::string &alias)
@@ -49,6 +54,11 @@ void LocationConfig::addErrorPage(const int error_status, const std::string &uri
 void LocationConfig::setUploadFilepath(const std::string &upload_filepath)
 {
 	this->upload_filepath = upload_filepath;
+}
+
+const std::string &LocationConfig::getUri() const
+{
+	return this->uri;
 }
 
 const std::string &LocationConfig::getAlias() const

@@ -8,6 +8,7 @@
 class LocationConfig
 {
 private:
+	std::string uri;
 	std::string alias;
 	bool autoindex;
 	std::vector<std::string> allow_method;
@@ -21,6 +22,7 @@ public:
 	LocationConfig();
 	~LocationConfig();
 
+	void setUri(const std::string &uri);
 	void setAlias(const std::string &alias);
 	void setAutoindex(const bool autoindex);
 	void addAllowMethod(const std::string &allow_method);
@@ -30,6 +32,7 @@ public:
 	void addErrorPage(const int error_status, const std::string &uri);
 	void setUploadFilepath(const std::string &upload_filepath);
 
+	const std::string &getUri() const;
 	const std::string &getAlias() const;
 	const bool &getAutoIndex() const;
 	const std::vector<std::string> &getAllowMethod() const;
