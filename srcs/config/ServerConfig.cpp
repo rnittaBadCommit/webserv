@@ -14,51 +14,61 @@ ServerConfig::~ServerConfig()
 
 void ServerConfig::setServerName(const std::string &server_name)
 {
+	this->is_set.insert(E_DirectibeType::SERVER_NAME);
 	this->server_name = server_name;
 }
 
 void ServerConfig::setListen(const int port)
 {
+	this->is_set.insert(E_DirectibeType::LISTEN);
 	this->listen = port;
 }
 
 void ServerConfig::setClientMaxBodySize(const std::string &client_max_body_size)
 {
+	this->is_set.insert(E_DirectibeType::CLIENT_MAX_BODY_SIZE);
 	this->client_max_body_size = client_max_body_size;
 }
 
 void ServerConfig::setAutoindex(const bool autoindex)
 {
+	this->is_set.insert(E_DirectibeType::AUTOINDEX);
 	this->autoindex = autoindex;
 }
 
 void ServerConfig::addAllowMethod(const std::string &allow_method)
 {
+	this->is_set.insert(E_DirectibeType::ALLOW_METHOD);
 	this->allow_method.push_back(allow_method);
 }
 
 void ServerConfig::addIndex(const std::string &index)
 {
+	this->is_set.insert(E_DirectibeType::INDEX);
 	this->index.push_back(index);
 }
 
 void ServerConfig::addCgiExtension(const std::string &cgi_extension)
 {
+	this->is_set.insert(E_DirectibeType::CGI_EXTENSION);
 	this->cgi_extension.push_back(cgi_extension);
 }
 
 void ServerConfig::addRedirect(const int redirect_status, const std::string &uri)
 {
+	this->is_set.insert(E_DirectibeType::REDIRECT);
 	this->redirect.insert(std::make_pair(redirect_status, uri));
 }
 
 void ServerConfig::addErrorPage(const int error_status, const std::string &uri)
 {
+	this->is_set.insert(E_DirectibeType::ERROR_PAGE);
 	this->error_page.insert(std::make_pair(error_status, uri));
 }
 
 void ServerConfig::setUploadFilepath(const std::string &upload_filepath)
 {
+	this->is_set.insert(E_DirectibeType::UPLOAD_FILEPATH);
 	this->upload_filepath = upload_filepath;
 }
 
@@ -120,4 +130,9 @@ const std::string &ServerConfig::getUploadFilepath() const
 const std::map<std::string, LocationConfig> &ServerConfig::getLocationConfig() const
 {
 	return this->location_config;
+}
+
+const bool &ServerConfig::isSet(E_DirectibeType type)
+{
+	return this->is_set.find(type) != this->is_set.end();
 }

@@ -4,12 +4,16 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 #include "LocationConfig.hpp"
+#include "ConfigConstant.hpp"
 
 class ServerConfig
 {
 private:
+	std::set<E_DirectibeType> is_set;
+
 	std::string server_name;
 	int listen;
 	std::string client_max_body_size;
@@ -50,6 +54,8 @@ public:
 	const std::map<int, std::string> &getErrorPage() const;
 	const std::string &getUploadFilepath() const;
 	const std::map<std::string, LocationConfig> &getLocationConfig() const;
+
+	const bool &isSet(E_DirectibeType type);
 };
 
 #endif

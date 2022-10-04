@@ -1,0 +1,26 @@
+#ifndef CONFIG_CONSTANT_HPP
+#define CONFIG_CONSTANT_HPP
+
+enum class E_DirectibeType
+{
+	SERVER_NAME,
+	LISTEN,
+	ERROR_PAGE,
+	CLIENT_MAX_BODY_SIZE,
+	INDEX,
+	ALLOW_METHOD,
+	REDIRECT,
+	ALIAS,
+	AUTOINDEX,
+	CGI_EXTENSION,
+	UPLOAD_FILEPATH,
+};
+
+enum class E_BlockType
+{
+	ROOT,
+	SERVER,
+	LOCATION,
+};
+
+#endif

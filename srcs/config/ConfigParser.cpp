@@ -30,15 +30,12 @@ Config ConfigParser::readFile(const std::string &filepath)
 	std::string line;
 	while (std::getline(ifs, line))
 	{
-		if (line.length() != 0 && line[0] == '#')
+		if (line.length() == 0 || (line.length() != 0 && line[0] == '#'))
 		{
 			continue;
 		}
 		std::vector<std::string> params = this->splitLine(line);
-		if (!params.empty())
-		{
-			this->parser_line.push_back(params);
-		}
+		this->parser_line.push_back(params);
 	}
 	this->setConfigFromParseLine();
 	return this->config;

@@ -18,41 +18,49 @@ void LocationConfig::setUri(const std::string &uri)
 
 void LocationConfig::setAlias(const std::string &alias)
 {
+	this->is_set.insert(E_DirectibeType::ALIAS);
 	this->alias = alias;
 }
 
 void LocationConfig::setAutoindex(const bool autoindex)
 {
+	this->is_set.insert(E_DirectibeType::AUTOINDEX);
 	this->autoindex = autoindex;
 }
 
 void LocationConfig::addAllowMethod(const std::string &allow_method)
 {
+	this->is_set.insert(E_DirectibeType::ALLOW_METHOD);
 	this->allow_method.push_back(allow_method);
 }
 
 void LocationConfig::addIndex(const std::string &index)
 {
+	this->is_set.insert(E_DirectibeType::INDEX);
 	this->index.push_back(index);
 }
 
 void LocationConfig::addCgiExtension(const std::string &cgi_extension)
 {
+	this->is_set.insert(E_DirectibeType::CGI_EXTENSION);
 	this->cgi_extension.push_back(cgi_extension);
 }
 
 void LocationConfig::addRedirect(const int redirect_status, const std::string &uri)
 {
+	this->is_set.insert(E_DirectibeType::REDIRECT);
 	this->redirect.insert(std::make_pair(redirect_status, uri));
 }
 
 void LocationConfig::addErrorPage(const int error_status, const std::string &uri)
 {
+	this->is_set.insert(E_DirectibeType::ERROR_PAGE);
 	this->error_page.insert(std::make_pair(error_status, uri));
 }
 
 void LocationConfig::setUploadFilepath(const std::string &upload_filepath)
 {
+	this->is_set.insert(E_DirectibeType::UPLOAD_FILEPATH);
 	this->upload_filepath = upload_filepath;
 }
 

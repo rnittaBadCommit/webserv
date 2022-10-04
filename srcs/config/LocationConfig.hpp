@@ -4,10 +4,14 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
+#include "ConfigConstant.hpp"
 
 class LocationConfig
 {
 private:
+	std::set<E_DirectibeType> is_set;
+
 	std::string uri;
 	std::string alias;
 	bool autoindex;
@@ -41,6 +45,8 @@ public:
 	const std::map<int, std::string> &getRedirect() const;
 	const std::map<int, std::string> &getErrorPage() const;
 	const std::string &getUploadFilepath() const;
+
+	const bool &isSet(E_DirectibeType type);
 };
 
 #endif
