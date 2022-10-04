@@ -1,0 +1,28 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "C/C++: clang++ アクティブなファイルのビルド",
+			"command": "/usr/bin/clang++",
+			"args": [
+				"-fcolor-diagnostics",
+				"-fansi-escape-codes",
+				"-g",
+				"-O0",
+				"${fileDirname}/socket_test.cpp",
+				"${fileDirname}/socket.cpp",
+				"-o",
+				"${fileDirname}/a.out"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "コンパイラ: /usr/bin/clang++"
+		}
+	]
+}
