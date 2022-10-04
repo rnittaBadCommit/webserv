@@ -17,7 +17,7 @@
 #include <set>
 
 #define BUFFER_SIZE 10
-#define _GNU_SOURCE
+
 namespace ft
 {
 
@@ -40,6 +40,7 @@ namespace ft
 		std::vector<struct pollfd> poll_fd_vec_;
 		std::vector<int> recieve_fd_vec_;
 		const size_t port_num_;
+		std::vector<std::string> recieved_msg_vec;
 
 		std::set<int> used_fd_set_;
 
@@ -49,6 +50,7 @@ namespace ft
 		void initialize_();
 		void tmp_();
 
+		void close_fd_(const int fd);
 		void closeAllSocket_();
 		void set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port);
 	};

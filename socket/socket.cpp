@@ -1,3 +1,5 @@
+
+// #define _GNU_SOURCE   // 一部のオペレーティング・システムでは、_GNU_SOURCEの定義は不要。(https://docs.oracle.com/cd/E39368_01/porting/ch03s06.html)
 #include "socket.hpp"
 
 namespace ft
@@ -63,32 +65,47 @@ namespace ft
 
 	std::string	ft_socket::recieve_msg()
 	{
+		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
 		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), -1);
 		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
 		{
+			if (poll_fd_vec_[i].revents & POLLERR)
+			{
+				close_fd_(poll_fd_vec_[i].fd);
+				poll_fd_vec_.erase(poll_fd_vec_.begin() + i);
+				throw std::exception();
+			}
+			else if (poll_fd_vec_[i].revents & POLLHUP)
+			{
+				close_fd_(poll_fd_vec_[i].fd);
+				poll_fd_vec_.erase(poll_fd_vec_.begin() + i);
+				throw std::exception();
+			}			
+			else if (poll_fd_vec_[i].revents & POLLRDHUP)
+			{
+				close_fd_(poll_fd_vec_[i].fd);
+				poll_fd_vec_.erase(poll_fd_vec_.begin() + i);
+				throw std::exception();
+			}
 			if (poll_fd_vec_[i].revents & POLLIN)
 			{
 				poll_fd_vec_[i].revents = 0;
 				if (used_fd_set_.count(poll_fd_vec_[i].fd))
 				{
+					poll_fd_vec_[i].revents = 0;
 					return (recieve_msg_from_connected_client_(poll_fd_vec_[i].fd));
 				}
 				else
 				{
-					std::cout << "register" << std::endl;
 					register_new_client_(poll_fd_vec_[i].fd);
 					poll_fd_vec_[i].revents = 0;
-					poll_fd_vec_[i].events = POLLIN;
+					poll_fd_vec_[i].events = POLLIN | POLLERR;
 					throw std::exception();
 				}
 			}
-			else if (poll_fd_vec_[i].revents & POLLRDHUP)
-			{
-				std::cout << "here!!" << std::endl;
-				throw std::exception();
-			}
 		}
-		std::cout << "Error: recieve_msg(), poll_fd_vec.size(): " << poll_fd_vec_.size() << std::endl;
+		exit(1);
+		// std::cout << "Error: recieve_msg(), poll_fd_vec.size(): " << poll_fd_vec_.size() << std::endl;
 		throw std::exception();
 	}
 
@@ -103,7 +120,7 @@ namespace ft
 		}
 		struct pollfd poll_fd;
 		poll_fd.fd = connection;
-		poll_fd.events = POLLIN;
+		poll_fd.events = POLLIN | POLLRDHUP;
 		poll_fd.revents = 0;
 		poll_fd_vec_.push_back(poll_fd);
 		used_fd_set_.insert(connection);
@@ -172,10 +189,17 @@ namespace ft
 // 		}
 // 	}
 
+	void ft_socket::close_fd_(const int fd)
+	{
+		close(fd);
+		used_fd_set_.erase(fd);
+	}
+
 	void ft_socket::closeAllSocket_()
 	{
 		for (size_t	i = 0; i < port_num_; ++i)
 			close(poll_fd_vec_[i].fd);
+		used_fd_set_.clear();
 	}
 
 	void ft_socket::set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port)
