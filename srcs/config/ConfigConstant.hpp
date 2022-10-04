@@ -1,7 +1,7 @@
 #ifndef CONFIG_CONSTANT_HPP
 #define CONFIG_CONSTANT_HPP
 
-enum class E_DirectibeType
+enum class E_DirectiveType
 {
 	SERVER_NAME,
 	LISTEN,

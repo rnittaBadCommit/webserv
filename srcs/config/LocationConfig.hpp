@@ -10,7 +10,7 @@
 class LocationConfig
 {
 private:
-	std::set<E_DirectibeType> is_set;
+	std::set<E_DirectiveType> is_set;
 
 	std::string uri;
 	std::string alias;
@@ -19,7 +19,6 @@ private:
 	std::vector<std::string> index;
 	std::vector<std::string> cgi_extension;
 	std::map<int, std::string> redirect;
-	std::map<int, std::string> error_page;
 	std::string upload_filepath;
 
 public:
@@ -33,7 +32,6 @@ public:
 	void addIndex(const std::string &index);
 	void addCgiExtension(const std::string &cgi_extension);
 	void addRedirect(const int redirect_status, const std::string &uri);
-	void addErrorPage(const int error_status, const std::string &uri);
 	void setUploadFilepath(const std::string &upload_filepath);
 
 	const std::string &getUri() const;
@@ -43,10 +41,9 @@ public:
 	const std::vector<std::string> &getIndex() const;
 	const std::vector<std::string> &getCgiExtension() const;
 	const std::map<int, std::string> &getRedirect() const;
-	const std::map<int, std::string> &getErrorPage() const;
 	const std::string &getUploadFilepath() const;
 
-	const bool &isSet(E_DirectibeType type);
+	const bool &isSet(E_DirectiveType type);
 };
 
 #endif

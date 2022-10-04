@@ -63,52 +63,27 @@ void ConfigParser::setConfigFromParseLine()
 
 void ConfigParser::setConfigRoot(std::vector<std::string> line)
 {
-	if (line[0] == "index")
-		this->setConfigIndex(E_BlockType::ROOT, line);
-	else if (line[0] == "autoindex")
-		this->setConfigAutoIndex(E_BlockType::ROOT, line);
-	else if (line[0] == "client_max_body_size")
-		this->setConfigClientMaxBodySize(E_BlockType::ROOT, line);
-	else if (line[0] == "allow_method")
-		this->setConfigAllowMethod(E_BlockType::ROOT, line);
-	else if (line[0] == "cgi_extension")
-		this->setConfigCgiExtension(E_BlockType::ROOT, line);
-	else if (line[0] == "error_page")
-		this->setConfigErrorPage(E_BlockType::ROOT, line);
-	else if (line[0] == "upload_filepath")
-		this->setConfigUploadFilepath(E_BlockType::ROOT, line);
-	else if (line[0] == "server" && line[1] == "{")
+	if (line[0] == "server" && line[1] == "{")
 	{
 		this->nowBlock = E_BlockType::SERVER;
 	}
 	else
 	{
-		throw std::invalid_argument("Root config Error");
+		std::string msg = "unknown Directive (Root): " + line[0];
+		throw std::invalid_argument(msg);
 	}
 }
 
 void ConfigParser::setConfigServer(std::vector<std::string> line)
 {
-	if (line[0] == "index")
-		this->setConfigIndex(E_BlockType::SERVER, line);
-	else if (line[0] == "server_name")
+	if (line[0] == "server_name")
 		this->setConfigServerName(E_BlockType::SERVER, line);
 	else if (line[0] == "listen")
 		this->setConfigListen(E_BlockType::SERVER, line);
-	else if (line[0] == "return")
-		this->setConfigRedirect(E_BlockType::SERVER, line);
-	else if (line[0] == "autoindex")
-		this->setConfigAutoIndex(E_BlockType::SERVER, line);
 	else if (line[0] == "client_max_body_size")
 		this->setConfigClientMaxBodySize(E_BlockType::SERVER, line);
-	else if (line[0] == "allow_method")
-		this->setConfigAllowMethod(E_BlockType::SERVER, line);
-	else if (line[0] == "cgi_extension")
-		this->setConfigCgiExtension(E_BlockType::SERVER, line);
 	else if (line[0] == "error_page")
 		this->setConfigErrorPage(E_BlockType::SERVER, line);
-	else if (line[0] == "upload_filepath")
-		this->setConfigUploadFilepath(E_BlockType::SERVER, line);
 	else if (line[0] == "location" && line[2] == "{")
 	{
 		this->nowBlock = E_BlockType::LOCATION;
@@ -122,7 +97,8 @@ void ConfigParser::setConfigServer(std::vector<std::string> line)
 	}
 	else
 	{
-		throw std::invalid_argument("Server config Error");
+		std::string msg = "unknown Directive (Server): " + line[0];
+		throw std::invalid_argument(msg);
 	}
 }
 
@@ -140,8 +116,6 @@ void ConfigParser::setConfigLocation(std::vector<std::string> line)
 		this->setConfigAllowMethod(E_BlockType::LOCATION, line);
 	else if (line[0] == "cgi_extension")
 		this->setConfigCgiExtension(E_BlockType::LOCATION, line);
-	else if (line[0] == "error_page")
-		this->setConfigErrorPage(E_BlockType::LOCATION, line);
 	else if (line[0] == "upload_filepath")
 		this->setConfigUploadFilepath(E_BlockType::LOCATION, line);
 	else if (line[0] == "}")
@@ -152,7 +126,8 @@ void ConfigParser::setConfigLocation(std::vector<std::string> line)
 	}
 	else
 	{
-		throw std::invalid_argument("Location config Error");
+		std::string msg = "unknown Directive (Location): " + line[0];
+		throw std::invalid_argument(msg);
 	}
 }
 
@@ -196,10 +171,7 @@ void ConfigParser::setConfigErrorPage(E_BlockType block_type, std::vector<std::s
 		throw std::exception();
 		break;
 	case E_BlockType::SERVER:
-		for (int i = 1; i < line.size() - 1; i++)
-		{
-			this->server_config.addRedirect(atoi(line[1].c_str()), line[2]);
-		}
+		throw std::exception();
 		break;
 	case E_BlockType::LOCATION:
 		for (int i = 1; i < line.size() - 1; i++)
@@ -215,7 +187,7 @@ void ConfigParser::setConfigClientMaxBodySize(E_BlockType block_type, std::vecto
 	switch (block_type)
 	{
 	case E_BlockType::ROOT:
-		this->config.setClientMaxBodySize(line[1]);
+		throw std::exception();
 		break;
 	case E_BlockType::SERVER:
 		this->server_config.setClientMaxBodySize(line[1]);
@@ -231,16 +203,10 @@ void ConfigParser::setConfigAllowMethod(E_BlockType block_type, std::vector<std:
 	switch (block_type)
 	{
 	case E_BlockType::ROOT:
-		for (int i = 1; i < line.size() - 1; i++)
-		{
-			this->config.addAllowMethod(line[i]);
-		}
+		throw std::exception();
 		break;
 	case E_BlockType::SERVER:
-		for (int i = 1; i < line.size() - 1; i++)
-		{
-			this->server_config.addAllowMethod(line[i]);
-		}
+		throw std::exception();
 		break;
 	case E_BlockType::LOCATION:
 		for (int i = 1; i < line.size() - 1; i++)
@@ -259,10 +225,7 @@ void ConfigParser::setConfigRedirect(E_BlockType block_type, std::vector<std::st
 		throw std::exception();
 		break;
 	case E_BlockType::SERVER:
-		for (int i = 1; i < line.size() - 1; i++)
-		{
-			this->server_config.addRedirect(atoi(line[1].c_str()), line[2]);
-		}
+		throw std::exception();
 		break;
 	case E_BlockType::LOCATION:
 		for (int i = 1; i < line.size() - 1; i++)
@@ -302,10 +265,10 @@ void ConfigParser::setConfigAutoIndex(E_BlockType block_type, std::vector<std::s
 	switch (block_type)
 	{
 	case E_BlockType::ROOT:
-		this->config.setAutoindex(autoindex);
+		throw std::exception();
 		break;
 	case E_BlockType::SERVER:
-		this->server_config.setAutoindex(autoindex);
+		throw std::exception();
 		break;
 	case E_BlockType::LOCATION:
 		this->location_config.setAutoindex(autoindex);
@@ -318,16 +281,10 @@ void ConfigParser::setConfigIndex(E_BlockType block_type, std::vector<std::strin
 	switch (block_type)
 	{
 	case E_BlockType::ROOT:
-		for (int i = 1; i < line.size() - 1; i++)
-		{
-			this->config.addIndex(line[i]);
-		}
+		throw std::exception();
 		break;
 	case E_BlockType::SERVER:
-		for (int i = 1; i < line.size() - 1; i++)
-		{
-			this->server_config.addIndex(line[i]);
-		}
+		throw std::exception();
 		break;
 	case E_BlockType::LOCATION:
 		for (int i = 1; i < line.size() - 1; i++)
@@ -343,16 +300,10 @@ void ConfigParser::setConfigCgiExtension(E_BlockType block_type, std::vector<std
 	switch (block_type)
 	{
 	case E_BlockType::ROOT:
-		for (int i = 1; i < line.size() - 1; i++)
-		{
-			this->config.addCgiExtension(line[i]);
-		}
+		throw std::exception();
 		break;
 	case E_BlockType::SERVER:
-		for (int i = 1; i < line.size() - 1; i++)
-		{
-			this->server_config.addCgiExtension(line[i]);
-		}
+		throw std::exception();
 		break;
 	case E_BlockType::LOCATION:
 		for (int i = 1; i < line.size() - 1; i++)
@@ -368,10 +319,10 @@ void ConfigParser::setConfigUploadFilepath(E_BlockType block_type, std::vector<s
 	switch (block_type)
 	{
 	case E_BlockType::ROOT:
-		this->config.setUploadFilepath(line[1]);
+		throw std::exception();
 		break;
 	case E_BlockType::SERVER:
-		this->server_config.setUploadFilepath(line[1]);
+		throw std::exception();
 		break;
 	case E_BlockType::LOCATION:
 		this->location_config.setUploadFilepath(line[1]);
