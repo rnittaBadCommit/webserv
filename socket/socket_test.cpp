@@ -1,5 +1,5 @@
 #include "socket.hpp"
-
+#include <map>
 int main()
 {
 	std::vector<in_port_t> port_vec;
@@ -8,17 +8,46 @@ int main()
 	port_vec.push_back(8081);
 	port_vec.push_back(8082);
 
-	// port_vec.push_back(8081);
-	ft::ft_socket socket("127.0.0.1", port_vec);
+	std::map<int, std::string> http_request_map;
+	ft::ft_socket::RecievedMsg	recieved_msg;
 
-	while (1)
+	// port_vec.push_back(8081);
+	try
 	{
-		try
+		ft::ft_socket socket("127.0.0.1", port_vec, 10);
+
+		while (1)
 		{
-			std::cout << socket.recieve_msg();
-		} catch (const std::exception e)
-		{
-			(void)e;
+			try
+			{
+				recieved_msg = socket.recieve_msg();
+				http_request_map[recieved_msg.client_id] += recieved_msg.content;
+				std::cout << "===============================" << std::endl
+					<< http_request_map[recieved_msg.client_id] << std::endl
+					<< "===============================" << std::endl;;
+			}
+			catch (const ft::ft_socket::recieveMsgFromNewClient &new_client)
+			{
+				http_request_map[new_client.client_id];
+			}
+			catch (const ft::ft_socket::connectionHangUp &deleted_client)
+			{
+				http_request_map.erase(deleted_client.client_id);
+			}
+			catch (const ft::ft_socket::NoRecieveMsg &e)
+			{
+				std::cerr << "no msg recieved" << std::endl;
+			}
+			catch (const std::exception &e)
+			{
+				std::cerr << "Error: undetermined" << std::endl;
+			}
 		}
 	}
+	catch (const ft::ft_socket::SetUpFailException &e)
+	{
+		std::cerr << e.what() << std::endl;
+		return (1);
+	}
+
 }
