@@ -180,7 +180,7 @@ void ConfigParser::setConfigLocation(std::vector<std::string> line)
 
 void ConfigParser::setConfigServerName(E_BlockType block_type, std::vector<std::string> line)
 {
-	validateServerName(line);
+	this->validateServerName(line);
 
 	switch (block_type)
 	{
@@ -379,7 +379,7 @@ void ConfigParser::setConfigUploadFilepath(E_BlockType block_type, std::vector<s
 	}
 }
 
-void validateServerName(std::vector<std::string> line)
+void ConfigParser::validateServerName(std::vector<std::string> line)
 {
 	if (!(line[0] == "server_name" && line[2] == ";" && line.size() == 3))
 	{
@@ -387,42 +387,42 @@ void validateServerName(std::vector<std::string> line)
 	}
 }
 
-void validateListen(std::vector<std::string> line)
+void ConfigParser::validateListen(std::vector<std::string> line)
 {
 }
 
-void validateErrorPage(std::vector<std::string> line)
+void ConfigParser::validateErrorPage(std::vector<std::string> line)
 {
 }
 
-void validateClientMaxBodySize(std::vector<std::string> line)
+void ConfigParser::validateClientMaxBodySize(std::vector<std::string> line)
 {
 }
 
-void validateAllowMethod(std::vector<std::string> line)
+void ConfigParser::validateAllowMethod(std::vector<std::string> line)
 {
 }
 
-void validateRedirect(std::vector<std::string> line)
+void ConfigParser::validateRedirect(std::vector<std::string> line)
 {
 }
 
-void validateAlias(std::vector<std::string> line)
+void ConfigParser::validateAlias(std::vector<std::string> line)
 {
 }
 
-void validateAutoIndex(std::vector<std::string> line)
+void ConfigParser::validateAutoIndex(std::vector<std::string> line)
 {
 }
 
-void validateIndex(std::vector<std::string> line)
+void ConfigParser::validateIndex(std::vector<std::string> line)
 {
 }
 
-void validateCgiExtension(std::vector<std::string> line)
+void ConfigParser::validateCgiExtension(std::vector<std::string> line)
 {
 }
 
-void validateUploadFilepath(std::vector<std::string> line)
+void ConfigParser::validateUploadFilepath(std::vector<std::string> line)
 {
 }
