@@ -31,6 +31,7 @@ namespace ft
 
 	private:
 		ft::Socket socket;
+		void setup_();
 		bool recieve_request_();
 		std::map<int, std::string> http_request_map_;
 	};

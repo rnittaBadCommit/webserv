@@ -10,12 +10,25 @@ namespace ft
 
 	void Server::start_server()
 	{
+		try
+		{
+			setup_();
+		}
+		catch (const std::exception &e)
+		{
+			exit(1);
+		}
+
 		while (1)
 		{
 			if (recieve_request_())
 			{
 			}
 		}
+	}
+
+	void setup_()
+	{
 	}
 
 	bool Server::recieve_request_()
