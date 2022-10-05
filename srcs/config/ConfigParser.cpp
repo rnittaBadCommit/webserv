@@ -357,8 +357,13 @@ std::vector<std::string> ConfigParser::splitLine(const std::string line)
 			start = end;
 			++end;
 			params.push_back(line.substr(start, (end - start)));
+			break;
 		}
 		start = end;
+	}
+	if (line[end])
+	{
+		throw std::invalid_argument("Error: should one param in a line");
 	}
 	return params;
 }
