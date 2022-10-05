@@ -44,6 +44,18 @@ public:
 	void setConfigCgiExtension(E_BlockType block_type, std::vector<std::string> line);
 	void setConfigUploadFilepath(E_BlockType block_type, std::vector<std::string> line);
 
+	void validateServerName(std::vector<std::string> line);
+	void validateListen(std::vector<std::string> line);
+	void validateErrorPage(std::vector<std::string> line);
+	void validateClientMaxBodySize(std::vector<std::string> line);
+	void validateAllowMethod(std::vector<std::string> line);
+	void validateRedirect(std::vector<std::string> line);
+	void validateAlias(std::vector<std::string> line);
+	void validateAutoIndex(std::vector<std::string> line);
+	void validateIndex(std::vector<std::string> line);
+	void validateCgiExtension(std::vector<std::string> line);
+	void validateUploadFilepath(std::vector<std::string> line);
+
 	void printParserLine();
 };
 

@@ -29,17 +29,63 @@ Config ConfigParser::readFile(const std::string &filepath)
 	std::ifstream ifs(filepath.c_str());
 
 	std::string line;
+	// conf の一行ずつを読み込む
 	while (std::getline(ifs, line))
 	{
+		// 空行やコメントアウト行は無視
 		if (line.length() == 0 || (line.length() != 0 && line[0] == '#'))
 		{
 			continue;
 		}
+		// 	server_name hoge_server; => [0]: "server_name" [1]: "hoge_server" [2]: ";"
 		std::vector<std::string> params = this->splitLine(line);
 		this->parser_line.push_back(params);
 	}
+	// 読み込んだ行のvectorを利用してクラスにセットする
 	this->setConfigFromParseLine();
 	return this->config;
+}
+
+std::vector<std::string> ConfigParser::splitLine(const std::string line)
+{
+	std::vector<std::string> params;
+	size_t start = 0;
+	size_t end = 0;
+
+	while (line[start])
+	{
+		while (isspace(line[start]))
+		{
+			start++;
+		}
+		end = start;
+		while (isprint(line[end]) && !(isspace(line[end]) || isParamDelimiter(line[end])))
+		{
+			end++;
+		}
+		if ((end - start) != 0)
+		{
+			params.push_back(line.substr(start, (end - start)));
+		}
+		if (isParamDelimiter(line[end]))
+		{
+			start = end;
+			++end;
+			params.push_back(line.substr(start, (end - start)));
+			break;
+		}
+		start = end;
+	}
+	if (line[end])
+	{
+		throw std::invalid_argument("Error: should one param in a line");
+	}
+	return params;
+}
+
+bool ConfigParser::isParamDelimiter(int c)
+{
+	return ((c == '{') || (c == '}') || (c == ';'));
 }
 
 void ConfigParser::setConfigFromParseLine()
@@ -134,6 +180,8 @@ void ConfigParser::setConfigLocation(std::vector<std::string> line)
 
 void ConfigParser::setConfigServerName(E_BlockType block_type, std::vector<std::string> line)
 {
+	validateServerName(line);
+
 	switch (block_type)
 	{
 	case ROOT:
@@ -331,44 +379,50 @@ void ConfigParser::setConfigUploadFilepath(E_BlockType block_type, std::vector<s
 	}
 }
 
-std::vector<std::string> ConfigParser::splitLine(const std::string line)
+void validateServerName(std::vector<std::string> line)
 {
-	std::vector<std::string> params;
-	size_t start = 0;
-	size_t end = 0;
-
-	while (line[start])
+	if (!(line[0] == "server_name" && line[2] == ";" && line.size() == 3))
 	{
-		while (isspace(line[start]))
-		{
-			start++;
-		}
-		end = start;
-		while (isprint(line[end]) && !(isspace(line[end]) || isParamDelimiter(line[end])))
-		{
-			end++;
-		}
-		if ((end - start) != 0)
-		{
-			params.push_back(line.substr(start, (end - start)));
-		}
-		if (isParamDelimiter(line[end]))
-		{
-			start = end;
-			++end;
-			params.push_back(line.substr(start, (end - start)));
-			break;
-		}
-		start = end;
+		throw std::invalid_argument("Error: must fix server_name");
 	}
-	if (line[end])
-	{
-		throw std::invalid_argument("Error: should one param in a line");
-	}
-	return params;
 }
 
-bool ConfigParser::isParamDelimiter(int c)
+void validateListen(std::vector<std::string> line)
 {
-	return ((c == '{') || (c == '}') || (c == ';'));
+}
+
+void validateErrorPage(std::vector<std::string> line)
+{
+}
+
+void validateClientMaxBodySize(std::vector<std::string> line)
+{
+}
+
+void validateAllowMethod(std::vector<std::string> line)
+{
+}
+
+void validateRedirect(std::vector<std::string> line)
+{
+}
+
+void validateAlias(std::vector<std::string> line)
+{
+}
+
+void validateAutoIndex(std::vector<std::string> line)
+{
+}
+
+void validateIndex(std::vector<std::string> line)
+{
+}
+
+void validateCgiExtension(std::vector<std::string> line)
+{
+}
+
+void validateUploadFilepath(std::vector<std::string> line)
+{
 }
