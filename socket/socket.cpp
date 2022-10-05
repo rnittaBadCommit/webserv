@@ -4,36 +4,36 @@
 
 namespace ft
 {
-	ft_socket::ft_socket()
-	: port_num_(1), keep_connect_time_len_(0)
+	Socket::Socket()
+		: port_num_(1), keep_connect_time_len_(0)
 	{
 	}
 
-	ft_socket::~ft_socket()
+	Socket::~Socket()
 	{
 		closeAllSocket_();
 	}
 
-	ft_socket::ft_socket(const char *ip_address, 
-							const std::vector<in_port_t> port_vec,
-							time_t keep_connect_time_len)
-	: port_num_(port_vec.size()), keep_connect_time_len_(keep_connect_time_len)
+	Socket::Socket(const char *ip_address,
+				   const std::vector<in_port_t> port_vec,
+				   time_t keep_connect_time_len)
+		: port_num_(port_vec.size()), keep_connect_time_len_(keep_connect_time_len)
 	{
 		// initialize_();
 		std::cout << "keep connection time sec: " << keep_connect_time_len_ << std::endl;
 		struct sockaddr_in server_sockaddr;
 		struct pollfd poll_fd;
-		
+
 		for (size_t i = 0; i < port_num_; ++i)
 		{
 			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
 			if (sockfd_vec_.back() < 0)
 				throw SetUpFailException("Error: socket()");
-			
+
 			set_sockaddr_(server_sockaddr, ip_address, port_vec[i]);
 			std::cout << ip_address << " " << port_vec[i] << std::endl;
-			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr, 
-						sizeof(server_sockaddr)) < 0)		
+			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr,
+					 sizeof(server_sockaddr)) < 0)
 				throw SetUpFailException("Error: bind()");
 
 			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)
@@ -48,19 +48,17 @@ namespace ft
 		}
 	}
 
-	ft_socket::RecievedMsg::RecievedMsg()
-	: content(""), client_id(0)
+	Socket::RecievedMsg::RecievedMsg()
+		: content(""), client_id(0)
 	{
-
 	}
 
-	ft_socket::RecievedMsg::RecievedMsg(const std::string content, const int client_id)
-	: content(content), client_id(client_id)
+	Socket::RecievedMsg::RecievedMsg(const std::string content, const int client_id)
+		: content(content), client_id(client_id)
 	{
-
 	}
 
-	ft_socket::RecievedMsg	ft_socket::RecievedMsg::operator=(const ft_socket::RecievedMsg &other)
+	Socket::RecievedMsg Socket::RecievedMsg::operator=(const Socket::RecievedMsg &other)
 	{
 		if (this == &other)
 			return (*this);
@@ -70,13 +68,13 @@ namespace ft
 		return (*this);
 	}
 
-	void ft_socket::initialize_()
+	void Socket::initialize_()
 	{
 		poll_fd_vec_.reserve(port_num_);
 		recieve_fd_vec_.reserve(port_num_);
 	}
 
-	ft_socket::RecievedMsg ft_socket::recieve_msg()
+	Socket::RecievedMsg Socket::recieve_msg()
 	{
 		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
 		check_keep_time_and_close_fd();
@@ -94,7 +92,7 @@ namespace ft
 				close_fd_(poll_fd_vec_[i].fd, i);
 				poll_fd_vec_.erase(poll_fd_vec_.begin() + i);
 				throw connectionHangUp(poll_fd_vec_[i].fd);
-			}			
+			}
 			else if (poll_fd_vec_[i].revents & POLLRDHUP)
 			{
 				close_fd_(poll_fd_vec_[i].fd, i);
@@ -122,24 +120,23 @@ namespace ft
 		throw NoRecieveMsg();
 	}
 
-
-	void	ft_socket::check_keep_time_and_close_fd()
+	void Socket::check_keep_time_and_close_fd()
 	{
-		time_t	current_time = time(NULL);
-		time_t	tmp_last_recieve_time;
+		time_t current_time = time(NULL);
+		time_t tmp_last_recieve_time;
 
 		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
 		{
 			tmp_last_recieve_time = last_recieve_time_map_[poll_fd_vec_[i].fd];
 			if (tmp_last_recieve_time != (time_t)-1)
-			{	// fd made by accept(), not sockfd
+			{ // fd made by accept(), not sockfd
 				if (current_time - tmp_last_recieve_time > keep_connect_time_len_)
 					close_fd_(poll_fd_vec_[i].fd, i);
 			}
 		}
 	}
 
-	void ft_socket::register_new_client_(int sock_fd)
+	void Socket::register_new_client_(int sock_fd)
 	{
 		int connection = accept(sock_fd, NULL, NULL);
 		if (connection < 0)
@@ -155,17 +152,17 @@ namespace ft
 		last_recieve_time_map_[connection] = time(NULL);
 	}
 
-	ft_socket::RecievedMsg	ft_socket::recieve_msg_from_connected_client_(int connection)
+	Socket::RecievedMsg Socket::recieve_msg_from_connected_client_(int connection)
 	{
 		char buf[BUFFER_SIZE + 1];
-		
+
 		last_recieve_time_map_[connection] = time(NULL);
 		int recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
 		buf[recv_ret] = '\0';
 		return (RecievedMsg(std::string(buf), connection));
 	}
 
-	void ft_socket::close_fd_(const int fd, const int i_poll_fd)
+	void Socket::close_fd_(const int fd, const int i_poll_fd)
 	{
 		close(fd);
 		poll_fd_vec_.erase(poll_fd_vec_.begin() + i_poll_fd);
@@ -173,14 +170,14 @@ namespace ft
 		throw connectionHangUp(fd);
 	}
 
-	void ft_socket::closeAllSocket_()
+	void Socket::closeAllSocket_()
 	{
-		for (size_t	i = 0; i < port_num_; ++i)
+		for (size_t i = 0; i < port_num_; ++i)
 			close(poll_fd_vec_[i].fd);
 		used_fd_set_.clear();
 	}
 
-	void ft_socket::set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port)
+	void Socket::set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port)
 	{
 		memset(&server_sockaddr, 0, sizeof(struct sockaddr_in));
 		server_sockaddr.sin_family = AF_INET;
@@ -188,36 +185,32 @@ namespace ft
 		server_sockaddr.sin_addr.s_addr = inet_addr(ip);
 	}
 
-	ft_socket::SetUpFailException::SetUpFailException(const std::string err_msg)
-	: err_msg(err_msg)
+	Socket::SetUpFailException::SetUpFailException(const std::string err_msg)
+		: err_msg(err_msg)
 	{
-
-	}
-	
-	ft_socket::SetUpFailException::~SetUpFailException() throw()
-	{
-
 	}
 
-	const char *ft_socket::SetUpFailException::what() const throw()
+	Socket::SetUpFailException::~SetUpFailException() throw()
+	{
+	}
+
+	const char *Socket::SetUpFailException::what() const throw()
 	{
 		return (err_msg.c_str());
 	}
 
-	const char *ft_socket::RecieveMsgException::what() const throw()
+	const char *Socket::RecieveMsgException::what() const throw()
 	{
 		return ("Error: recieve msg fail, shouldn't happen");
 	}
 
-	ft_socket::recieveMsgFromNewClient::recieveMsgFromNewClient(const int client_id)
-	: client_id(client_id)
+	Socket::recieveMsgFromNewClient::recieveMsgFromNewClient(const int client_id)
+		: client_id(client_id)
 	{
-
 	}
 
-	ft_socket::connectionHangUp::connectionHangUp(const int client_id)
-	: client_id(client_id)
+	Socket::connectionHangUp::connectionHangUp(const int client_id)
+		: client_id(client_id)
 	{
-
 	}
 }
