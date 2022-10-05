@@ -9,12 +9,12 @@ int main()
 	port_vec.push_back(8082);
 
 	std::map<int, std::string> http_request_map;
-	ft::ft_socket::RecievedMsg	recieved_msg;
+	ft::Socket::RecievedMsg recieved_msg;
 
 	// port_vec.push_back(8081);
 	try
 	{
-		ft::ft_socket socket("127.0.0.1", port_vec, 10);
+		ft::Socket socket("127.0.0.1", port_vec, 10);
 
 		while (1)
 		{
@@ -23,18 +23,19 @@ int main()
 				recieved_msg = socket.recieve_msg();
 				http_request_map[recieved_msg.client_id] += recieved_msg.content;
 				std::cout << "===============================" << std::endl
-					<< http_request_map[recieved_msg.client_id] << std::endl
-					<< "===============================" << std::endl;;
+						  << http_request_map[recieved_msg.client_id] << std::endl
+						  << "===============================" << std::endl;
+				;
 			}
-			catch (const ft::ft_socket::recieveMsgFromNewClient &new_client)
+			catch (const ft::Socket::recieveMsgFromNewClient &new_client)
 			{
 				http_request_map[new_client.client_id];
 			}
-			catch (const ft::ft_socket::connectionHangUp &deleted_client)
+			catch (const ft::Socket::connectionHangUp &deleted_client)
 			{
 				http_request_map.erase(deleted_client.client_id);
 			}
-			catch (const ft::ft_socket::NoRecieveMsg &e)
+			catch (const ft::Socket::NoRecieveMsg &e)
 			{
 				std::cerr << "no msg recieved" << std::endl;
 			}
@@ -44,10 +45,9 @@ int main()
 			}
 		}
 	}
-	catch (const ft::ft_socket::SetUpFailException &e)
+	catch (const ft::Socket::SetUpFailException &e)
 	{
 		std::cerr << e.what() << std::endl;
 		return (1);
 	}
-
 }
