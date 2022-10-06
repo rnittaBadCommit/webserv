@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "./HTTPRequst.hpp"
+//ifmac \r if unix \r\n
 int main() {
     int             rlt = 1;
     std::string     str;

@@ -11,14 +11,17 @@ int      HTTPRequest::Parse(const std::string& request) {
     _save += request;
 
     //rlt 0 = fin, 1 = not fin, 2 = empty string
-    std::cout << _requestMethod << std::endl;
+
     if (_requestMethod == "") {
         rlt = _parseRequestMethod();
-    } else if (rlt && _requestURI == "") {
+    }
+    if (rlt && _requestURI == "") {
        rlt =  _parseRequestURI();
-    } else if (rlt && _HTTPv == "") {
+    }
+    if (rlt && _HTTPv == "") {
         rlt = _parseHTTPv();
-    } else if (!_headerFieldsFin){
+    }
+    if (rlt && !_headerFieldsFin){
        //return _parseHeaderFields();
     }
 
@@ -39,9 +42,7 @@ int     HTTPRequest::_parseRequestMethod() {
 
     if (i != std::string::npos) {
         _requestMethod = _save.substr(0, i);
-        std::cout << "request command is: " << _requestMethod << std::endl;
         _save.erase(0, i + 1);
-        return(_parseRequestURI());
     }
     return (1);
 }
@@ -52,13 +53,12 @@ int     HTTPRequest::_parseRequestURI() {
     if (i != std::string::npos) {
         _requestURI = _save.substr(0, i);
         _save.erase(0, i + 1);
-        return (_parseHTTPv());
     }
     return (1);
 }
 
 int     HTTPRequest::_parseHTTPv() {
-    size_t i = _save.find('\n');
+    size_t i = _save.find('\r\n');
 
     if (i != std::string::npos) {
         _HTTPv = _save.substr(0, i);
