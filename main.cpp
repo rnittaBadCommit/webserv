@@ -1,5 +1,13 @@
 #include <iostream>
+
+#include "./HTTPRequst.hpp"
 int main() {
-    std::cout << "hey\n";
+    int             rlt = 1;
+    std::string     str;
+    HTTPRequest     req;
+
+    while (rlt && std::cin >> str) {
+       rlt = req.Parse(str);
+    }
     return 0;
 }

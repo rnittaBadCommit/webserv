@@ -4,32 +4,40 @@
 
 #include <string>
 #include <cstddef>
+#include <vector>
+#include <map>
 
 class HTTPRequest {
 public:
-    typdef std::vector<std::pair<std::string, std::string> >   header_type;
+    typedef std::vector<std::map<std::string, std::string> >   header_type;
 
 private:
     std::string     _requestMethod;
     std::string     _requestURI;
+    std::string     _HTTPv;
     header_type     _headerFields;
+    bool            _headerFieldsFin;
     std::string     _body;
+    std::string     _save;
 
 public:
-    HTTPRequest(){}
-    ~HTTPRequest(){}
+    HTTPRequest();
+    ~HTTPRequest();
 
-    void ParseHTTPRequest(const std::string& request);
+    int Parse(const std::string& request);
 
     const std::string&  GetRequestMethod();
     const std::string&  GetRequestURI();
+    const std::string&  GetHTTPv();
     const header_type&  GetHeaderFields();
     const std::string&  GetBody();
 
 private:
 
-    void    _parseStartLine(const std::string& request);
-    void    _parseHeaderFields(const std::stringstream& ss, const std::string& request);
+    int     _parseRequestMethod();
+    int     _parseRequestURI();
+    int     _parseHTTPv();
+    //int     _parseHeaderFields();
 
 };
 
