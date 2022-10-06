@@ -3,9 +3,23 @@
 namespace ft
 {
 
-	Server::Server(std::vector<in_port_t> port_vec)
-		: socket("127.0.0.1", port_vec, 10)
+	Server::Server(const std::vector<in_port_t> port_vec)
+		: socket_("127.0.0.1", port_vec, 10)
 	{
+	}
+
+	Server::Server(const std::string config_path)
+		: config_()
+	{
+		import_config_(config_path);
+
+		std::vector<in_port_t> port_vec;
+		const std::vector<ServerConfig> &serverConfig = config_.getServerConfig();
+		for (size_t i = 0; i < serverConfig.size(); ++i)
+		{
+			port_vec.push_back(serverConfig[i].getListen());
+		}
+		socket_("127.0.0.1", port_vec);
 	}
 
 	void Server::start_server()
@@ -27,6 +41,12 @@ namespace ft
 		}
 	}
 
+	void Server::import_config_(const std::string config_path)
+	{
+		ConfigParser configParser;
+		config_ = configParser.readFile(config_path);
+	}
+
 	void setup_()
 	{
 	}
@@ -37,7 +57,7 @@ namespace ft
 
 		try
 		{
-			recieved_msg = socket.recieve_msg();
+			recieved_msg = socket_.recieve_msg();
 			http_request_map_[recieved_msg.client_id] += recieved_msg.content;
 			std::cout << "===============================" << std::endl
 					  << http_request_map_[recieved_msg.client_id] << std::endl

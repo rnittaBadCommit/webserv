@@ -5,7 +5,6 @@
 namespace ft
 {
 	Socket::Socket()
-		: port_num_(1), keep_connect_time_len_(0)
 	{
 	}
 
@@ -74,7 +73,19 @@ namespace ft
 		recieve_fd_vec_.reserve(port_num_);
 	}
 
-	Socket::RecievedMsg Socket::recieve_msg()
+	void Socket::setup(const Config config)
+	{
+		std::vector<in_port_t> port_vec;
+
+		const std::vector<ServerConfig> &serverConfig = config.getServerConfig();
+		for (size_t i = 0; i < serverConfig.size(); ++i)
+		{
+			port_vec.push_back(serverConfig[i].getListen());
+		}
+	}
+
+	Socket::RecievedMsg
+	Socket::recieve_msg()
 	{
 		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
 		check_keep_time_and_close_fd();
