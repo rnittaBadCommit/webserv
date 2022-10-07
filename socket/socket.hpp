@@ -20,6 +20,7 @@
 
 #include "../srcs/config/Config.hpp"
 
+
 #define BUFFER_SIZE 10
 
 namespace ft
@@ -38,6 +39,8 @@ namespace ft
 			   const std::vector<in_port_t> portvec,
 			   time_t keep_connect_time_len);
 
+		Socket(const Config config);
+
 		class RecievedMsg
 		{
 		public:
@@ -46,9 +49,10 @@ namespace ft
 			RecievedMsg operator=(const RecievedMsg &other);
 			std::string content;
 			int client_id;
+			in_port_t	port;
 		};
 
-		void setup(const Config config);
+		void setup(const std::vector<ServerConfig> &server_config);
 
 		RecievedMsg recieve_msg();
 
@@ -96,7 +100,7 @@ namespace ft
 		std::set<int> used_fd_set_;
 
 		size_t port_num_;
-		time_t keep_connect_time_len_;
+		time_t keep_connect_time_len_ = 5;
 
 		RecievedMsg recieve_msg_from_connected_client_(int connection);
 		void register_new_client_(int sock_fd);

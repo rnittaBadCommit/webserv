@@ -26,9 +26,10 @@ namespace ft
 	{
 	public:
 		Server();							 // default conf
-		Server(const std::string conf_path); // custom conf
+		// Server(const std::string conf_path); // custom conf
 		Server(const std::vector<in_port_t> port_vec);
 		Server(const std::string config_path);
+		// Server(const ServerConfig server_config);
 
 		void start_server();
 
