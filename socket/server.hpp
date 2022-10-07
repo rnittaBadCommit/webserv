@@ -36,6 +36,7 @@ namespace ft
 	private:
 		Config config_;
 		Socket socket_;
+		
 
 		void import_config_(const std::string config_path);
 		void setup_();

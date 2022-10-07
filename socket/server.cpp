@@ -36,6 +36,7 @@ namespace ft
 		try
 		{
 			recieved_msg = socket_.recieve_msg();
+			// if (http_request_map_.count(recieved_msg.client_id))
 			http_request_map_[recieved_msg.client_id] = recieved_msg.content;
 			std::cout << "===============================" << std::endl
 					  << http_request_map_[recieved_msg.client_id] << std::endl
