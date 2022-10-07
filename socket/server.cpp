@@ -2,29 +2,27 @@
 
 namespace ft
 {
-
-	Server::Server(std::vector<in_port_t> port_vec)
-		: socket("127.0.0.1", port_vec, 10)
+	Server::Server(const std::string config_path)
 	{
+		import_config_(config_path);
+
+		socket_.setup(config_.getServerConfig());
 	}
 
 	void Server::start_server()
 	{
-		try
-		{
-			setup_();
-		}
-		catch (const std::exception &e)
-		{
-			exit(1);
-		}
-
 		while (1)
 		{
 			if (recieve_request_())
 			{
 			}
 		}
+	}
+
+	void Server::import_config_(const std::string config_path)
+	{
+		ConfigParser configParser;
+		config_ = configParser.readFile(config_path);
 	}
 
 	void setup_()
@@ -37,8 +35,9 @@ namespace ft
 
 		try
 		{
-			recieved_msg = socket.recieve_msg();
-			http_request_map_[recieved_msg.client_id] += recieved_msg.content;
+			recieved_msg = socket_.recieve_msg();
+			// if (http_request_map_.count(recieved_msg.client_id))
+			http_request_map_[recieved_msg.client_id] = recieved_msg.content;
 			std::cout << "===============================" << std::endl
 					  << http_request_map_[recieved_msg.client_id] << std::endl
 					  << "===============================" << std::endl;

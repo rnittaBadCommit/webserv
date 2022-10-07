@@ -5,47 +5,12 @@
 namespace ft
 {
 	Socket::Socket()
-		: port_num_(1), keep_connect_time_len_(0)
 	{
 	}
 
 	Socket::~Socket()
 	{
 		closeAllSocket_();
-	}
-
-	Socket::Socket(const char *ip_address,
-				   const std::vector<in_port_t> port_vec,
-				   time_t keep_connect_time_len)
-		: port_num_(port_vec.size()), keep_connect_time_len_(keep_connect_time_len)
-	{
-		// initialize_();
-		std::cout << "keep connection time sec: " << keep_connect_time_len_ << std::endl;
-		struct sockaddr_in server_sockaddr;
-		struct pollfd poll_fd;
-
-		for (size_t i = 0; i < port_num_; ++i)
-		{
-			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
-			if (sockfd_vec_.back() < 0)
-				throw SetUpFailException("Error: socket()");
-
-			set_sockaddr_(server_sockaddr, ip_address, port_vec[i]);
-			std::cout << ip_address << " " << port_vec[i] << std::endl;
-			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr,
-					 sizeof(server_sockaddr)) < 0)
-				throw SetUpFailException("Error: bind()");
-
-			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)
-				throw SetUpFailException("Error: listen()");
-
-			poll_fd.fd = sockfd_vec_.back();
-			poll_fd.events = POLLIN;
-			poll_fd.revents = 0;
-			poll_fd_vec_.push_back(poll_fd);
-
-			last_recieve_time_map_[sockfd_vec_.back()] = -1;
-		}
 	}
 
 	Socket::RecievedMsg::RecievedMsg()
@@ -68,13 +33,37 @@ namespace ft
 		return (*this);
 	}
 
-	void Socket::initialize_()
+	void Socket::setup(const std::vector<ServerConfig> &server_config_vec)
 	{
-		poll_fd_vec_.reserve(port_num_);
-		recieve_fd_vec_.reserve(port_num_);
+		struct sockaddr_in server_sockaddr;
+		struct pollfd poll_fd;
+
+		for (size_t i = 0; i < server_config_vec.size(); ++i)
+		{
+			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
+			if (sockfd_vec_.back() < 0)
+				throw SetUpFailException("Error: socket()");
+			
+			set_sockaddr_(server_sockaddr, "127.0.0.1", server_config_vec[i].getListen());
+			std::cout << "127.0.0.1" << " " << server_config_vec[i].getListen() << std::endl;
+
+			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr,
+						sizeof(server_sockaddr)) < 0)
+				throw SetUpFailException("Error: bind()");
+
+			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)
+				throw SetUpFailException("Error: listen()");
+
+			poll_fd.fd = sockfd_vec_.back();
+			poll_fd.events = POLLIN;
+			poll_fd.revents = 0;
+			poll_fd_vec_.push_back(poll_fd);
+
+			last_recieve_time_map_[sockfd_vec_.back()] = -1;
+		}
 	}
 
-	Socket::RecievedMsg Socket::recieve_msg()
+	Socket::RecievedMsg	Socket::recieve_msg()
 	{
 		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
 		check_keep_time_and_close_fd();
