@@ -9,22 +9,25 @@
 
 class HTTPRequest {
 public:
-    typedef std::vector<std::map<std::string, std::string> >   header_type;
+    typedef std::map<std::string, std::string>  header_type;
 
 private:
     std::string     _requestMethod;
     std::string     _requestURI;
     std::string     _HTTPv;
     header_type     _headerFields;
+    int             _contentLength; //int?
     bool            _headerFieldsFin;
     std::string     _body;
     std::string     _save;
+    int             _errorStatus;
 
 public:
     HTTPRequest();
     ~HTTPRequest();
 
-    int Parse(const std::string& request);
+    int     Parse(const std::string& request);
+    void    PrintRequest();
 
     const std::string&  GetRequestMethod();
     const std::string&  GetRequestURI();
@@ -38,6 +41,7 @@ private:
     int     _parseRequestURI();
     int     _parseHTTPv();
     //int     _parseHeaderFields();
+    bool    _HTTPRequestComplete();
 
 };
 
