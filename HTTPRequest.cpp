@@ -23,15 +23,19 @@ int      HTTPRequest::Parse(const std::string& request) {
     if (rlt && _HTTPv == "") {
         rlt = _parseHTTPv();
     }
-    if (rlt && !_headerFieldsFin) {
+    if (rlt && _HTTPv != "" && !_headerFieldsFin) {
         _parseHeaderFields();
     }
 
+    if (_HTTPRequestComplete()) {
+        return (0);
+    }
+    return (1);
     // if content-length
     //    ...
 
     //getbody
-    return (rlt);
+    //return (rlt);
 }
 
 const std::string&                  HTTPRequest::GetRequestMethod() { return _requestMethod; }
@@ -45,8 +49,9 @@ int     HTTPRequest::_parseRequestMethod() {
     if (i != std::string::npos) {
         _requestMethod = _save.substr(0, i);
         _save.erase(0, i + 1);
+        return(1);
     }
-    return (1);
+    return (0);
 }
 
 int     HTTPRequest::_parseRequestURI() {
@@ -55,8 +60,9 @@ int     HTTPRequest::_parseRequestURI() {
     if (i != std::string::npos) {
         _requestURI = _save.substr(0, i);
         _save.erase(0, i + 1);
+        return (1);
     }
-    return (1);
+    return (0);
 }
 
 int     HTTPRequest::_parseHTTPv() {
@@ -67,43 +73,45 @@ int     HTTPRequest::_parseHTTPv() {
         // if _requesturi not HTTP/1.1 error?
         _save.erase(0, i + 1);
         //return (_parseHeaderFields());
+        return (1);
     }
-    return (1);
+    return (0);
 }
 
 int     HTTPRequest::_parseHeaderFields() {
     std::locale loc;
-    if (_currentHeader.first == "") {
-        size_t i = _save.find(':');
-        if (i != std::string::npos) {
-            _currentHeader.first = _save.substr(0, i);
-            for (size_t i = 0; i < _currentHeader.first.length(); ++i) {
+    while (_save.find(DELIM) != 0) {
+        if (_currentHeader.first == "") {
+            size_t i = _save.find(':');
+            if (i != std::string::npos) {
+                _currentHeader.first = _save.substr(0, i);
+                for (size_t i = 0; i < _currentHeader.first.length(); ++i) {
                     std::tolower(_currentHeader.first[i], loc);
+                }
+                _save.erase(0, i + 1);
             }
-            _save.erase(0, i + 1);
+        }
+        if (_currentHeader.first != "") {
+            size_t i = _save.find(DELIM);
+            if (i != std::string::npos) {
+                _currentHeader.second = _save.substr(0, i);
+                _save.erase(0, i + 1);
+                /*while (_currentHeader.second.size() && isspace(_currentHeader.second.front())) {
+                    _currentHeader.second.erase(0);
+                }
+                for (size_t i = 0; i < _currentHeader.second.length(); ++i) {
+                    std::tolower(_currentHeader.second[i], loc);
+                }*/
+                if (_currentHeader.first == "content-length") {
+                    //_contentLength = stoi _currentHeader.second;
+                }
+                _headerFields.insert(std::make_pair(_currentHeader.first, _currentHeader.second));
+                _currentHeader.first = "";
+                _currentHeader.second = "";
+            }
         }
     }
-    if (_currentHeader.first != "") {
-        size_t i = _save.find(DELIM);
-        if (i != std::string::npos) {
-            _currentHeader.second = _save.substr(0, i);
-            _save.erase(0, i + 1);
-            /*while (_currentHeader.second.size() && isspace(_currentHeader.second.front())) {
-                _currentHeader.second.erase(0);
-            }
-            for (size_t i = 0; i < _currentHeader.second.length(); ++i) {
-                std::tolower(_currentHeader.second[i], loc);
-            }*/
-            if (_currentHeader.first == "content-length") {
-                //_contentLength = stoi _currentHeader.second;
-            }
-            _headerFields.insert(std::make_pair(_currentHeader.first, _currentHeader.second));
-            _currentHeader.first = "";
-            _currentHeader.second = "";
-        }
-    }
-
-    return (1);
+    return (0);
 }
 
 bool    HTTPRequest::_HTTPRequestComplete() {
