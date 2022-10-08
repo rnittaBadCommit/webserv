@@ -86,7 +86,7 @@ int     HTTPRequest::_parseHeaderFields() {
             if (i != std::string::npos) {
                 _currentHeader.first = _save.substr(0, i);
                 for (size_t i = 0; i < _currentHeader.first.length(); ++i) {
-                    std::tolower(_currentHeader.first[i], loc);
+                    _currentHeader.first[i] = std::tolower(_currentHeader.first[i], loc);
                 }
                 _save.erase(0, i + 1);
             }
@@ -96,12 +96,12 @@ int     HTTPRequest::_parseHeaderFields() {
             if (i != std::string::npos) {
                 _currentHeader.second = _save.substr(0, i);
                 _save.erase(0, i + 1);
-                /*while (_currentHeader.second.size() && isspace(_currentHeader.second.front())) {
-                    _currentHeader.second.erase(0);
+                while (_currentHeader.second.size() && isspace(_currentHeader.second.front())) {
+                    _currentHeader.second.erase(0, 1);
                 }
                 for (size_t i = 0; i < _currentHeader.second.length(); ++i) {
-                    std::tolower(_currentHeader.second[i], loc);
-                }*/
+                    _currentHeader.second[i] = std::tolower(_currentHeader.second[i], loc);
+                }
                 if (_currentHeader.first == "content-length") {
                     //_contentLength = stoi _currentHeader.second;
                 }
@@ -124,6 +124,6 @@ bool    HTTPRequest::_HTTPRequestComplete() {
 void    HTTPRequest::PrintRequest() {
     std::cout << _requestMethod << ' ' << _requestURI << ' ' << _HTTPv << std::endl;
     for(header_type::iterator it = _headerFields.begin(); it != _headerFields.end(); ++it) {
-        std::cout << it->first << ": " << it->second << std::endl;
+        std::cout << it->first << ":" << it->second << std::endl;
     }
 }
