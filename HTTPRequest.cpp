@@ -80,7 +80,7 @@ int     HTTPRequest::_parseHTTPv() {
 
 int     HTTPRequest::_parseHeaderFields() {
     std::locale loc;
-    while (_save.find(DELIM) != 0) {
+    while (_save.find(DELIM) != 0 && _save.find(DELIM) != std::string::npos) {
         if (_currentHeader.first == "") {
             size_t i = _save.find(':');
             if (i != std::string::npos) {
