@@ -1,5 +1,5 @@
 #include "HTTPRequst.hpp"
-
+#include "webserv.hpp"
 #include <iostream>
 HTTPRequest::HTTPRequest() : _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _contentLength(), _headerFieldsFin(false), _body(), _save() {}
 HTTPRequest::~HTTPRequest(){}
@@ -59,7 +59,7 @@ int     HTTPRequest::_parseRequestURI() {
 }
 
 int     HTTPRequest::_parseHTTPv() {
-    size_t i = _save.find('\n');
+    size_t i = _save.find(DELIM);
 
     if (i != std::string::npos) {
         _HTTPv = _save.substr(0, i);
