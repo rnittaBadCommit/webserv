@@ -1,7 +1,9 @@
 #include "HTTPRequst.hpp"
 #include "webserv.hpp"
 #include <iostream>
-HTTPRequest::HTTPRequest() : _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _contentLength(), _headerFieldsFin(false), _body(), _save() {}
+
+HTTPRequest::HTTPRequest() : _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
+    _contentLength(), _headerFieldsFin(false), _body(), _save() {}
 HTTPRequest::~HTTPRequest(){}
 
 int      HTTPRequest::Parse(const std::string& request) {
@@ -22,7 +24,7 @@ int      HTTPRequest::Parse(const std::string& request) {
         rlt = _parseHTTPv();
     }
     if (rlt && !_headerFieldsFin) {
-        //_parseHeaderFields();
+        _parseHeaderFields();
     }
 
     // if content-length
@@ -38,7 +40,6 @@ const HTTPRequest::header_type&     HTTPRequest::GetHeaderFields() { return _hea
 const std::string&                  HTTPRequest::GetBody() { return _body; }
 
 int     HTTPRequest::_parseRequestMethod() {
-
     size_t i = _save.find(' ');
 
     if (i != std::string::npos) {
@@ -66,8 +67,42 @@ int     HTTPRequest::_parseHTTPv() {
         // if _requesturi not HTTP/1.1 error?
         _save.erase(0, i + 1);
         //return (_parseHeaderFields());
-        return(0);
     }
+    return (1);
+}
+
+int     HTTPRequest::_parseHeaderFields() {
+    std::locale loc;
+    if (_currentHeader.first == "") {
+        size_t i = _save.find(':');
+        if (i != std::string::npos) {
+            _currentHeader.first = _save.substr(0, i);
+            for (size_t i = 0; i < _currentHeader.first.length(); ++i) {
+                    std::tolower(_currentHeader.first[i], loc);
+            }
+            _save.erase(0, i + 1);
+        }
+    }
+    if (_currentHeader.first != "") {
+        size_t i = _save.find(DELIM);
+        if (i != std::string::npos) {
+            _currentHeader.second = _save.substr(0, i);
+            _save.erase(0, i + 1);
+            /*while (_currentHeader.second.size() && isspace(_currentHeader.second.front())) {
+                _currentHeader.second.erase(0);
+            }
+            for (size_t i = 0; i < _currentHeader.second.length(); ++i) {
+                std::tolower(_currentHeader.second[i], loc);
+            }*/
+            if (_currentHeader.first == "content-length") {
+                //_contentLength = stoi _currentHeader.second;
+            }
+            _headerFields.insert(std::make_pair(_currentHeader.first, _currentHeader.second));
+            _currentHeader.first = "";
+            _currentHeader.second = "";
+        }
+    }
+
     return (1);
 }
 

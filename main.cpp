@@ -11,10 +11,7 @@ int main() {
         rlt = req.Parse(std::string(line));
         // if httprequest is complete &&
     }
-    std::cout << "Request" << std::endl;
+    std::cout << "Here is your Request" << std::endl;
     req.PrintRequest();
-
-
-    std::cout << "DONE" << std::endl;
     return 0;
 }

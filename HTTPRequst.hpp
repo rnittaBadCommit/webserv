@@ -10,12 +10,14 @@
 class HTTPRequest {
 public:
     typedef std::map<std::string, std::string>  header_type;
+    typedef std::pair<std::string, std::string> header_value;
 
 private:
     std::string     _requestMethod;
     std::string     _requestURI;
     std::string     _HTTPv;
     header_type     _headerFields;
+    header_value    _currentHeader;
     int             _contentLength; //int?
     bool            _headerFieldsFin;
     std::string     _body;
@@ -40,7 +42,7 @@ private:
     int     _parseRequestMethod();
     int     _parseRequestURI();
     int     _parseHTTPv();
-    //int     _parseHeaderFields();
+    int     _parseHeaderFields();
     bool    _HTTPRequestComplete();
 
 };
