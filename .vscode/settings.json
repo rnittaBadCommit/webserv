@@ -1,5 +1,7 @@
 {
 	"files.associations": {
 		"iostream": "cpp"
-	}
+	},
+	"editor.fontSize": 13,
+	"vim.useSystemClipboard": true
 }

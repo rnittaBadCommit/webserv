@@ -26,16 +26,25 @@ int      HTTPRequest::Parse(const std::string& request) {
     if (rlt && _HTTPv != "" && !_headerFieldsFin) {
         _parseHeaderFields();
     }
+    if (_headerFieldsFin) {
+        header_type::iterator content_length = _headerFields.find("content-length");
+        header_type::iterator field_content = _headerFields.find("field-content");
+        if (content_length != _headerFields.end() && field_content != _headerFields.end()) {
+            throw std::runtime_error("HTTP reques should not contain both content-length and field-content");
+        } else if (content_length != _headerFields.end() && field_content != _headerFields.end()) {
+            // Not sure yet
+        } else if (content_length != _headerFields.end()) {
+            std::cout << "we're gonne read: " << _contentLength << " bytes to get the body" << std::endl;
+        } else {
+            std::cout << "we're gonna read some chunks until we get a 0 size chunk.. whatever that means...." << std::endl;
+        }
+        return (0);
+    }
 
     if (_HTTPRequestComplete()) {
         return (0);
     }
     return (1);
-    // if content-length
-    //    ...
-
-    //getbody
-    //return (rlt);
 }
 
 const std::string&                  HTTPRequest::GetRequestMethod() { return _requestMethod; }
@@ -78,7 +87,7 @@ int     HTTPRequest::_parseHTTPv() {
     return (0);
 }
 
-int     HTTPRequest::_parseHeaderFields() {
+void    HTTPRequest::_parseHeaderFields() {
     std::locale loc;
     while (_save.find(DELIM) != 0 && _save.find(DELIM) != std::string::npos) {
         if (_currentHeader.first == "") {
@@ -96,14 +105,14 @@ int     HTTPRequest::_parseHeaderFields() {
             if (i != std::string::npos) {
                 _currentHeader.second = _save.substr(0, i);
                 _save.erase(0, i + 1);
-                while (_currentHeader.second.size() && isspace(_currentHeader.second.front())) {
+                while (_currentHeader.second.size() && isspace(_currentHeader.second[0])) {
                     _currentHeader.second.erase(0, 1);
                 }
                 for (size_t i = 0; i < _currentHeader.second.length(); ++i) {
                     _currentHeader.second[i] = std::tolower(_currentHeader.second[i], loc);
                 }
                 if (_currentHeader.first == "content-length") {
-                    //_contentLength = stoi _currentHeader.second;
+                    _contentLength = _strToBase(_currentHeader.second, std::dec);
                 }
                 _headerFields.insert(std::make_pair(_currentHeader.first, _currentHeader.second));
                 _currentHeader.first = "";
@@ -111,7 +120,9 @@ int     HTTPRequest::_parseHeaderFields() {
             }
         }
     }
-    return (0);
+    if (_save.find(DELIM) == 0) {
+        _headerFieldsFin = true;
+    } 
 }
 
 bool    HTTPRequest::_HTTPRequestComplete() {
@@ -126,4 +137,16 @@ void    HTTPRequest::PrintRequest() {
     for(header_type::iterator it = _headerFields.begin(); it != _headerFields.end(); ++it) {
         std::cout << it->first << ":" << it->second << std::endl;
     }
+}
+
+unsigned int     HTTPRequest::_strToBase(const std::string& str, std::ios_base& (*base)(std::ios_base&)) {
+    std::stringstream  stream(str);
+    unsigned long int  num;
+
+    stream >> base >> num;
+
+    if (num > std::numeric_limits<unsigned int>::max()) {
+        throw std::runtime_error("overflow/underflow");
+    }
+    return (static_cast<unsigned int>(num));
 }
