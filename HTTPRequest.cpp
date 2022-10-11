@@ -3,7 +3,7 @@
 #include <iostream>
 
 HTTPRequest::HTTPRequest() : _errorStatus(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
-    _contentLength(), _body(), _save(), _reqLineHeader() {}
+    _contentLength(), _bytesRead(0), _chunkBytes(0), _body(), _save(), _reqLineHeader() {}
 
 HTTPRequest::~HTTPRequest(){}
 
@@ -120,18 +120,19 @@ bool    HTTPRequest::_parseHeaderFields() {
         }
     }
     if (_save.find(DELIM) == 0) {
+        _save.erase(0, 1);
         return (true);
     } 
     return (false);
 }
 
-void    HTTPRequest::PrintRequest() {
-    std::cout << _requestMethod << ' ' << _requestURI << ' ' << _HTTPv << std::endl;
-    for(header_type::iterator it = _headerFields.begin(); it != _headerFields.end(); ++it) {
-        std::cout << it->first << ":" << it->second << std::endl;
-    }
+void    HTTPRequest::_readBody() {
+    if (_bytesRead == _contentLength && _save.empty() || _save == "") { // which one?
+        _parseStatus == complete;// ??
+    } else if (_save.empty() || _save == "") {
+        // which one? and how to decide if body is shorted than content lenght and need to exti
+    }// else if ()
 }
-
 bool    HTTPRequest::_HTTPRequestComplete() {
     return (_parseStatus == complete);
 }
@@ -177,4 +178,12 @@ unsigned int     HTTPRequest::_strToBase(const std::string& str, std::ios_base& 
         throw std::runtime_error("overflow/underflow");
     }
     return (static_cast<unsigned int>(num));
+}
+
+
+void    HTTPRequest::PrintRequest() {
+    std::cout << _requestMethod << ' ' << _requestURI << ' ' << _HTTPv << std::endl;
+    for(header_type::iterator it = _headerFields.begin(); it != _headerFields.end(); ++it) {
+        std::cout << it->first << ":" << it->second << std::endl;
+    }
 }

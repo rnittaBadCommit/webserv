@@ -25,6 +25,8 @@ private:
     header_type     _headerFields;
     header_value    _currentHeader;
     unsigned int    _contentLength;
+    unsigned int    _bytesRead;
+    unsigned int    _chunkBytes;
     std::string     _body;
     std::string     _save;
     std::string     _reqLineHeader;
@@ -36,7 +38,6 @@ public:
     ~HTTPRequest();
 
     int     Parse(const std::string& request);
-    void    PrintRequest();
     const std::string& GetReqLineHeader();
 
  
@@ -50,10 +51,14 @@ private:
 
     void        _parseRequestLine();
     bool        _parseHeaderFields();
+    void        _readBody();
     bool        _HTTPRequestComplete();
     void        _decideReadType();
 
     unsigned int _strToBase(const std::string& str, std::ios_base& (*base)(std::ios_base&));
+
+public:
+    void    PrintRequest();
 };
 
 #endif
