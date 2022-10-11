@@ -8,11 +8,16 @@ int main() {
     std::string     line;
     int             rlt = 1;
 
-    while(rlt && std::getline(std::cin, line, '|')) {
+    try {
+        while(rlt && std::getline(std::cin, line, '|')) {
         //std::cout << "sending:\n" << line << std::endl;
-        rlt = req.Parse(std::string(line));
+            rlt = req.Parse(std::string(line));
+        }
+    } catch (const std::exception& e) {
+        std::cout << "[exception]: " << e.what() << std::endl;
     }
-    //std::cout << "Here is your Request" << std::endl;
-    //req.PrintRequest();
+    
+    std::cout << "Here is your Request" << std::endl;
+    req.PrintRequest();
     return 0;
 }
