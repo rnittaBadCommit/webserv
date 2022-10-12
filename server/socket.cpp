@@ -104,9 +104,25 @@ namespace ft
 					throw recieveMsgFromNewClient(poll_fd_vec_[i].fd);
 				}
 			}
+			else if (poll_fd_vec_[i].revents & POLLOUT)
+			{
+				poll_fd_vec_[i].revents = 0;
+				send(poll_fd_vec_[i].fd, )
+			}
 		}
 		// throw recieveMsgException();	// pollにタイムアウトを設定するので除外
 		throw NoRecieveMsg();
+	}
+
+	void Socket::send_msg(int fd, const std::string msg)
+	{
+		msg_to_send_[fd] = msg;
+		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
+			if (poll_fd_vec_[i].fd == fd)
+			{
+				poll_fd_vec_[i].events = POLLOUT;
+				break;
+			}
 	}
 
 	void Socket::check_keep_time_and_close_fd()
