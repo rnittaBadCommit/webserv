@@ -3,7 +3,7 @@
 #include <iostream>
 
 HTTPRequest::HTTPRequest() : _errorStatus(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
-    _contentLength(), _bytesRead(0), _chunkBytes(0), _body(), _save(), _reqLineHeader() {}
+    _contentLength(), _chunkBytes(0), _body(), _save(), _reqLineHeader() {}
 
 HTTPRequest::~HTTPRequest(){}
 
@@ -22,7 +22,6 @@ int      HTTPRequest::Parse(const std::string& request) {
         bool finished = _parseHeaderFields();
         if (finished) {
             _decideReadType();
-            return (0);
         }
         // check for errors to return 0
     }
@@ -30,7 +29,7 @@ int      HTTPRequest::Parse(const std::string& request) {
     if (_parseStatus == readChunks) {
 
     } else if (_parseStatus == readStraight) {
-
+        _readBody();
     }
 
     if (_HTTPRequestComplete()) {
@@ -127,12 +126,30 @@ bool    HTTPRequest::_parseHeaderFields() {
 }
 
 void    HTTPRequest::_readBody() {
-    if (_bytesRead == _contentLength && _save.empty() || _save == "") { // which one?
-        _parseStatus == complete;// ??
-    } else if (_save.empty() || _save == "") {
-        // which one? and how to decide if body is shorted than content lenght and need to exti
-    }// else if ()
+    std::cout << "MADEIT\n";
+    if (!_contentLength) {
+        if (_save.empty() || _save == "") { // which one?
+            _parseStatus = complete;// ??
+            // which one? and how to decide if body is shorted than content lenght and need to exti
+        } else {
+            // error bcs too much body?
+        }
+    } else {
+        if (_contentLength >= _save.length()) {
+            _contentLength -= _save.length();
+            _body += _save;
+            _save.clear();
+        } else {
+            //error too much body
+        }
+
+    }
+    if (!_contentLength) {
+        _parseStatus = complete;
+        // check for additional str in save
+    }
 }
+
 bool    HTTPRequest::_HTTPRequestComplete() {
     return (_parseStatus == complete);
 }
@@ -186,4 +203,8 @@ void    HTTPRequest::PrintRequest() {
     for(header_type::iterator it = _headerFields.begin(); it != _headerFields.end(); ++it) {
         std::cout << it->first << ":" << it->second << std::endl;
     }
+}
+
+void    HTTPRequest::PrintBody() {
+    std::cout << _body << std::endl;
 }

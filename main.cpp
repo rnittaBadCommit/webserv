@@ -19,5 +19,7 @@ int main() {
     
     std::cout << "Here is your Request" << std::endl;
     req.PrintRequest();
+    std::cout << "Here is your Body" << std::endl;
+    req.PrintBody();
     return 0;
 }

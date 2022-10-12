@@ -25,7 +25,6 @@ private:
     header_type     _headerFields;
     header_value    _currentHeader;
     unsigned int    _contentLength;
-    unsigned int    _bytesRead;
     unsigned int    _chunkBytes;
     std::string     _body;
     std::string     _save;
@@ -59,6 +58,7 @@ private:
 
 public:
     void    PrintRequest();
+    void    PrintBody();
 };
 
 #endif
