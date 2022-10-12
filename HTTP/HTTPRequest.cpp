@@ -1,5 +1,5 @@
 #include "HTTPRequst.hpp"
-#include "webserv.hpp"
+#include "../webserv.hpp"
 #include <iostream>
 
 HTTPRequest::HTTPRequest() : _responseCode(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
@@ -29,15 +29,34 @@ int      HTTPRequest::Parse(const std::string& request) {
     }
 
     if (_parseStatus == readChunks) {
-
+        size_t i = 0;
+        while (_save.find(DELIM) != std::string::npos) {
+            if (!_readBytes) {
+                i = _save.find(DELIM);
+                _readBytes = _strToBase(_save.substr(0, i), std::hex);
+                _save.erase(0, i + 1);
+                if (_readBytes == 0) {
+                    _parseStatus = complete;
+                    break ;
+                }
+            }
+            if (_save.find(DELIM) == std::string::npos) {
+                break ;
+            }
+            i = _save.find(DELIM);
+            std::string line = _save.substr(0, i);
+            _save.erase(0, i + 1);
+            if (_readBytes != line.size()) {
+                // throw error
+            }
+            _body += line;
+            _readBytes = 0;
+        }
     } else if (_parseStatus == readStraight) {
         _readBody();
     }
 
-    if (HTTPRequestComplete()) {
-        return (0);
-    }
-    return (1);
+    return (HTTPRequestComplete() ? 0 : 1);
 }
 
 const std::string&                  HTTPRequest::GetRequestMethod() { return _requestMethod; }

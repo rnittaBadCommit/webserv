@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <limits>
-#include "./HTTPRequst.hpp"
+#include "HTTP/HTTPRequst.hpp"
 
 int main() {
     HTTPRequest     req;

@@ -1,7 +1,7 @@
 NAME := webserv
 CXX := c++
 CXXFLAGS := -std=c++98 -pedantic -Wall -Wextra -Werror
-SRCS := main.cpp HTTPRequest.cpp
+SRCS := main.cpp HTTP/HTTPRequest.cpp
 OBJS := $(SRCS:.cpp=.o)
 
 $(NAME): $(OBJS)
