@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <exception>
 
 class HTTPRequest {
 public:
@@ -17,7 +18,7 @@ public:
 private:
     enum            ParseStatus { requestLine, headerFields, readChunks, readStraight, complete };
 
-    int             _errorStatus;
+    int             _responseCode;
     ParseStatus     _parseStatus;
     std::string     _requestMethod;
     std::string     _requestURI;
@@ -25,7 +26,7 @@ private:
     header_type     _headerFields;
     header_value    _currentHeader;
     unsigned int    _contentLength;
-    unsigned int    _chunkBytes;
+    unsigned int    _readBytes;
     std::string     _body;
     std::string     _save;
     std::string     _reqLineHeader;
@@ -37,8 +38,8 @@ public:
     ~HTTPRequest();
 
     int     Parse(const std::string& request);
-    const std::string& GetReqLineHeader();
 
+    bool    HTTPRequestComplete();
  
     const std::string&  GetRequestMethod();
     const std::string&  GetRequestURI();
@@ -51,14 +52,16 @@ private:
     void        _parseRequestLine();
     bool        _parseHeaderFields();
     void        _readBody();
-    bool        _HTTPRequestComplete();
+
     void        _decideReadType();
 
     unsigned int _strToBase(const std::string& str, std::ios_base& (*base)(std::ios_base&));
+    void        _throw(int responseCode, const std::string& message);
 
 public:
     void    PrintRequest();
     void    PrintBody();
+    const std::string& GetReqLineHeader();
 };
 
 #endif

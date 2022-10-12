@@ -2,13 +2,15 @@
 #include "webserv.hpp"
 #include <iostream>
 
-HTTPRequest::HTTPRequest() : _errorStatus(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
-    _contentLength(), _chunkBytes(0), _body(), _save(), _reqLineHeader() {}
+HTTPRequest::HTTPRequest() : _responseCode(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
+    _contentLength(), _readBytes(0), _body(), _save(), _reqLineHeader() {}
 
 HTTPRequest::~HTTPRequest(){}
 
 int      HTTPRequest::Parse(const std::string& request) {
-    // if request sting is empty and we don't have all the data we need, throw error?
+    // if _request.empty() && !_readBytes.... && _parseStatus >headerfields??.... && !conetntlenth && !transferencoding??
+    //, throw error? means body is too big
+
     _save += request;
     if (_parseStatus < readChunks) {
         _reqLineHeader += request;
@@ -32,7 +34,7 @@ int      HTTPRequest::Parse(const std::string& request) {
         _readBody();
     }
 
-    if (_HTTPRequestComplete()) {
+    if (HTTPRequestComplete()) {
         return (0);
     }
     return (1);
@@ -111,6 +113,7 @@ bool    HTTPRequest::_parseHeaderFields() {
                     // multiple content-length headers with same number? don't change _contentLength / (add , to _fieldheader content length header?)
                     // multiple with differing numbers or a single invalid value is unrecoverable error.. 400 (bad request)
                     _contentLength = _strToBase(_currentHeader.second, std::dec);
+                    _readBytes = _contentLength;
                 }
                 _headerFields.insert(std::make_pair(_currentHeader.first, _currentHeader.second));
                 _currentHeader.first = "";
@@ -119,38 +122,35 @@ bool    HTTPRequest::_parseHeaderFields() {
         }
     }
     if (_save.find(DELIM) == 0) {
-        _save.erase(0, 1);
+        _save.erase(0, 1); 
         return (true);
     } 
     return (false);
 }
 
 void    HTTPRequest::_readBody() {
-    std::cout << "MADEIT\n";
-    if (!_contentLength) {
-        if (_save.empty() || _save == "") { // which one?
-            _parseStatus = complete;// ??
-            // which one? and how to decide if body is shorted than content lenght and need to exti
-        } else {
-            // error bcs too much body?
-        }
+    if (_readBytes >= _save.size()) {
+        _readBytes -= _save.size();
+        _body += _save;
+        _save.clear();
+    } else if (_parseStatus == readChunks) {
+        _body += _save.substr(0, _readBytes);
+        _save.erase(0, _readBytes);
+        _readBytes = 0;
+        // return for outside loop to get new readbytes and enter again?
+        // what if bytes to be read doesn't match.. to big / too little
     } else {
-        if (_contentLength >= _save.length()) {
-            _contentLength -= _save.length();
-            _body += _save;
-            _save.clear();
-        } else {
-            //error too much body
-        }
-
-    }
-    if (!_contentLength) {
+        _body += _save.substr(0, _readBytes);
+        _save.erase(0, _readBytes);
+        _readBytes = 0;
+        _throw(413, "Payload too Large");
+    } 
+    if (!_readBytes) {
         _parseStatus = complete;
-        // check for additional str in save
     }
 }
 
-bool    HTTPRequest::_HTTPRequestComplete() {
+bool    HTTPRequest::HTTPRequestComplete() {
     return (_parseStatus == complete);
 }
 
@@ -179,6 +179,12 @@ void    HTTPRequest::_decideReadType() {
         // if request.lengt() == 0 (no body??), return 0 else below?
         //RFC 2161:4.3 ignore the body? but per below must notify
         // Not sure yet  
+        // does it mean only a head request, etc? set status to complete
+        if (_save.size()) {
+            _throw(411, "Length Required");
+        }
+        _responseCode = 200; //??
+        _parseStatus = complete;
     }
 }
 
@@ -196,7 +202,10 @@ unsigned int     HTTPRequest::_strToBase(const std::string& str, std::ios_base& 
     }
     return (static_cast<unsigned int>(num));
 }
-
+void    HTTPRequest::_throw(int responseCode, const std::string& message) {
+    _responseCode = responseCode;
+    throw std::runtime_error(message);
+}
 
 void    HTTPRequest::PrintRequest() {
     std::cout << _requestMethod << ' ' << _requestURI << ' ' << _HTTPv << std::endl;
