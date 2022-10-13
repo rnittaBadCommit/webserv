@@ -9,6 +9,7 @@
 #include <string>
 #include <cstring>
 #include <poll.h>
+#include <stdlib.h> //exit()
 
 #include <errno.h>
 #include <stdio.h>
@@ -16,8 +17,9 @@
 #include <vector>
 
 #include "socket.hpp"
-#include "../srcs/config/Config.hpp"
-#include "../srcs/config/ConfigParser.hpp"
+#include "../config/Config.hpp"
+#include "../config/ConfigParser.hpp"
+#include "../HTTP/HTTPRequst.hpp"
 
 namespace ft
 {
@@ -36,6 +38,7 @@ namespace ft
 	private:
 		Config config_;
 		Socket socket_;
+		std::map<int, HTTPRequest> HTTPRequest_vec_;
 		
 
 		void import_config_(const std::string config_path);

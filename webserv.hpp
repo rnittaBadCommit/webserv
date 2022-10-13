@@ -2,7 +2,7 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# define DELIM "\n"
-# define BREAK "\n\n"
+# define DELIM "\r\n"
+# define BREAK "\r\n\r\n"
 
 #endif

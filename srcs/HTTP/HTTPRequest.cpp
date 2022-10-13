@@ -1,5 +1,5 @@
 #include "HTTPRequst.hpp"
-#include "../webserv.hpp"
+#include "../../webserv.hpp"
 #include <iostream>
 
 HTTPRequest::HTTPRequest() : _responseCode(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
@@ -15,7 +15,6 @@ int      HTTPRequest::Parse(const std::string& request) {
     if (_parseStatus < readChunks) {
         _reqLineHeader += request;
     }
-
     if (_parseStatus == requestLine) {
         _parseRequestLine();
         // check for errors to return 0
@@ -101,8 +100,16 @@ void     HTTPRequest::_parseRequestLine() {
 
 bool    HTTPRequest::_parseHeaderFields() {
     std::locale loc;
-    while (_save.find(DELIM) != 0 && _save.find(DELIM) != std::string::npos) {
+    while (_save.find(DELIM) != 0 && _save.find(DELIM) != std::string::npos && _save.find('\n') != std::string::npos) { 
         // response code for too many headers? (avoid smuggling etc)
+        /*std::cout << "save: " << _save << std::endl;
+        std::cout << "len: " << _save.size() << std::endl;
+        std::cout << "delim exists in str " << (_save.find(DELIM) != std::string::npos) << std::endl;
+        std::cout << "delim is irst: " << (_save.find(DELIM) == 0) << std::endl;
+        std::cout << "break exists in str " << (_save.find(BREAK) != std::string::npos) << std::endl;
+        std::cout << "break is irst: " << (_save.find(BREAK) == 0) << std::endl;
+        std::cout << "newline???????? " << (_save.find('\n') != std::string::npos) << std::endl;
+        throw std::runtime_error("");*/
         if (_currentHeader.first == "") {
             size_t i = _save.find(':');
             if (i != std::string::npos) {
@@ -113,6 +120,7 @@ bool    HTTPRequest::_parseHeaderFields() {
                 for (size_t i = 0; i < _currentHeader.first.length(); ++i) {
                     _currentHeader.first[i] = std::tolower(_currentHeader.first[i], loc);
                 }
+                std::cout << "YO" << _currentHeader.first << std::endl;
                 _save.erase(0, i + 1);
             }
         }
@@ -137,11 +145,12 @@ bool    HTTPRequest::_parseHeaderFields() {
                     _readBytes = _contentLength;
                 }
                 _headerFields.insert(std::make_pair(_currentHeader.first, _currentHeader.second));
+                std::cout << _currentHeader.first << ':' << _currentHeader.second << std::endl;
                 _currentHeader.first = "";
                 _currentHeader.second = "";
             }
         }
-    }
+    } 
     if (_save.find(DELIM) == 0) {
         _save.erase(0, 1); 
         return (true);
