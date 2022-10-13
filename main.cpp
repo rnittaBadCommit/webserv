@@ -18,9 +18,8 @@ int main() {
         std::cout << "[exception]: " << e.what() << std::endl;
     }
     
-    std::cout << "Here is your Request" << std::endl;
+    std::cout << "\n\nHere is your Request" << std::endl;
     req.PrintRequest();
-    std::cout << "Here is your Body" << std::endl;
     req.PrintBody();
     return 0;
 }

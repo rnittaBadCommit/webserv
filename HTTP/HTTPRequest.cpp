@@ -39,6 +39,7 @@ int      HTTPRequest::Parse(const std::string& request) {
                     _parseStatus = complete;
                     break ;
                 }
+                // if never recieve 0??
             }
             if (_save.find(DELIM) == std::string::npos) {
                 break ;
@@ -56,6 +57,7 @@ int      HTTPRequest::Parse(const std::string& request) {
         _readBody();
     }
 
+    //if (!_readBytes && _parseStatus != complete && )
     return (HTTPRequestComplete() ? 0 : 1);
 }
 
