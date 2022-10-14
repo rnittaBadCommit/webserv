@@ -54,6 +54,8 @@ namespace ft
 
 		void setup(const std::vector<ServerConfig> &server_config);
 
+		void add_pollfd(const pollfd pollfd);
+
 		RecievedMsg recieve_msg();
 
 		void send_msg(int fd, const std::string msg);
@@ -96,7 +98,7 @@ namespace ft
 	private:
 		std::vector<int> sockfd_vec_;
 		std::vector<struct pollfd> poll_fd_vec_;
-		std::vector<int> recieve_fd_vec_;
+		// std::vector<int> recieve_fd_vec_;
 		std::map<int, time_t> last_recieve_time_map_; // sockfd => -1
 		std::map<int, std::string> msg_to_send_;
 

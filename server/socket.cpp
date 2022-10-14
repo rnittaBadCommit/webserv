@@ -63,6 +63,11 @@ namespace ft
 		}
 	}
 
+	void Socket::add_pollfd(const pollfd pollfd)
+	{
+		poll_fd_vec_.push_back(pollfd);
+	}
+
 	Socket::RecievedMsg	Socket::recieve_msg()
 	{
 		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;

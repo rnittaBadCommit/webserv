@@ -64,4 +64,9 @@ namespace ft
 
 		return (false);
 	}
+
+	void run_cgi(const int fd)
+	{
+		
+	}
 }

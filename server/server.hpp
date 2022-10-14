@@ -41,6 +41,7 @@ namespace ft
 		void import_config_(const std::string config_path);
 		void setup_();
 		bool recieve_request_();
+		void run_cgi_();
 		std::map<int, std::string> http_request_map_;
 	};
 
