@@ -5,6 +5,10 @@
 #ifndef WEBSERV_SRCS_STATUS_CODE_HPP_
 #define WEBSERV_SRCS_STATUS_CODE_HPP_
 
+/*
+ * https://developer.mozilla.org/ja/docs/Web/HTTP/Status
+ */
+
 #define HTTP_CONTINUE                   100
 #define HTTP_SWITCHING_PROTOCOLS        101
 

@@ -11,9 +11,6 @@
 #define CRLF "\r\n"
 
 /*
- * # ref
- *  https://github.com/nginx/nginx/blob/master/src/http/ngx_http_header_filter_module.c
- *
  * nginx
  *  - Server
  *    - nginx
@@ -42,10 +39,9 @@
  *  // GZIP
  *  - Vary
  *    - Accept-Encoding
- *
  */
 
-std::string GetResponseMessage(int status_code) {
+std::string GetResponseLine(int status_code) {
   switch (status_code) {
     case HTTP_OK:
       return "200 OK";
@@ -113,20 +109,36 @@ std::string GetResponseMessage(int status_code) {
   }
 }
 
-std::string GetResponseHeader(int status_code) {
-  std::stringstream response_header;
+std::string GetResponseMessage(int status_code) {
+  std::stringstream response_message;
+  char str[1024];
+  time_t gmt_time;
+  time(&gmt_time);
 
-  response_header << "HTTP/1.1 " << GetResponseMessage(status_code) << CRLF; // TODO: check status code
+  // Response line
+  response_message << "HTTP/1.1 " << GetResponseLine(status_code) << CRLF; // TODO: check status code
 
-  return response_header.str();
+  // Response header
+  strftime(str, 1024, "%a, %d %b %Y %X %Z", gmtime(&gmt_time));
+  response_message << "Date: " << str << CRLF;
+
+  // Empty line
+  response_message << CRLF;
+
+  // Message Body
+
+  return response_message.str();
 }
+
+#include <sys/time.h>
 
 // TODO: REMOVE
 // TEST MAIN
 int main() {
+
   for (int i = 200; i < 508; ++i) {
     if (GetResponseMessage(i) != "ERROR")
-      std::cout << GetResponseHeader(i) << std::endl;
+      std::cout << GetResponseMessage(i) << std::endl;
   }
 
   return 0;
