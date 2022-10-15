@@ -36,6 +36,7 @@ namespace ft
 		try
 		{
 			recieved_msg = socket_.recieve_msg();
+			socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");
 			// if (http_request_map_.count(recieved_msg.client_id))
 			http_request_map_[recieved_msg.client_id] = recieved_msg.content;
 			std::cout << "===============================" << std::endl
@@ -67,6 +68,5 @@ namespace ft
 
 	void run_cgi(const int fd)
 	{
-		
 	}
 }
