@@ -109,6 +109,21 @@ std::string GetResponseLine(int status_code) {
   }
 }
 
+std::string CreateResponseErrorBody(int status_code) {
+  std::stringstream response_body;
+
+  response_body << "<html>" CRLF
+                << "<head><title>"
+                << GetResponseLine(status_code)
+                << "</title></head>" CRLF
+                << "<body>" CRLF
+                << "<center><h1>"
+                << GetResponseLine(status_code)
+                << "</h1></center>" CRLF;
+
+  return response_body.str();
+}
+
 std::string GetResponseMessage(int status_code) {
   std::stringstream response_message;
 
@@ -177,6 +192,8 @@ std::string GetResponseMessage(int status_code) {
   response_message << CRLF;
 
   // Message Body
+  if (status_code >= 300)
+    response_message << CreateResponseErrorBody(status_code);
 
   return response_message.str();
 }
