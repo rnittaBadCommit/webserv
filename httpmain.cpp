@@ -1,10 +1,10 @@
 #include <iostream>
 #include <sstream>
 #include <limits>
-#include "HTTP/HTTPRequst.hpp"
+#include "srcs/HTTP/HTTPRequst.hpp"
 
 int main() {
-    HTTPRequest     req;
+    ft::HTTPRequest     req;
     std::string     line;
     int             rlt = 1;
 

@@ -43,7 +43,9 @@ namespace ft
 					  << "===============================" << std::endl;
 			if (!HTTPRequest_vec_[recieved_msg.client_id].Parse(recieved_msg.content)) {
 				std::cout << "REQUEST SUCCESSFULLY RECEIVED" << std::endl;
+				std::cout << "request: " << std::endl;
 				HTTPRequest_vec_[recieved_msg.client_id].PrintRequest();
+				std::cout << "body: " << std::endl;
 				HTTPRequest_vec_[recieved_msg.client_id].PrintBody();
 			}
 			return (true);

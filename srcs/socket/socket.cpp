@@ -4,7 +4,7 @@
 
 namespace ft
 {
-	Socket::Socket() : keep_connect_time_len_(5)
+	Socket::Socket() : keep_connect_time_len_(60)
 	{
 	}
 
