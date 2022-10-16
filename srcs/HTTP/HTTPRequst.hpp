@@ -12,6 +12,7 @@
 #include <stack>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 
 namespace ft {
     enum            HTTPParseStatus { requestLine, headerFields, readChunks, readStraight, complete };
@@ -55,6 +56,7 @@ namespace ft {
 
         int     Parse(const std::string& request);
         bool    HTTPRequestComplete();
+        void    CreateFile(const std::string& file);
     
         const int&          GetResponseCode();
         const HTTPParseStatus&  GetParseStatus();

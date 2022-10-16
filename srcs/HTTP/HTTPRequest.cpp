@@ -37,10 +37,13 @@ namespace ft {
             _readBody();
         }
 
-        /*if (!_readBytes && _parseStatus != complete && )*/
         return (HTTPRequestComplete() ? 0 : 1);
     }
 
+    void    HTTPRequest::CreateFile(const std::string& file) {
+        std::ofstream ofs (file.c_str(), std::ofstream::out);
+        ofs.close();
+    }
     const int&                          HTTPRequest::GetResponseCode() { return _responseCode;}
     const HTTPParseStatus&              HTTPRequest::GetParseStatus() { return _parseStatus; }
     const unsigned int&                 HTTPRequest::GetContentLength() { return _contentLength; }
