@@ -109,7 +109,7 @@ namespace ft
 		std::set<int> used_fd_set_;
 
 		size_t port_num_;
-		time_t keep_connect_time_len_ = 5;
+		time_t keep_connect_time_len_ = 100;
 
 		RecievedMsg recieve_msg_from_connected_client_(int connection);
 		void register_new_client_(int sock_fd);

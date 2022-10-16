@@ -83,14 +83,19 @@ namespace ft
 
 	Socket::RecievedMsg Socket::recieve_msg()
 	{
-		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
 		check_keep_time_and_close_fd();
+		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
+		std::cout << "poll" << std::endl;
 		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), 1000);
+
+		std::cout << "poll done" << std::endl;
 		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
 		{
 			if (poll_fd_vec_[i].revents & POLLERR)
 			{
 				close_fd_(poll_fd_vec_[i].fd, i);
+
+				poll_fd_vec_[i].revents = 0;
 				std::cerr << "POLLERR" << std::endl;
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
@@ -98,12 +103,14 @@ namespace ft
 			{
 				close_fd_(poll_fd_vec_[i].fd, i);
 				std::cerr << "POLLHUP" << std::endl;
+				poll_fd_vec_[i].revents = 0;
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
 			else if (poll_fd_vec_[i].revents & POLLRDHUP)
 			{
 				close_fd_(poll_fd_vec_[i].fd, i);
 				std::cerr << "POLLRDHUP" << std::endl;
+				poll_fd_vec_[i].revents = 0;
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
 			else if (poll_fd_vec_[i].revents & POLLIN)
@@ -145,18 +152,15 @@ namespace ft
 	void Socket::send_msg(int fd, const std::string msg)
 	{
 		msg_to_send_map_[fd].append(msg);
-		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
-			if (poll_fd_vec_[i].fd == fd)
-			{
-				poll_fd_vec_[fd_to_index_nap_[fd]].events = POLLOUT;
-				break;
-			}
+		poll_fd_vec_[fd_to_index_nap_[fd]].events = POLLOUT;
 	}
 
 	void Socket::check_keep_time_and_close_fd()
 	{
 		time_t current_time = time(NULL);
 		time_t tmp_last_recieve_time;
+
+		std::cout << current_time << std::endl;
 
 		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
 		{

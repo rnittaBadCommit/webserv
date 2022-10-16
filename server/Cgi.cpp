@@ -18,18 +18,17 @@ namespace ft
 		pid_t pid = fork();
 
 		if (pid == 0)
-			run_cgi(fd);
+			run_cgi();
 		else if (pid == -1)
 			throw std::runtime_error("Cgi: fork fail");
 
 		close(pipefd[1]);
 	}
 
-	void Cgi::run_cgi(const int fd)
+	void Cgi::run_cgi()
 	{
 		close(pipefd[0]);
 		dup2(1, pipefd[1]);
-		close(1);
 		close(pipefd[1]);
 		execve(cgi_path_.c_str(), argv.data(), envp.data());
 	}
