@@ -193,7 +193,7 @@ namespace ft {
             _body += _save.substr(0, _readBytes);
             _save.erase(0, _readBytes);
             _readBytes = 0;
-            _throw(400, "Bad Request - unexcpect body bytes");
+            _throw(400, "Bad Request - unexpected body bytes");
         } 
         if (_readBytes == 0) {
             _responseCode = 200;
