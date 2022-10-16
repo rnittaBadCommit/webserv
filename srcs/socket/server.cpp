@@ -41,7 +41,13 @@ namespace ft
 			std::cout << "===============================" << std::endl
 					  << http_request_map_[recieved_msg.client_id] << std::endl
 					  << "===============================" << std::endl;
-
+			if (!HTTPRequest_vec_[recieved_msg.client_id].Parse(recieved_msg.content)) {
+				std::cout << "REQUEST SUCCESSFULLY RECEIVED" << std::endl;
+				std::cout << "request: " << std::endl;
+				HTTPRequest_vec_[recieved_msg.client_id].PrintRequest();
+				std::cout << "body: " << std::endl;
+				HTTPRequest_vec_[recieved_msg.client_id].PrintBody();
+			}
 			return (true);
 		}
 		catch (const ft::Socket::recieveMsgFromNewClient &new_client)
@@ -58,7 +64,8 @@ namespace ft
 		}
 		catch (const std::exception &e)
 		{
-			std::cerr << "Error: undetermined" << std::endl;
+			std::cerr << e.what() << std::endl;
+			//std::cerr << "Error: undetermined" << std::endl;
 			exit(1);
 		}
 

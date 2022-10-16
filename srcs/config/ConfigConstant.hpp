@@ -13,14 +13,14 @@ enum E_DirectiveType
 	ALIAS,
 	AUTOINDEX,
 	CGI_EXTENSION,
-	UPLOAD_FILEPATH,
+	UPLOAD_FILEPATH
 };
 
 enum E_BlockType
 {
 	ROOT,
 	SERVER,
-	LOCATION,
+	LOCATION
 };
 
 #endif
