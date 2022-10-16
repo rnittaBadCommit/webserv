@@ -21,9 +21,11 @@ namespace ft {
         } 
         if (_parseStatus == headerFields) {
             bool finished = _parseHeaderFields();
+            std::cout << "NOT FINISHED\n";
             if (finished) {
+                std::cout << "FINISHED\n";
                 if (_headerFields.size() > MAXHEADERS || _headerFields.find("host") == _headerFields.end()) {
-                    _throw(400, "Bad Request");
+                    _throw(400, "Bad Request - MAXHEADERS / host");
                 }
                 _decideReadType();
             }
@@ -88,7 +90,7 @@ namespace ft {
                 _requestURI = _save.substr(0, i);
                 _save.erase(0, i + SP.size()); 
                 if (_requestURI == "*") { // REMOVE IF DO OPTIONS METHOD
-                    _throw (400, "Bad request");
+                    _throw (400, "Bad request - *");
                 }
                 if (_requestURI.size() > MAXBUFFER) {
                     _throw (414, "URI Too Long");
@@ -99,7 +101,7 @@ namespace ft {
             i = _save.find(DELIM);
             if (i != std::string::npos) {
                 if (_requestMethod == "" || _requestURI == "") {
-                    _throw(400, "Bad Request");
+                    _throw(400, "Bad Request - invalid request line");
                 }
                 const std::string versionComp = "HTTP/1.";
                 _HTTPv = _save.substr(0, i);
@@ -113,49 +115,27 @@ namespace ft {
     }
 
     bool    HTTPRequest::_parseHeaderFields() {
-        std::locale loc;
         while (_save.find(DELIM) != 0 && _save.find(DELIM) != std::string::npos) {
             if (_currentHeader.first == "") {
                 size_t i = _save.find(CN);
                 if (i != std::string::npos) {
                     _currentHeader.first = _save.substr(0, i); 
-                    for (size_t i = 0; i < _currentHeader.first.length(); ++i) {
-                        _currentHeader.first[i] = std::tolower(_currentHeader.first[i], loc);
-                    } 
+                    _toLower(_currentHeader.first); 
                     _save.erase(0, i + CN.size());
                 }
             }
             if (_currentHeader.first != "") {
                 size_t i = _save.find(DELIM);
                 if (i != std::string::npos) {
-                    // obs-fold MUST either reject the message by 400 bad request, preferably with representation explaining that obsolete line folding is uacceptable
-                    // or reaplce each received obs-fold with one or more space octets prior to interpreting the field value or forwardingin the message downstream
                     _currentHeader.second = _save.substr(0, i);
                     _save.erase(0, i + DELIM.size());
-                    // also need to remove trailing white spaces
-                    while (_currentHeader.second.size() && isspace(_currentHeader.second[0])) {
-                        _currentHeader.second.erase(0, 1);
-                    }
-                    for (size_t i = 0; i < _currentHeader.second.length(); ++i) {
-                        _currentHeader.second[i] = std::tolower(_currentHeader.second[i], loc);
-                    }
-                    if (_currentHeader.first == "content-length") {
-                        // multiple content-length headers with same number? don't change _contentLength / (add , to _fieldheader content length header?)
-                        // multiple with differing numbers or a single invalid value is unrecoverable error.. 400 (bad request)
-                        _contentLength = _strToBase(_currentHeader.second, std::dec);
-                        _readBytes = _contentLength;
-                    }
-                    if (_currentHeader.first[_currentHeader.first.size() - 1] == ' ') {
-                        while (_currentHeader.first[_currentHeader.first.size() - 1] == ' ') {
-                            _currentHeader.first.erase(_currentHeader.first.size() - 1, 1);
-                        }
-                        _headerFields.insert(std::make_pair(_currentHeader.first, _currentHeader.second));
-                        _throw(400, "Bad Request");
+                    _removeWSP(_currentHeader.second);
+                    _toLower(_currentHeader.second);
+                    if (!_validateHeader()) {
+                        continue ;
                     }
                     _headerFields.insert(std::make_pair(_currentHeader.first, _currentHeader.second));
-                    std::cout << _currentHeader.first << ':' << _currentHeader.second << std::endl;
-                    _currentHeader.first = "";
-                    _currentHeader.second = "";
+                    _resetCurrentHeader();
                 }
             }
         } 
@@ -164,6 +144,62 @@ namespace ft {
             return (true);
         } 
         return (false);
+    }
+
+    void        HTTPRequest::_toLower(std::string& str) {
+        std::locale loc;
+        for (size_t i = 0; i < str.length(); ++i) {
+            str[i] = std::tolower(str[i], loc);
+        } 
+    }
+    void        HTTPRequest::_removeWSP(std::string& str) {
+        while (str.size() && isspace(str[0])) {
+            str.erase(0, 1);
+        }
+        while (str.size() && isspace(str[str.size() - 1])) {
+            str.erase(str.size() - 1, 1);
+        }
+    }
+    void        HTTPRequest::_resetCurrentHeader() {
+        _currentHeader.first = "";
+        _currentHeader.second = "";
+    }
+    bool        HTTPRequest::_validateHeader() {
+        // validate content-length
+        if (_currentHeader.first == "content-length") {
+            /* 0 size content length?? */
+            if (_currentHeader.second.find(',') != std::string::npos) {
+                _throw(400, "Bad Request - comma separated content-length");
+            }
+            _contentLength = _strToBase(_currentHeader.second, std::dec);
+            _readBytes = _contentLength;
+        }
+        // Handle multi header inclusion
+        header_type::iterator _findHeader = _headerFields.find(_currentHeader.first);
+        if (_findHeader != _headerFields.end()) {
+            if (_currentHeader.first == "content-length") {
+                 if (_contentLength != _strToBase(_currentHeader.second, std::hex)) {
+                    _throw(400, "Bad Request - new content-length different from old content-length");
+                }
+                _resetCurrentHeader();
+                return(false);
+            } else {
+                _headerFields[_currentHeader.first] = _findHeader->second + ", " + _currentHeader.second;
+            }
+        
+        }
+        // check for WSP in key
+        if (isspace(_currentHeader.first[_currentHeader.first.size() - 1])) {
+            _removeWSP(_currentHeader.first);
+            _headerFields.insert(std::make_pair(_currentHeader.first, _currentHeader.second));
+            _throw(400, "Bad Request - trailing white space after header key");
+        
+        }
+        // Check for obs-fold in value
+        if (_currentHeader.second[_currentHeader.second.size() - 1] == '\\') {
+             _throw(400, "Bad Request - obs-fold in header value");
+        }
+        return (true);
     }
 
     void    HTTPRequest::_readBody() {
@@ -181,7 +217,7 @@ namespace ft {
             _body += _save.substr(0, _readBytes);
             _save.erase(0, _readBytes);
             _readBytes = 0;
-            _throw(400, "Bad Request");
+            _throw(400, "Bad Request - unexcpect body bytes");
         } 
         if (!_readBytes) {
             _responseCode = 200;
@@ -199,12 +235,12 @@ namespace ft {
 
         if (transfer_encoding != _headerFields.end() && content_length != _headerFields.end()) {
             _headerFields.erase(content_length); 
-            _throw(400, "Bad Request");
+            _throw(400, "Bad Request - both transfer-encoding and content-length exist");
         } else if (transfer_encoding != _headerFields.end()) {
             const std::string te = transfer_encoding->second;
             const std::string chunked = "chunked";
             if (te.size() < chunked.size() || te.compare(te.length() - chunked.size(), chunked.size(), chunked) != 0) {
-                _throw(400, "Bad Request");
+                _throw(400, "Bad Request - \"chunked\" is not last item in transfer-encoding header value");
             }
             // A server that receives a request message with a transfer coding it does not understand SHOOULD respond with 501 (Not Implemented)
             // if request methos == GET throw 400? if reqeust method == DELETE throw 405 "not allowed"?
@@ -225,8 +261,7 @@ namespace ft {
         stream >> base >> num;
 
         if (num > std::numeric_limits<unsigned int>::max()) {
-            _throw(400, "Bad Request");
-            throw std::runtime_error("overflow/underflow");
+            _throw(400, "Bad Request - invalid length");
         }
         return (static_cast<unsigned int>(num));
     }

@@ -66,10 +66,14 @@ namespace ft {
 
         void        _parseRequestLine();
         bool        _parseHeaderFields();
+        void        _toLower(std::string& str);
+        void        _removeWSP(std::string& str);
+        bool        _validateHeader();
         void        _readBody();
         void        _decideReadType();
         unsigned int _strToBase(const std::string& str, std::ios_base& (*base)(std::ios_base&));
         void        _throw(int responseCode, const std::string& message);
+        void        _resetCurrentHeader();
 
     public:
         void    PrintRequest();
