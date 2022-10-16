@@ -41,7 +41,7 @@
  *    - Accept-Encoding
  */
 
-std::string GetResponseLine(int status_code) {
+std::string HttpResponse::GetResponseLine_(int status_code) {
   switch (status_code) {
     case HTTP_OK:
       return "200 OK";
@@ -109,23 +109,24 @@ std::string GetResponseLine(int status_code) {
   }
 }
 
-std::string CreateResponseErrorBody(int status_code) {
+std::string HttpResponse::CreateResponseNoSuccessBody_(int status_code) {
   std::stringstream response_body;
 
   response_body << "<html>" CRLF
                 << "<head><title>"
-                << GetResponseLine(status_code)
+                << GetResponseLine_(status_code)
                 << "</title></head>" CRLF
                 << "<body>" CRLF
                 << "<center><h1>"
-                << GetResponseLine(status_code)
+                << GetResponseLine_(status_code)
                 << "</h1></center>" CRLF;
 
   return response_body.str();
 }
 
-std::string GetResponseMessage(int status_code) {
+std::string HttpResponse::GetResponseMessage(int status_code) {
   std::stringstream response_message;
+  std::string error_response_body = status_code >= 300 ? CreateResponseNoSuccessBody_(status_code) : "";
 
   // Temporary val
   char date[1024];
@@ -145,7 +146,7 @@ std::string GetResponseMessage(int status_code) {
   std::string keep_alive_header = "5";
 
   // Response line
-  response_message << "HTTP/1.1 " << GetResponseLine(status_code) << CRLF; // TODO: check status code
+  response_message << "HTTP/1.1 " << GetResponseLine_(status_code) << CRLF; // TODO: check status code
 
   // Response header
   response_message << "Server: " << "42webserv" << "/1.0" << CRLF;
@@ -158,7 +159,8 @@ std::string GetResponseMessage(int status_code) {
       response_message << "; charset=" << content_charset;
     response_message << CRLF;
   }
-  response_message << "Content-Length: " << content_length << CRLF;
+  // \rと\0も数えているから見た目（printable + '\n'）より5増える　これでよい？
+  response_message << "Content-Length: " << (!error_response_body.empty() ? error_response_body.length() : content_length) << CRLF;
   response_message << "Last-Modified: " << date << CRLF;
 
   if (!host_data.empty()) {
@@ -193,7 +195,7 @@ std::string GetResponseMessage(int status_code) {
 
   // Message Body
   if (status_code >= 300)
-    response_message << CreateResponseErrorBody(status_code);
+    response_message << error_response_body;
 
   return response_message.str();
 }
