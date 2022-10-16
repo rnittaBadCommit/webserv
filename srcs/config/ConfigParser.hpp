@@ -11,7 +11,7 @@
 class ConfigParser
 {
 private:
-	std::vector<std::vector<std::string>> parser_line;
+	std::vector<std::vector<std::string> > parser_line;
 
 	Config config;
 	ServerConfig server_config;
@@ -45,7 +45,7 @@ public:
 	void setConfigUploadFilepath(E_BlockType block_type, std::vector<std::string> line);
 
 	void validateServerName(std::vector<std::string> line);
-	void validateListen(std::vector<std::string> line);
+	/*void validateListen(std::vector<std::string> line);
 	void validateErrorPage(std::vector<std::string> line);
 	void validateClientMaxBodySize(std::vector<std::string> line);
 	void validateAllowMethod(std::vector<std::string> line);
@@ -54,7 +54,7 @@ public:
 	void validateAutoIndex(std::vector<std::string> line);
 	void validateIndex(std::vector<std::string> line);
 	void validateCgiExtension(std::vector<std::string> line);
-	void validateUploadFilepath(std::vector<std::string> line);
+	void validateUploadFilepath(std::vector<std::string> line);*/
 
 	void printParserLine();
 };
