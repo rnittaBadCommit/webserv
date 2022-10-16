@@ -10,6 +10,10 @@
 
 #define CRLF "\r\n"
 
+HttpResponse::HttpResponse() {};
+HttpResponse::~HttpResponse() {};
+
+
 /*
  * nginx
  *  - Server
@@ -41,7 +45,7 @@
  *    - Accept-Encoding
  */
 
-std::string HttpResponse::GetResponseLine_(int status_code) {
+static std::string GetResponseLine_(int status_code) {
   switch (status_code) {
     case HTTP_OK:
       return "200 OK";
@@ -109,7 +113,7 @@ std::string HttpResponse::GetResponseLine_(int status_code) {
   }
 }
 
-std::string HttpResponse::CreateResponseNoSuccessBody_(int status_code) {
+static std::string CreateResponseNoSuccessBody_(int status_code) {
   std::stringstream response_body;
 
   response_body << "<html>" CRLF
@@ -205,10 +209,11 @@ std::string HttpResponse::GetResponseMessage(int status_code) {
 // TODO: REMOVE
 // TEST MAIN
 int main() {
+  HttpResponse r;
 
   for (int i = 200; i < 508; ++i) {
-    if (GetResponseMessage(i).find("ERROR NO OUTPUT") == std::string::npos)
-      std::cout << GetResponseMessage(i) << std::endl;
+    if (r.GetResponseMessage(i).find("ERROR NO OUTPUT") == std::string::npos)
+      std::cout << r.GetResponseMessage(i) << std::endl;
   }
 
   return 0;
