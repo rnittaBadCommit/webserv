@@ -207,6 +207,9 @@ namespace ft {
             if (!_readBytes) { 
                 i = _save.find(DELIM);
                 _readBytes = _strBaseToUI(_save.substr(0, i), std::hex);
+                if (_readBytes > _bodyMaxSize) {
+                    _throw(413, "Payload Too Large");
+                }
                 _save.erase(0, i + DELIM.size());
                 if (_readBytes == 0) {
                     _responseCode = 200;
