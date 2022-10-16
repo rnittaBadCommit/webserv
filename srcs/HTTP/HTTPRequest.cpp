@@ -2,7 +2,7 @@
 
 namespace ft {
     HTTPRequest::HTTPRequest(unsigned int bodyMaxSize) : _responseCode(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
-        _contentLength(), _readBytes(0), _body(), _save("") {
+        _contentLength(), _readBytes(0), _body(), _save() {
             _bodyMaxSize = bodyMaxSize;
             _validMethods.push_back("POST");
             _validMethods.push_back("GET");
