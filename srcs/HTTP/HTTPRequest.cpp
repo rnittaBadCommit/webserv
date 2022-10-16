@@ -11,8 +11,8 @@ namespace ft {
     HTTPRequest::~HTTPRequest(){}
 
     int      HTTPRequest::Parse(const std::string& request) {
-        // if _request.empty() && !_readBytes.... && _parseStatus >headerfields??.... && !conetntlenth && !transferencoding??
-        //, throw error? means body is too big
+        /* if _request.empty() && !_readBytes.... && _parseStatus >headerfields??.... && !conetntlenth && !transferencoding??
+        , throw error? means body is too big*/
 
         _save += request;
 
@@ -32,40 +32,19 @@ namespace ft {
         }
 
         if (_parseStatus == readChunks) {
-            size_t i = 0;
-            while (_save.find(DELIM) != std::string::npos) {
-                if (!_readBytes) {
-                    i = _save.find(DELIM);
-                    _readBytes = _strToBase(_save.substr(0, i), std::hex);
-                    _save.erase(0, i + DELIM.size());
-                    if (_readBytes == 0) {
-                        _responseCode = 200;
-                        _parseStatus = complete;
-                        break ;
-                    }
-                    // if never recieve 0??
-                }
-                if (_save.find(DELIM) == std::string::npos) {
-                    break ;
-                }
-                i = _save.find(DELIM);
-                std::string line = _save.substr(0, i);
-                _save.erase(0, i + DELIM.size());
-                if (_readBytes != line.size()) {
-                    // throw error
-                }
-                _body += line;
-                _readBytes = 0;
-            }
-            // check for trailer header field when recieve 0 size
+            _readChunks();
         } else if (_parseStatus == readStraight) {
             _readBody();
         }
 
-        //if (!_readBytes && _parseStatus != complete && )
+        /*if (!_readBytes && _parseStatus != complete && )*/
         return (HTTPRequestComplete() ? 0 : 1);
     }
 
+    const int&                          HTTPRequest::GetResponseCode() { return _responseCode;}
+    const HTTPParseStatus&              HTTPRequest::GetParseStatus() { return _parseStatus; }
+    const unsigned int&                 HTTPRequest::GetContentLength() { return _contentLength; }
+    const std::string&                  HTTPRequest::getSave() { return _save; }
     const std::string&                  HTTPRequest::GetRequestMethod() { return _requestMethod; }
     const std::string&                  HTTPRequest::GetRequestURI() { return _requestURI; }
     const HTTPRequest::header_type&     HTTPRequest::GetHeaderFields() { return _headerFields; }
@@ -116,6 +95,7 @@ namespace ft {
 
     bool    HTTPRequest::_parseHeaderFields() {
         while (_save.find(DELIM) != 0 && _save.find(DELIM) != std::string::npos) {
+            // get header key
             if (_currentHeader.first == "") {
                 size_t i = _save.find(CN);
                 if (i != std::string::npos) {
@@ -124,6 +104,7 @@ namespace ft {
                     _save.erase(0, i + CN.size());
                 }
             }
+            // get header value and validate header
             if (_currentHeader.first != "") {
                 size_t i = _save.find(DELIM);
                 if (i != std::string::npos) {
@@ -138,7 +119,8 @@ namespace ft {
                     _resetCurrentHeader();
                 }
             }
-        } 
+        }
+        // decide if heaer is complete (line break reached)
         if (_save.find(DELIM) == 0) {
             _save.erase(0, DELIM.size()); 
             return (true);
@@ -207,22 +189,45 @@ namespace ft {
             _readBytes -= _save.size();
             _body += _save;
             _save.clear();
-        } else if (_parseStatus == readChunks) {
-            _body += _save.substr(0, _readBytes);
-            _save.erase(0, _readBytes);
-            _readBytes = 0;
-            // return for outside loop to get new readbytes and enter again?
-            // what if bytes to be read doesn't match.. to big / too little
         } else {
             _body += _save.substr(0, _readBytes);
             _save.erase(0, _readBytes);
             _readBytes = 0;
             _throw(400, "Bad Request - unexcpect body bytes");
         } 
-        if (!_readBytes) {
+        if (_readBytes == 0) {
             _responseCode = 200;
             _parseStatus = complete;
         }
+    }
+
+    void    HTTPRequest::_readChunks() {
+        size_t i = 0;
+         while (_save.find(DELIM) != std::string::npos) {
+            if (!_readBytes) { 
+                i = _save.find(DELIM);
+                _readBytes = _strToBase(_save.substr(0, i), std::hex);
+                _save.erase(0, i + DELIM.size());
+                if (_readBytes == 0) {
+                    _responseCode = 200;
+                    _parseStatus = complete;
+                    break ;
+                }
+                /* if never recieve 0?? */
+            }
+            if (_save.find(DELIM) == std::string::npos) {
+                break ;
+            }
+            i = _save.find(DELIM);
+            std::string line = _save.substr(0, i);
+            _save.erase(0, i + DELIM.size());
+            if (_readBytes != line.size()) {
+                _throw(400, "Bad Request - hex does not match line size");
+            }
+            _body += line;
+            _readBytes = 0;
+        }
+        /*check for trailer header field when recieve 0 size*/
     }
 
     bool    HTTPRequest::HTTPRequestComplete() {
@@ -242,11 +247,11 @@ namespace ft {
             if (te.size() < chunked.size() || te.compare(te.length() - chunked.size(), chunked.size(), chunked) != 0) {
                 _throw(400, "Bad Request - \"chunked\" is not last item in transfer-encoding header value");
             }
-            // A server that receives a request message with a transfer coding it does not understand SHOOULD respond with 501 (Not Implemented)
-            // if request methos == GET throw 400? if reqeust method == DELETE throw 405 "not allowed"?
+            /* A server that receives a request message with a transfer coding it does not understand SHOOULD respond with 501 (Not Implemented)*/
+            /*if request methos == GET throw 400? if reqeust method == DELETE throw 405 "not allowed"?*/
             _parseStatus = readChunks;
         } else if (content_length!= _headerFields.end()) { 
-            // if request methos == GET throw? if reqeust method == DELETE throw 405 "not allowed"?
+            /*if request methos == GET throw? if reqeust method == DELETE throw 405 "not allowed"?*/
             _parseStatus = readStraight;
         } else {
             _responseCode = 200;

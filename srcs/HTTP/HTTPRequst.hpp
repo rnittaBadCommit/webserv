@@ -14,9 +14,10 @@
 #include <algorithm>
 
 namespace ft {
+    enum            HTTPParseStatus { requestLine, headerFields, readChunks, readStraight, complete };
 
-    const static std::string    DELIM = "\n";
-    const static std::string    BREAK = "\n\n";
+    const static std::string    DELIM = "\r\n";
+    const static std::string    BREAK = "\r\n\r\n";
     const static std::string    SP = " ";
     const static std::string    CN = ":";
     const static std::string    HTTPV = "HTTP/1.1";
@@ -29,10 +30,10 @@ namespace ft {
         typedef std::pair<std::string, std::string> header_value;
 
     private:
-        enum            ParseStatus { requestLine, headerFields, readChunks, readStraight, complete };
+        
 
         int             _responseCode;
-        ParseStatus     _parseStatus;
+        HTTPParseStatus     _parseStatus;
         std::string     _requestMethod;
         std::string     _requestURI;
         std::string     _HTTPv;
@@ -55,6 +56,10 @@ namespace ft {
         int     Parse(const std::string& request);
         bool    HTTPRequestComplete();
     
+        const int&          GetResponseCode();
+        const HTTPParseStatus&  GetParseStatus();
+        const unsigned int& GetContentLength();
+        const std::string&  getSave();
         const std::string&  GetRequestMethod();
         const std::string&  GetRequestURI();
         const std::string&  GetHTTPv();
@@ -70,6 +75,7 @@ namespace ft {
         void        _removeWSP(std::string& str);
         bool        _validateHeader();
         void        _readBody();
+        void        _readChunks();
         void        _decideReadType();
         unsigned int _strToBase(const std::string& str, std::ios_base& (*base)(std::ios_base&));
         void        _throw(int responseCode, const std::string& message);
