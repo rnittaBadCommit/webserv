@@ -1,8 +1,9 @@
 #include "HTTPRequst.hpp"
 
 namespace ft {
-    HTTPRequest::HTTPRequest() : _responseCode(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
+    HTTPRequest::HTTPRequest(unsigned int bodyMaxSize) : _responseCode(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
         _contentLength(), _readBytes(0), _body(), _save() {
+            _bodyMaxSize = bodyMaxSize;
             _validMethods.push_back("POST");
             _validMethods.push_back("GET");
             _validMethods.push_back("DELETE");
@@ -21,9 +22,7 @@ namespace ft {
         } 
         if (_parseStatus == headerFields) {
             bool finished = _parseHeaderFields();
-            std::cout << "NOT FINISHED\n";
             if (finished) {
-                std::cout << "FINISHED\n";
                 if (_headerFields.size() > MAXHEADERS || _headerFields.find("host") == _headerFields.end()) {
                     _throw(400, "Bad Request - MAXHEADERS / host");
                 }
@@ -37,7 +36,6 @@ namespace ft {
             _readBody();
         }
 
-        /*if (!_readBytes && _parseStatus != complete && )*/
         return (HTTPRequestComplete() ? 0 : 1);
     }
 
@@ -120,7 +118,7 @@ namespace ft {
                 }
             }
         }
-        // decide if heaer is complete (line break reached)
+        // decide if header is complete (line break reached)
         if (_save.find(DELIM) == 0) {
             _save.erase(0, DELIM.size()); 
             return (true);
@@ -149,18 +147,20 @@ namespace ft {
     bool        HTTPRequest::_validateHeader() {
         // validate content-length
         if (_currentHeader.first == "content-length") {
-            /* 0 size content length?? */
             if (_currentHeader.second.find(',') != std::string::npos) {
                 _throw(400, "Bad Request - comma separated content-length");
             }
-            _contentLength = _strToBase(_currentHeader.second, std::dec);
+            _contentLength = _strBaseToUI(_currentHeader.second, std::dec);
+            if (_contentLength > _bodyMaxSize) {
+                _throw(413, "Payload Too Large");
+            }
             _readBytes = _contentLength;
         }
         // Handle multi header inclusion
         header_type::iterator _findHeader = _headerFields.find(_currentHeader.first);
         if (_findHeader != _headerFields.end()) {
             if (_currentHeader.first == "content-length") {
-                 if (_contentLength != _strToBase(_currentHeader.second, std::hex)) {
+                 if (_contentLength != _strBaseToUI(_currentHeader.second, std::dec)) {
                     _throw(400, "Bad Request - new content-length different from old content-length");
                 }
                 _resetCurrentHeader();
@@ -193,7 +193,7 @@ namespace ft {
             _body += _save.substr(0, _readBytes);
             _save.erase(0, _readBytes);
             _readBytes = 0;
-            _throw(400, "Bad Request - unexcpect body bytes");
+            _throw(400, "Bad Request - unexpected body bytes");
         } 
         if (_readBytes == 0) {
             _responseCode = 200;
@@ -206,7 +206,10 @@ namespace ft {
          while (_save.find(DELIM) != std::string::npos) {
             if (!_readBytes) { 
                 i = _save.find(DELIM);
-                _readBytes = _strToBase(_save.substr(0, i), std::hex);
+                _readBytes = _strBaseToUI(_save.substr(0, i), std::hex);
+                if (_readBytes > _bodyMaxSize) {
+                    _throw(413, "Payload Too Large");
+                }
                 _save.erase(0, i + DELIM.size());
                 if (_readBytes == 0) {
                     _responseCode = 200;
@@ -248,18 +251,19 @@ namespace ft {
                 _throw(400, "Bad Request - \"chunked\" is not last item in transfer-encoding header value");
             }
             /* A server that receives a request message with a transfer coding it does not understand SHOOULD respond with 501 (Not Implemented)*/
-            /*if request methos == GET throw 400? if reqeust method == DELETE throw 405 "not allowed"?*/
             _parseStatus = readChunks;
         } else if (content_length!= _headerFields.end()) { 
-            /*if request methos == GET throw? if reqeust method == DELETE throw 405 "not allowed"?*/
             _parseStatus = readStraight;
         } else {
+            if (_requestMethod == "POST") {
+                _throw(400, "Bad Request - POST expects content-length or transfer-encoding");
+            }
             _responseCode = 200;
             _parseStatus = complete;
         }
     }
 
-    unsigned int     HTTPRequest::_strToBase(const std::string& str, std::ios_base& (*base)(std::ios_base&)) {
+    unsigned int     HTTPRequest::_strBaseToUI(const std::string& str, std::ios_base& (*base)(std::ios_base&)) {
         std::stringstream  stream(str);
         unsigned long int  num;
 
@@ -270,6 +274,7 @@ namespace ft {
         }
         return (static_cast<unsigned int>(num));
     }
+
     void    HTTPRequest::_throw(int responseCode, const std::string& message) {
         _responseCode = responseCode;
         throw std::runtime_error(message);
