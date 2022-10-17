@@ -40,9 +40,12 @@ namespace ft {
         return (HTTPRequestComplete() ? 0 : 1);
     }
 
-    void    HTTPRequest::CreateFile(const std::string& file) {
-        std::ofstream ofs (file.c_str(), std::ofstream::out);
-        ofs.close();
+    void    HTTPRequest::CreateFile(const std::string& file) { 
+        std::ifstream inFile(file.c_str());
+        if (inFile.fail()) {
+            std::ofstream outFile(file.c_str(), std::ofstream::out);
+            outFile.close();
+        }
     }
     const int&                          HTTPRequest::GetResponseCode() { return _responseCode;}
     const HTTPParseStatus&              HTTPRequest::GetParseStatus() { return _parseStatus; }
