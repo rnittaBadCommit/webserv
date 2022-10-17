@@ -2,10 +2,10 @@
 
  
 namespace ft {
-    void    CreateFile(const std::string& file, const std::string& body) { 
-        std::ofstream newFile(file.c_str(), std::ofstream::out);
+    void    CreateFile(const std::string& filePath, const std::string& body) { 
+        std::ofstream newFile(filePath.c_str(), std::ofstream::out);
         if (!newFile.good()) {
-            throw std::runtime_error("Could not open file");
+            throw std::runtime_error("Could not create file");
         }
         newFile << body;
         newFile.close();
