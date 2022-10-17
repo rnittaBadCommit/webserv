@@ -6,6 +6,7 @@
 #include <limits>
 #include <cstddef>
 #include <vector>
+#include <set>
 #include <map>
 #include <sstream>
 #include <exception>
@@ -44,7 +45,8 @@ namespace ft {
         unsigned int    _readBytes;
         std::string     _body;
         std::string     _save;
-        std::vector<std::string> _validMethods;
+        std::vector<std::string>    _validMethods;
+        std::set<std::string>       _directoryList;
 
 
 
@@ -57,6 +59,7 @@ namespace ft {
         int     Parse(const std::string& request);
         bool    HTTPRequestComplete();
         void    CreateFile(const std::string& file);
+        void    AddDirectory(const std::string& file);
     
         const int&          GetResponseCode();
         const HTTPParseStatus&  GetParseStatus();
@@ -67,6 +70,7 @@ namespace ft {
         const std::string&  GetHTTPv();
         const header_type&  GetHeaderFields();
         const std::string&  GetBody();
+        const std::set<std::string>& GetDirectoryList();
 
     private:
 
