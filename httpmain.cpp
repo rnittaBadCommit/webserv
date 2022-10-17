@@ -4,7 +4,7 @@
 #include "srcs/HTTP/HTTPRequst.hpp"
 
 int main() {
-    ft::HTTPRequest     req(8000);
+    ft::HTTPRequest     req;
     std::string     line;
     int             rlt = 1;
 
