@@ -43,8 +43,8 @@ namespace ft
 					  << "===============================" << std::endl;
 			std::map<int, HTTPRequest>::iterator httpReq = HTTPRequest_vec_.find(recieved_msg.client_id);
 			if (httpReq == HTTPRequest_vec_.end()) {
-				// later 8000 = maxbodysize		
-				HTTPRequest_vec_.insert(std::make_pair(recieved_msg.client_id, HTTPRequest(8000)));
+				// HTTPRequest(config->which serverConfig?-> getClientMaxBodySize)
+				HTTPRequest_vec_.insert(std::make_pair(recieved_msg.client_id, HTTPRequest("1000000")));
 				httpReq = HTTPRequest_vec_.find(recieved_msg.client_id);
 			}
 			if (!httpReq->second.Parse(recieved_msg.content)) {

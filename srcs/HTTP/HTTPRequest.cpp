@@ -1,9 +1,9 @@
 #include "HTTPRequst.hpp"
 
 namespace ft {
-    HTTPRequest::HTTPRequest(unsigned int bodyMaxSize) : _responseCode(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
+    HTTPRequest::HTTPRequest(const std::string& bodyMaxSize) : _responseCode(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
         _contentLength(), _readBytes(0), _body(), _save() {
-            _bodyMaxSize = bodyMaxSize;
+            _bodyMaxSize = _strBaseToUI(bodyMaxSize, std::dec);
             _validMethods.push_back("POST");
             _validMethods.push_back("GET");
             _validMethods.push_back("DELETE");

@@ -50,7 +50,7 @@ namespace ft {
 
 
     public:
-        HTTPRequest(unsigned int bodyMaxSize);
+        HTTPRequest(const std::string& bodyMaxSize);
         //HTTPRequest(const HTTPRequest& src);
         //HTTPRequest& operator=(const HTTPRequest& rhs);
         ~HTTPRequest();
