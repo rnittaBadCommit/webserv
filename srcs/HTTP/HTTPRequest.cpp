@@ -2,7 +2,7 @@
 
 namespace ft {
     HTTPRequest::HTTPRequest() : _responseCode(), _parseStatus(requestLine), _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(),
-        _contentLength(), _readBytes(0), _body(), _save(), _directoryList() {
+        _contentLength(), _readBytes(0), _body(), _save() {
             _validMethods.push_back("POST");
             _validMethods.push_back("GET");
             _validMethods.push_back("DELETE");
@@ -40,17 +40,6 @@ namespace ft {
         return (HTTPRequestComplete() ? 0 : 1);
     }
 
-    void    HTTPRequest::CreateFile(const std::string& file) { 
-        std::ifstream inFile(file.c_str());
-        if (inFile.fail()) {
-            std::ofstream outFile(file.c_str(), std::ofstream::out);
-            outFile.close();
-        }
-    }
-
-    void    HTTPRequest::AddDirectory(const std::string& directoryPath) {
-        _directoryList.insert(directoryPath);
-    }
     const int&                          HTTPRequest::GetResponseCode() { return _responseCode;}
     const HTTPParseStatus&              HTTPRequest::GetParseStatus() { return _parseStatus; }
     const unsigned int&                 HTTPRequest::GetContentLength() { return _contentLength; }
@@ -59,7 +48,6 @@ namespace ft {
     const std::string&                  HTTPRequest::GetRequestURI() { return _requestURI; }
     const HTTPRequest::header_type&     HTTPRequest::GetHeaderFields() { return _headerFields; }
     const std::string&                  HTTPRequest::GetBody() { return _body; }
-    const std::set<std::string>&        HTTPRequest::GetDirectoryList() { return _directoryList; }
 
     void     HTTPRequest::_parseRequestLine() {
         size_t i;

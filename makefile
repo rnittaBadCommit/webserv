@@ -4,7 +4,7 @@ CXXFLAGS := -std=c++98 -pedantic -Wall -Wextra -Werror
 CONFIGSRCS := srcs/config/Config.cpp srcs/config/ConfigParser.cpp srcs/config/LocationConfig.cpp srcs/config/ServerConfig.cpp
 HTTPSRCS := srcs/HTTP/HTTPRequest.cpp
 SOCKETSRCS := srcs/socket/server.cpp srcs/socket/socket.cpp
-SRCS := main.cpp $(CONFIGSRCS) $(HTTPSRCS) $(SOCKETSRCS)
+SRCS := main.cpp srcs/utils.cpp $(CONFIGSRCS) $(HTTPSRCS) $(SOCKETSRCS)
 OBJS := $(SRCS:.cpp=.o)
 
 $(NAME): $(OBJS)
