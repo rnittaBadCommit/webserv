@@ -41,18 +41,12 @@ namespace ft
 			std::cout << "===============================" << std::endl
 					  << http_request_map_[recieved_msg.client_id] << std::endl
 					  << "===============================" << std::endl;
-			std::map<int, HTTPRequest>::iterator httpReq = HTTPRequest_vec_.find(recieved_msg.client_id);
-			if (httpReq == HTTPRequest_vec_.end()) {
-				// later 8000 = maxbodysize		
-				HTTPRequest_vec_.insert(std::make_pair(recieved_msg.client_id, HTTPRequest(8000)));
-				httpReq = HTTPRequest_vec_.find(recieved_msg.client_id);
-			}
-			if (!httpReq->second.Parse(recieved_msg.content)) {
+			if (!HTTPRequest_vec_[recieved_msg.client_id].Parse(recieved_msg.content)) {
 				std::cout << "REQUEST SUCCESSFULLY RECEIVED" << std::endl;
 				std::cout << "request: " << std::endl;
-				httpReq->second.PrintRequest();
+				HTTPRequest_vec_[recieved_msg.client_id].PrintRequest();
 				std::cout << "body: " << std::endl;
-				httpReq->second.PrintBody();
+				HTTPRequest_vec_[recieved_msg.client_id].PrintBody();
 			}
 			return (true);
 		}

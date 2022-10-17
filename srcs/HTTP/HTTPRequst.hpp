@@ -33,7 +33,7 @@ namespace ft {
         
 
         int             _responseCode;
-        HTTPParseStatus  _parseStatus;
+        HTTPParseStatus     _parseStatus;
         std::string     _requestMethod;
         std::string     _requestURI;
         std::string     _HTTPv;
@@ -41,7 +41,6 @@ namespace ft {
         header_value    _currentHeader;
         unsigned int    _contentLength;
         unsigned int    _readBytes;
-        unsigned int    _bodyMaxSize;
         std::string     _body;
         std::string     _save;
         std::vector<std::string> _validMethods;
@@ -49,7 +48,7 @@ namespace ft {
 
 
     public:
-        HTTPRequest(unsigned int bodyMaxSize);
+        HTTPRequest();
         //HTTPRequest(const HTTPRequest& src);
         //HTTPRequest& operator=(const HTTPRequest& rhs);
         ~HTTPRequest();
@@ -69,7 +68,7 @@ namespace ft {
 
     private:
 
-        HTTPRequest();
+
         void        _parseRequestLine();
         bool        _parseHeaderFields();
         void        _toLower(std::string& str);
@@ -78,7 +77,7 @@ namespace ft {
         void        _readBody();
         void        _readChunks();
         void        _decideReadType();
-        unsigned int _strBaseToUI(const std::string& str, std::ios_base& (*base)(std::ios_base&));
+        unsigned int _strToBase(const std::string& str, std::ios_base& (*base)(std::ios_base&));
         void        _throw(int responseCode, const std::string& message);
         void        _resetCurrentHeader();
 
