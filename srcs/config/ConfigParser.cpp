@@ -387,7 +387,7 @@ void ConfigParser::validateServerName(std::vector<std::string> line)
 	}
 }
 
-void ConfigParser::validateListen(std::vector<std::string> line)
+/*void ConfigParser::validateListen(std::vector<std::string> line)
 {
 }
 
@@ -425,4 +425,4 @@ void ConfigParser::validateCgiExtension(std::vector<std::string> line)
 
 void ConfigParser::validateUploadFilepath(std::vector<std::string> line)
 {
-}
+}*/

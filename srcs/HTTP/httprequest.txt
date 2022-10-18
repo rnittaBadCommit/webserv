@@ -1,0 +1,30 @@
+POST * HTTP/1.1
+content-length:114
+
+asl;dfja;lskdjfalejrpo3i5u1 ;2otad
+fga
+sdfal sdjf
+q34tljwqe;ldfhalskdhflaksjhdflkawe5 qvl;wketjqawlejfga;ls
+sdfg
+
+GET http://localhost:80
+Content-Length:3
+
+hey
+
+
+
+POST / HTTP/1.1
+host:localhost
+content-length:3
+content-length:3
+
+HEY
+
+POST / HTTP/1.1
+host:www.example.org
+content-length:3
+content-length:3
+
+
+
