@@ -1,0 +1,12 @@
+//
+// Created by ymori on 2022/10/18.
+//
+
+#ifndef WEBSERV_SRCS_HTTPMETHOD_HTTPMETHOD_H_
+#define WEBSERV_SRCS_HTTPMETHOD_HTTPMETHOD_H_
+
+class HTTPMethod {
+
+};
+
+#endif //WEBSERV_SRCS_HTTPMETHOD_HTTPMETHOD_H_
