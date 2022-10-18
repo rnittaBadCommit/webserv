@@ -6,12 +6,17 @@
 # include <fstream>
 # include <istream>
 #include <set>
+#include <vector>
 #include <sys/types.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 namespace ft {
-    void                    CreateFile(const std::string& file, const std::string& body);
-    std::set<std::string>   CreateDirectoryList(const std::string& directoryPath);
+    int                     FilePathExists(const std::string& filePath);
+    void                    CreateFile(std::string file, const std::string& body);
+    std::set<std::string>   CreateDirectoryList(std::string directoryPath);
 }
 
 #endif
