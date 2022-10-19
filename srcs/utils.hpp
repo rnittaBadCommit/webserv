@@ -14,7 +14,6 @@
 #include <unistd.h>
 
 namespace ft {
-    int                     FilePathExists(const std::string& filePath);
     void                    CreateFile(std::string file, const std::string& body);
     std::set<std::string>   CreateDirectoryList(std::string directoryPath);
 }
