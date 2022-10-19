@@ -45,22 +45,24 @@ namespace ft {
         if (!newFile.good()) {
             if (FilePathExists(filePath)) {
                 // No write permissions
-                throw std::runtime_error("Could not create file");
+                throw std::runtime_error("Could not open file");
             }
             MakeLeadingDirectories(filePath);
             newFile.open(filePath.c_str(), std::ofstream::out);
+            if (!newFile.good()) {
+                throw std::runtime_error("Could not create file");
+            }
         }
         newFile << body;
-        newFile.close();
+        newFile.close();  
     }
 
     std::set<std::string>    CreateDirectoryList(std::string directoryPath) {
         std::set<std::string> dirList;
         struct dirent *dirent_ptr;
 
-        // will include . hidden directories
-        // will not throw error in case of create("abc/def")
         if (!FilePathExists(directoryPath)) {
+            //throw std::runtime_error("Could not create directory");
             MakeLeadingDirectories(directoryPath);
             if (mkdir(directoryPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) { 
                 throw std::runtime_error("Could not create directory");
