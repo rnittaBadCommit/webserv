@@ -57,7 +57,7 @@ namespace ft {
                 _requestMethod = _save.substr(0, i);
                 _save.erase(0, i + SP.size());
                 if (std::find(_validMethods.begin(), _validMethods.end(), _requestMethod) == _validMethods.end()) {
-                    _throw(501, "Not Implemented");
+                    _throw(501, "Not Implemented - invalid request method");
                 }
             }  
         }
@@ -245,12 +245,9 @@ namespace ft {
             _headerFields.erase(content_length); 
             _throw(400, "Bad Request - both transfer-encoding and content-length exist");
         } else if (transfer_encoding != _headerFields.end()) {
-            const std::string te = transfer_encoding->second;
-            const std::string chunked = "chunked";
-            if (te.size() < chunked.size() || te.compare(te.length() - chunked.size(), chunked.size(), chunked) != 0) {
-                _throw(400, "Bad Request - \"chunked\" is not last item in transfer-encoding header value");
+            if (transfer_encoding->second != "chunked") {
+                _throw(501, "Not Implemented - does not understand transfer-encoding");
             }
-            /* A server that receives a request message with a transfer coding it does not understand SHOOULD respond with 501 (Not Implemented)*/
             _parseStatus = readChunks;
         } else if (content_length!= _headerFields.end()) { 
             _parseStatus = readStraight;
