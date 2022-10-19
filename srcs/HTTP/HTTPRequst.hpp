@@ -35,7 +35,7 @@ namespace ft {
         
 
         int             _responseCode;
-        HTTPParseStatus  _parseStatus;
+        HTTPParseStatus _parseStatus;
         std::string     _requestMethod;
         std::string     _requestURI;
         std::string     _HTTPv;
@@ -58,36 +58,35 @@ namespace ft {
         int     Parse(const std::string& request);
         bool    HTTPRequestComplete();
     
-        const int&          GetResponseCode();
+        const int&              GetResponseCode();
         const HTTPParseStatus&  GetParseStatus();
-        const unsigned int& GetContentLength();
-        const std::string&  getSave();
-        const std::string&  GetRequestMethod();
-        const std::string&  GetRequestURI();
-        const std::string&  GetHTTPv();
-        const header_type&  GetHeaderFields();
-        const std::string&  GetBody();
+        const unsigned int&     GetContentLength();
+        const std::string&      getSave();
+        const std::string&      GetRequestMethod();
+        const std::string&      GetRequestURI();
+        const std::string&      GetHTTPv();
+        const header_type&      GetHeaderFields();
+        const std::string&      GetBody();
 
     private:
 
         HTTPRequest();
-        void        _parseRequestLine();
-        bool        _parseHeaderFields();
-        void        _toLower(std::string& str);
-        void        _removeWSP(std::string& str);
-        bool        _validateHeader();
-        void        _readBody();
-        void        _readChunks();
-        void        _decideReadType();
-        unsigned int _strBaseToUI(const std::string& str, std::ios_base& (*base)(std::ios_base&));
-        void        _throw(int responseCode, const std::string& message);
-        void        _resetCurrentHeader();
+        void            _parseRequestLine();
+        bool            _parseHeaderFields();
+        void            _toLower(std::string& str);
+        void            _removeWSP(std::string& str);
+        bool            _validateHeader();
+        void            _readBody();
+        void            _readChunks();
+        void            _decideReadType();
+        unsigned int    _strBaseToUI(const std::string& str, std::ios_base& (*base)(std::ios_base&));
+        void            _throw(int responseCode, const std::string& message);
+        void            _resetCurrentHeader();
 
     public:
         void    PrintRequest();
         void    PrintBody();
     };
 }
-
 
 #endif

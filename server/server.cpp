@@ -37,21 +37,21 @@ namespace ft
 		{
 			recieved_msg = socket_.recieve_msg();
 			socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");
-			// if (http_request_map_.count(recieved_msg.client_id))
-			http_request_map_[recieved_msg.client_id] = recieved_msg.content;
+			if (cd)
+				httpRequest_map_[recieved_msg.client_id] = recieved_msg.content;
 			std::cout << "===============================" << std::endl
-					  << http_request_map_[recieved_msg.client_id] << std::endl
+					  << httpRequest_map_[recieved_msg.client_id] << std::endl
 					  << "===============================" << std::endl;
 
 			return (true);
 		}
 		catch (const ft::Socket::recieveMsgFromNewClient &new_client)
 		{
-			http_request_map_[new_client.client_id];
+			httpRequest_map_[new_client.client_id];
 		}
 		catch (const ft::Socket::connectionHangUp &deleted_client)
 		{
-			http_request_map_.erase(deleted_client.client_id);
+			httpRequest_map_.erase(deleted_client.client_id);
 		}
 		catch (const ft::Socket::NoRecieveMsg &e)
 		{
