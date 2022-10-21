@@ -8,7 +8,6 @@
 #include "HttpResponse.hpp"
 #include "status_code.hpp"
 
-#define CRLF "\r\n"
 
 HttpResponse::HttpResponse() {};
 HttpResponse::~HttpResponse() {};
@@ -45,16 +44,12 @@ HttpResponse::~HttpResponse() {};
  *    - Accept-Encoding
  */
 
-static std::string GetResponseLine_(int status_code) {
+std::string HttpResponse::GetResponseLine(int status_code) {
   switch (status_code) {
-    case HTTP_OK:
-      return "200 OK";
-    case HTTP_CREATED:
-      return "201 Created";
-    case HTTP_ACCEPTED:
-      return "202 Accepted";
-    case HTTP_PARTIAL_CONTENT:
-      return "206 Partial Content";
+    case HTTP_OK:return "200 OK";
+    case HTTP_CREATED:return "201 Created";
+    case HTTP_ACCEPTED:return "202 Accepted";
+    case HTTP_PARTIAL_CONTENT:return "206 Partial Content";
     case HTTP_MOVED_PERMANENTLY:
       return "301 Moved Permanently";
     case HTTP_MOVED_TEMPORARILY:
@@ -113,7 +108,7 @@ static std::string GetResponseLine_(int status_code) {
   }
 }
 
-static std::string CreateResponseNoSuccessBody_(int status_code) {
+std::string HttpResponse::CreateResponseNoSuccessBody(int status_code) {
   std::stringstream response_body;
 
   response_body << "<html>" CRLF

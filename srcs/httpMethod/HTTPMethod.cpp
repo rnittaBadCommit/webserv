@@ -4,7 +4,16 @@
 
 #include "HTTPMethod.hpp"
 
+#include <unistd.h>
+
 #include <iostream>
+#include <sstream>
+#include <fstream>
+#include <map>
+
+#include "../httpResponse/HttpResponse.hpp"
+
+typedef std::map<std::string, std::string> http_header_t;
 
 /**
  * Persistent
@@ -90,6 +99,67 @@ int executeGet() {
   }
 }
 
-int do_http() {
+std::string CreateErrorSentence(int status_code) {
+  std::stringstream error_sentence;
 
+  char date[1024];
+  time_t gmt_time;
+  time(&gmt_time);
+  strftime(date, 1024, "%a, %d %b %Y %X %Z", gmtime(&gmt_time)); // RFC7231
+
+// Error file create
+//  << "<!DOCTYPE html>" << CRLF;
+//  << "<html><head>" << CRLF;
+//  << "<title>Error</title></head>" << CRLF;
+//  << "<body>Error</body>" << CRLF;
+
+  error_sentence << "HTTP/1.1 " << HttpResponse::GetResponseLine(status_code)
+                 << CRLF; // TODO: check status code
+  error_sentence << "Server: " << "42webserv" << "/1.0" << CRLF;
+  error_sentence << "Content-Type: text/html" << CRLF;
+
+  return error_sentence.str();
+}
+
+int do_delete(http_header_t http_header,
+              std::string &file_path,
+              std::string &response_message_str) {
+  int response_status;
+  std::stringstream response_message_stream;
+  std::string delete_dir = "ok";
+
+  // Range not allowed for DELETE
+  if (http_header.find("Range :") == http_header.end()) {
+    response_message_stream << CreateErrorSentence(501);
+    return 501;
+  }
+
+  // unlink
+  int ret = unlink(file_path.c_str());
+  // TODO: check errno
+  if (ret == 0) {
+    response_message_stream << "HTTP/1.1 204 No Content" << CRLF;
+    response_status = 204;
+  } else {
+    response_message_stream << "HTTP/1.1 500 Server Error" << CRLF;
+    response_status = 500;
+  }
+
+  // Server:
+  response_message_stream << "Server: " << "42webserv" << "/1.0" << CRLF;
+
+  // Date:
+  char date[1024];
+  time_t gmt_time;
+  time(&gmt_time);
+  strftime(date, 1024, "%a, %d %b %Y %X %Z", gmtime(&gmt_time)); // RFC7231
+
+  response_message_str = response_message_stream.str();
+  return response_status;
+}
+
+int do_http() {
+  std::stringstream send_data;
+
+  return 0;
 }
