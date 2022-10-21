@@ -12,7 +12,8 @@ namespace ft
 			LocationConfig location_config = (*it).second;
 			if (!location_config.getRedirect().first != LocationConfig::NO_REDIRECT)
 			{ // LocationConfig にredirectが設定されている
-				redirectList_map_[location_config.getUri()] = location_config.getRedirect();
+				std::pair<int, const std::string> tmp = location_config.getRedirect();
+				redirectList_map_[location_config.getUri()].status_code = tmp.first;
 			}
 		}
 	}
