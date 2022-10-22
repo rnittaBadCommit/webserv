@@ -14,12 +14,6 @@
 
 
 /**
- * Persistent
- * Chunked
- *
-*/
-
-/**
  *
  * @arg
  *  Socket:
@@ -31,6 +25,25 @@
  *
  * @return
  *  status code
+ *
+ *
+ * The following implementations are omitted
+ *
+ * -- Check Mod, Match, Range and each processing
+ * If-Modified-Since
+ * If-Unmodified-Since
+ * If-Match
+ * If-None-Match
+ * If-Range
+ *
+ * -- Check and judge status
+ * 304
+ * 412
+ * 206
+ * 200
+ * 206
+ * 200
+ *
 */
 
 std::string CreateDate() {
@@ -84,24 +97,6 @@ int do_get(const http_header_t& http_header,
     return (404);
   }
 
-  // Check Mod, Match, Range and each processing
-  /*
-   * Check and judge status
-   *
-   * If-Modified-Since
-   * If-Unmodified-Since
-   * If-Match
-   * If-None-Match
-   * If-Range
-   *
-   * 304
-   * 412
-   * 206
-   * 200
-   * 206
-   * 200
-   */
-
   response_message_stream << "HTTP/1.1 200 OK" << CRLF;
   response_status = 200;
 
@@ -133,9 +128,9 @@ int do_get(const http_header_t& http_header,
   // Content-Length:
 
   // don't send unless GET
-  // if (method == "GET") {
-  //    // TODO: sendText in Socket class
-  // }
+   if (http_header.at("Method") == "GET") {
+      // TODO: sendText in Socket class
+   }
 
   return response_status;
 }
@@ -156,7 +151,7 @@ int do_delete(const http_header_t& http_header,
 
   // unlink
   int ret = unlink(file_path.c_str());
-  // TODO: check errno
+  // TODO: check errno ?
   if (ret == 0) {
     response_message_stream << "HTTP/1.1 204 No Content" << CRLF;
     response_status = 204;
