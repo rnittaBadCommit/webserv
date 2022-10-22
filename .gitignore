@@ -33,3 +33,4 @@
 
 # IDE specific settings files
 .idea
+cmake-build-debug
