@@ -18,12 +18,12 @@ namespace ft
 		} redirectConf;
 		// typedef std::pair<const int, const std::string> redirectConf;
 		ServerChild(const ServerConfig &server_config);
+		bool is_redirect_(const std::string &url);
 
 	private:
 		const ServerConfig &server_config_;
-		const std::map<const std::string, redirectConf> redirectList_map_;
+		std::map<const std::string, redirectConf> redirectList_map_;
 
-		bool is_redirect_(const std::string &url);
 	};
 }
 
