@@ -10,13 +10,13 @@ add_subdirectory(UnitTests)
 add_subdirectory(srcs/httpMethod)
 
 add_executable(webserv
-        socket/main.cpp
-        socket/server.cpp
-        socket/server.hpp
-        socket/socket.cpp
-        socket/socket.hpp
-        socket/socket_test.cpp
-        socket/test.cpp
+        main.cpp
+        srcs/socket/server.cpp
+        srcs/socket/server.hpp
+        srcs/socket/socket.cpp
+        srcs/socket/socket.hpp
+        srcs/socket/socket_test.cpp
+        srcs/socket/test.cpp
         srcs/config/Config.cpp
         srcs/config/Config.hpp
         srcs/config/ConfigConstant.hpp

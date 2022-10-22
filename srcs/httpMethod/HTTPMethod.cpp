@@ -130,19 +130,9 @@ int do_get(http_header_t http_header,
   // Content-Length:
 
   // don't send unless GET
-  if (method == "GET") {
-    if (type == "binary") {
-      /*
-       * TODO: sentBinary in Socket class
-       * sendBinary(path)
-       */
-    } else {
-      /*
-       * TODO: sendText in Socket class
-       * sendText(path)
-       */
-    }
-  }
+  // if (method == "GET") {
+  //    // TODO: sendText in Socket class
+  // }
 
   return response_status;
 }
