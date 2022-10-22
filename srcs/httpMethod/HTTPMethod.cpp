@@ -33,13 +33,20 @@
  *  status code
 */
 
-std::string CreateErrorSentence(int status_code) {
-  std::stringstream error_sentence;
-
+std::string CreateDate() {
+  std::stringstream ret_date;
   char date[1024];
   time_t gmt_time;
+
   time(&gmt_time);
   strftime(date, 1024, "%a, %d %b %Y %X %Z", gmtime(&gmt_time)); // RFC7231
+
+  ret_date << date;
+  return ret_date.str();
+}
+
+std::string CreateErrorSentence(int status_code) {
+  std::stringstream error_sentence;
 
 // Error file create
 //  << "<!DOCTYPE html>" << CRLF;
@@ -50,13 +57,14 @@ std::string CreateErrorSentence(int status_code) {
   error_sentence << "HTTP/1.1 " << HttpResponse::GetResponseLine(status_code)
                  << CRLF; // TODO: check status code
   error_sentence << "Server: " << "42webserv" << "/1.0" << CRLF;
-  error_sentence << "Date: " << date << CRLF;
+  error_sentence << "Date: " << CreateDate();
+  error_sentence << CRLF;
   error_sentence << "Content-Type: text/html";
 
   return error_sentence.str();
 }
 
-int do_get(http_header_t http_header,
+int do_get(const http_header_t& http_header,
            std::string &file_path,
            std::string &response_message_str) {
   int response_status;
@@ -135,7 +143,7 @@ int do_get(http_header_t http_header,
   return response_status;
 }
 
-int do_delete(http_header_t http_header,
+int do_delete(const http_header_t& http_header,
               std::string &file_path,
               std::string &response_message_str) {
   int response_status;
@@ -164,11 +172,7 @@ int do_delete(http_header_t http_header,
   response_message_stream << "Server: " << "42webserv" << "/1.0" << CRLF;
 
   // Date:
-  char date[1024];
-  time_t gmt_time;
-  time(&gmt_time);
-  strftime(date, 1024, "%a, %d %b %Y %X %Z", gmtime(&gmt_time)); // RFC7231
-  response_message_stream << "Date: " << date;
+  response_message_stream << "Date: " << CreateDate();
 
   response_message_str = response_message_stream.str();
   return response_status;

@@ -16,7 +16,7 @@ namespace {
    std::string ok_path;
  };
 
-TEST_F(DoDelete, ERROR501) {
+TEST_F(DoDelete, ServerError500) {
   http_header_t http_header;
   std::string response_message_str;
 
@@ -26,7 +26,7 @@ TEST_F(DoDelete, ERROR501) {
   std::cout << "*****" << std::endl;
 }
 
-TEST_F(DoDelete, ServerError) {
+TEST_F(DoDelete, ServerError501) {
   http_header_t http_header {
       {"Range :", "100"}
   };

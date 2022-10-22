@@ -12,7 +12,7 @@ typedef std::map<std::string, std::string> http_header_t;
 
 int return1();
 
-int do_delete(http_header_t http_header,
+int do_delete(const http_header_t& http_header,
               std::string &file_path,
               std::string &response_message_str);
 
