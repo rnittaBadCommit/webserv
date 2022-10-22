@@ -9,11 +9,9 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <map>
 
 #include "../httpResponse/HttpResponse.hpp"
 
-typedef std::map<std::string, std::string> http_header_t;
 
 /**
  * Persistent
@@ -53,7 +51,7 @@ std::string CreateErrorSentence(int status_code) {
                  << CRLF; // TODO: check status code
   error_sentence << "Server: " << "42webserv" << "/1.0" << CRLF;
   error_sentence << "Date: " << date << CRLF;
-  error_sentence << "Content-Type: text/html" << CRLF;
+  error_sentence << "Content-Type: text/html";
 
   return error_sentence.str();
 }
@@ -147,6 +145,7 @@ int do_delete(http_header_t http_header,
   // Range not allowed for DELETE
   if (http_header.find("Range :") == http_header.end()) {
     response_message_stream << CreateErrorSentence(501);
+    response_message_str = response_message_stream.str();
     return 501;
   }
 
@@ -169,7 +168,7 @@ int do_delete(http_header_t http_header,
   time_t gmt_time;
   time(&gmt_time);
   strftime(date, 1024, "%a, %d %b %Y %X %Z", gmtime(&gmt_time)); // RFC7231
-  response_message_stream << "Date: " << date << CRLF;
+  response_message_stream << "Date: " << date;
 
   response_message_str = response_message_stream.str();
   return response_status;

@@ -10,6 +10,7 @@ add_executable(Google_Tests_run
 
 target_link_libraries(Google_Tests_run
         httpMethod
+        httpResponse
         )
 
 target_link_libraries(Google_Tests_run

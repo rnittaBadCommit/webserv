@@ -113,11 +113,11 @@ std::string HttpResponse::CreateResponseNoSuccessBody(int status_code) {
 
   response_body << "<html>" CRLF
                 << "<head><title>"
-                << GetResponseLine_(status_code)
+                << GetResponseLine(status_code)
                 << "</title></head>" CRLF
                 << "<body>" CRLF
                 << "<center><h1>"
-                << GetResponseLine_(status_code)
+                << GetResponseLine(status_code)
                 << "</h1></center>" CRLF;
 
   return response_body.str();
@@ -125,7 +125,7 @@ std::string HttpResponse::CreateResponseNoSuccessBody(int status_code) {
 
 std::string HttpResponse::GetResponseMessage(int status_code) {
   std::stringstream response_message;
-  std::string error_response_body = status_code >= 300 ? CreateResponseNoSuccessBody_(status_code) : "";
+  std::string error_response_body = status_code >= 300 ? CreateResponseNoSuccessBody(status_code) : "";
 
   // Temporary val
   char date[1024];
@@ -145,7 +145,7 @@ std::string HttpResponse::GetResponseMessage(int status_code) {
   std::string keep_alive_header = "5";
 
   // Response line
-  response_message << "HTTP/1.1 " << GetResponseLine_(status_code) << CRLF; // TODO: check status code
+  response_message << "HTTP/1.1 " << GetResponseLine(status_code) << CRLF; // TODO: check status code
 
   // Response header
   response_message << "Server: " << "42webserv" << "/1.0" << CRLF;
@@ -203,13 +203,13 @@ std::string HttpResponse::GetResponseMessage(int status_code) {
 
 // TODO: REMOVE
 // TEST MAIN
-int main() {
-  HttpResponse r;
-
-  for (int i = 200; i < 508; ++i) {
-    if (r.GetResponseMessage(i).find("ERROR NO OUTPUT") == std::string::npos)
-      std::cout << r.GetResponseMessage(i) << std::endl;
-  }
-
-  return 0;
-}
+//int main() {
+//  HttpResponse r;
+//
+//  for (int i = 200; i < 508; ++i) {
+//    if (r.GetResponseMessage(i).find("ERROR NO OUTPUT") == std::string::npos)
+//      std::cout << r.GetResponseMessage(i) << std::endl;
+//  }
+//
+//  return 0;
+//}

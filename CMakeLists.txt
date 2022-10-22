@@ -8,6 +8,7 @@ include_directories(srcs)
 include_directories(srcs/config)
 add_subdirectory(UnitTests)
 add_subdirectory(srcs/httpMethod)
+add_subdirectory(srcs/httpResponse)
 
 add_executable(webserv
         main.cpp
