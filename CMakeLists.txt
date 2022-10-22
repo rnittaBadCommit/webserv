@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 project(webserv)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 98)
 
 include_directories(socket)
 include_directories(srcs)
 include_directories(srcs/config)
+add_subdirectory(UnitTests)
+add_subdirectory(srcs/httpMethod)
 
 add_executable(webserv
         socket/main.cpp
@@ -26,4 +28,10 @@ add_executable(webserv
         srcs/config/ServerConfig.hpp
         srcs/httpResponse/HttpResponse.cpp
         srcs/httpResponse/HttpResponse.hpp
-        srcs/httpResponse/status_code.hpp)
+        srcs/httpResponse/status_code.hpp
+
+        srcs/httpMethod/HTTPMethod.cpp
+        )
+
+target_link_libraries(webserv
+        )
