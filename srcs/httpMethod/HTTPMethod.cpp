@@ -9,8 +9,12 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <cstring>
 
 #include "../httpResponse/HttpResponse.hpp"
+#include "../HTTP/HTTPRequst.hpp"
 
 
 /*
@@ -90,26 +94,19 @@ std::string CreateErrorSentence(int status_code) {
  * @param response_message_str
  * @return
  */
-int do_get(const http_header_t& http_header,
+int do_get(ft::HTTPRequest &http_request,
            std::string &file_path,
            std::string &response_message_str) {
   int response_status;
   std::stringstream response_message_stream;
 
   int ret_val;
+  struct stat st = {};
 
-  if (!file_path.empty()) {
-    // TODO: index search
-    int ret_val = 0;
-    if (ret_val != 0) { // Resource not found
-      response_message_stream << CreateErrorSentence(404);
-      return (404);
-    }
-    // copy file path to path ?
-  }
-  // ret_val = stat
-  if (ret_val < 0) {
+  ret_val = stat(file_path.c_str(), &st);
+  if (ret_val < 0 || !S_ISREG(st.st_mode)) {
     response_message_stream << CreateErrorSentence(404);
+    response_message_str = response_message_stream.str();
     return (404);
   }
 
@@ -120,27 +117,34 @@ int do_get(const http_header_t& http_header,
   response_message_stream << "Date: " << CreateDate() << CRLF;
   response_message_stream << "Last-Modified: " << CreateDate() << CRLF;
 
-  // Force search results to text/html type
-  if (!file_path.empty()) {
-    // find type "x.html"
-  } else {
-    // find type file_path
-  }
+//  // Force search results to text/html type
+//  if (!file_path.empty()) {
+//    // find type "x.html"
+//  } else {
+//    // find type file_path
+//  }
 
   // sending partial content
 
   // send full entry
   // Content-Type:
+  response_message_stream << "Content-Type: " << "text/html" << CRLF;
   // Content-Length:
+  response_message_stream << "Content-Lenght: " << st.st_size << CRLF;
 
-  // don't send unless GET
-//   if (http_header.at("Method") == "GET") {
-//      // TODO: sendText in Socket class
-//   }
+  // send body
+  response_message_stream << CRLF;
+  // file read
+  std::ifstream reading_file;
+  std::string reading_line_buf;
+  reading_file.open(file_path.c_str());
+  while (std::getline(reading_file, reading_line_buf))
+    response_message_stream << reading_line_buf << CRLF;
 
   response_message_str = response_message_stream.str();
   return response_status;
 }
+
 
 /**
  *
