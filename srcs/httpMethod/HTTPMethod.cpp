@@ -13,8 +13,7 @@
 #include "../httpResponse/HttpResponse.hpp"
 
 
-/**
- *
+/*
  * @arg
  *  Socket:
  *  Method:
@@ -46,6 +45,11 @@
  *
 */
 
+
+/**
+ *
+ * @return GMT time in RFC7231 format
+ */
 std::string CreateDate() {
   char date[1024];
   time_t gmt_time;
@@ -56,6 +60,11 @@ std::string CreateDate() {
   return std::string(date);
 }
 
+/**
+ *
+ * @param status_code
+ * @return
+ */
 std::string CreateErrorSentence(int status_code) {
   std::stringstream error_sentence;
 
@@ -74,6 +83,13 @@ std::string CreateErrorSentence(int status_code) {
   return error_sentence.str();
 }
 
+/**
+ *
+ * @param http_header
+ * @param file_path
+ * @param response_message_str
+ * @return
+ */
 int do_get(const http_header_t& http_header,
            std::string &file_path,
            std::string &response_message_str) {
@@ -100,19 +116,9 @@ int do_get(const http_header_t& http_header,
   response_message_stream << "HTTP/1.1 200 OK" << CRLF;
   response_status = 200;
 
-  // Server:
   response_message_stream << "Server: " << "42webserv" << "/1.0" << CRLF;
-
-  // Date:
-  char date[1024];
-  time_t gmt_time;
-  time(&gmt_time);
-  strftime(date, 1024, "%a, %d %b %Y %X %Z", gmtime(&gmt_time)); // RFC7231
-  response_message_stream << "Date: " << date << CRLF;
-
-  // Last-Modified:
-  strftime(date, 1024, "%a, %d %b %Y %X %Z", gmtime(&gmt_time)); // RFC7231
-  response_message_stream << "Last-Modified: " << date << CRLF;
+  response_message_stream << "Date: " << CreateDate() << CRLF;
+  response_message_stream << "Last-Modified: " << CreateDate() << CRLF;
 
   // Force search results to text/html type
   if (!file_path.empty()) {
@@ -128,13 +134,21 @@ int do_get(const http_header_t& http_header,
   // Content-Length:
 
   // don't send unless GET
-   if (http_header.at("Method") == "GET") {
-      // TODO: sendText in Socket class
-   }
+//   if (http_header.at("Method") == "GET") {
+//      // TODO: sendText in Socket class
+//   }
 
+  response_message_str = response_message_stream.str();
   return response_status;
 }
 
+/**
+ *
+ * @param http_header
+ * @param file_path
+ * @param response_message_str
+ * @return
+ */
 int do_delete(const http_header_t& http_header,
               std::string &file_path,
               std::string &response_message_str) {
@@ -143,11 +157,11 @@ int do_delete(const http_header_t& http_header,
   std::string delete_dir = "ok";
 
   // Range not allowed for DELETE
-  if (http_header.find("Range :") == http_header.end()) {
-    response_message_stream << CreateErrorSentence(501);
-    response_message_str = response_message_stream.str();
-    return 501;
-  }
+//  if (http_header.find("Range :") == http_header.end()) {
+//    response_message_stream << CreateErrorSentence(501);
+//    response_message_str = response_message_stream.str();
+//    return 501;
+//  }
 
   // unlink
   int ret = unlink(file_path.c_str());
