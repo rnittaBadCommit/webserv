@@ -2,6 +2,7 @@
 #define SERVERCHILD_HPP
 
 #include "../srcs/config/Config.hpp"
+#include "Location.hpp"
 #include <map>
 
 namespace ft
@@ -17,13 +18,14 @@ namespace ft
 			std::string dest_uri;
 		} redirectConf;
 		// typedef std::pair<const int, const std::string> redirectConf;
+		ServerChild();
 		ServerChild(const ServerConfig &server_config);
 		bool is_redirect_(const std::string &url);
 
 	private:
 		const ServerConfig &server_config_;
+		std::map<const std::string, Location> location_map_;
 		std::map<const std::string, redirectConf> redirectList_map_;
-
 	};
 }
 

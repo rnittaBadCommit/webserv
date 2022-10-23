@@ -3,6 +3,11 @@
 namespace ft
 {
 
+	ServerChild::ServerChild()
+		: server_config_(ServerConfig())
+	{
+	}
+
 	ServerChild::ServerChild(const ServerConfig &server_config)
 		: server_config_(server_config)
 	{
