@@ -115,4 +115,13 @@ namespace ft {
         }
         return (dirList);
     }
+
+    void    TrimWSP(std::string& str) {
+        while (str.size() && isspace(str[0])) {
+            str.erase(0, 1);
+        }
+        while (str.size() && isspace(str[str.size() - 1])) {
+            str.erase(str.size() - 1, 1);
+        }
+    }
 }
