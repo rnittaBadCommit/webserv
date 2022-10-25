@@ -2,7 +2,7 @@
 
 LocationConfig::LocationConfig()
 	: uri(), alias(), autoindex(), allow_method(),
-	  index(), cgi_extension(), redirect(),
+	  index(), cgi_extension(), redirect(-1, ""),
 	  upload_filepath()
 {
 }
@@ -49,7 +49,8 @@ void LocationConfig::addCgiExtension(const std::string &cgi_extension)
 void LocationConfig::addRedirect(const int redirect_status, const std::string &uri)
 {
 	this->is_set.insert(REDIRECT);
-	this->redirect.insert(std::make_pair(redirect_status, uri));
+	this->redirect.first = redirect_status;
+	this->redirect.second = uri;
 }
 
 void LocationConfig::setUploadFilepath(const std::string &upload_filepath)
@@ -88,7 +89,7 @@ const std::vector<std::string> &LocationConfig::getCgiExtension() const
 	return this->cgi_extension;
 }
 
-const std::map<int, std::string> &LocationConfig::getRedirect() const
+const std::pair<int, std::string> &LocationConfig::getRedirect() const
 {
 	return this->redirect;
 }
