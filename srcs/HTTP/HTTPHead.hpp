@@ -1,6 +1,6 @@
 #pragma once
-#ifndef HTTPREQUEST_HPP
-# define HTTPREQUEST_HPP
+#ifndef HTTPHEAD_HPP
+# define HTTPHEAD_HPP
 
 #include <string>
 #include <limits>
@@ -17,7 +17,7 @@
 #include "../utils.hpp"
 
 namespace ft {
-    enum            HTTPParseStatus { requestLine, headerFields, body, readChunks, readStraight, complete };
+    enum            HTTPParseStatus { requestLine, headerFields, readChunks, readStraight, complete };
 
     const static std::string    DELIM = "\r\n";
     const static std::string    BREAK = "\r\n\r\n";
@@ -53,6 +53,7 @@ namespace ft {
         int     Parse(const std::string& request);
         bool    HTTPRequestComplete();
     
+        const std::string&      GetHost();
         const int&              GetResponseCode();
         const HTTPParseStatus&  GetParseStatus();
         const std::string&      GetRequestMethod();
@@ -61,13 +62,14 @@ namespace ft {
         const header_type&      GetHeaderFields();
         const std::string&      getSave();
 
+
     private:
 
-        void            parseRequestLine();
-        void            parseHeaderFields();
-        void            toLower(std::string& str);
-        bool            multiInclusion();  
-        void            _throw(int responseCode, const std::string& message);
+        void    parseRequestLine();
+        void    parseHeaderFields();
+        void    toLower(std::string& str);
+        bool    multiInclusion();  
+        void    _throw(int responseCode, const std::string& message);
 
     public:
         void    PrintRequest();

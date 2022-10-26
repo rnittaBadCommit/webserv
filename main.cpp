@@ -1,5 +1,4 @@
-#include "srcs/socket/server.hpp"
-#include "srcs/utils.hpp"
+#include "srcs/server/server.hpp"
 
 int main()
 {

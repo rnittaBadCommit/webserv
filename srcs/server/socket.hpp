@@ -20,7 +20,6 @@
 
 #include "../config/Config.hpp"
 
-
 #define BUFFER_SIZE 10
 
 namespace ft
@@ -49,12 +48,20 @@ namespace ft
 			RecievedMsg operator=(const RecievedMsg &other);
 			std::string content;
 			int client_id;
-			in_port_t	port;
+			in_port_t port;
 		};
 
 		void setup(const std::vector<ServerConfig> &server_config);
 
+		void add_pollfd(const pollfd pollfd);
+
+		void erase_pollfd(const int fd);
+
+		void erase_pollfd_by_index(const int index);
+
 		RecievedMsg recieve_msg();
+
+		void send_msg(int fd, const std::string msg);
 
 		void check_keep_time_and_close_fd();
 
@@ -94,13 +101,15 @@ namespace ft
 	private:
 		std::vector<int> sockfd_vec_;
 		std::vector<struct pollfd> poll_fd_vec_;
-		std::vector<int> recieve_fd_vec_;
+		std::map<int, int> fd_to_index_nap_;
+		// std::vector<int> recieve_fd_vec_;
 		std::map<int, time_t> last_recieve_time_map_; // sockfd => -1
+		std::map<int, std::string> msg_to_send_map_;
 
 		std::set<int> used_fd_set_;
 
 		size_t port_num_;
-		time_t keep_connect_time_len_;
+		time_t keep_connect_time_len_ = 100;
 
 		RecievedMsg recieve_msg_from_connected_client_(int connection);
 		void register_new_client_(int sock_fd);

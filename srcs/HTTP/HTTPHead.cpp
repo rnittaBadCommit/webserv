@@ -1,4 +1,4 @@
-#include "HTTPRequst.hpp"
+#include "HTTPHead.hpp"
 
 namespace ft {
     HTTPHead::HTTPHead() : _responseCode(), _parseStatus(requestLine),
@@ -15,14 +15,18 @@ namespace ft {
         if (_parseStatus == headerFields) {
             parseHeaderFields();
             if (_parseStatus > headerFields) {
-                if (_headerFields.size() > MAXHEADERS) {
-                    _throw(400, "Bad Request - MAXHEADERS");
+                if (_headerFields.size() > MAXHEADERS || _headerFields.find("host") == _headerFields.end()) {
+                    _throw(400, "Bad Request - MAXHEADERS / host");
                 }
             }
         }
         return (_parseStatus > headerFields ? 0 : 1);
     }
 
+    const std::string&              HTTPHead::GetHost() {
+        header_type::const_iterator host = _headerFields.find("host");
+        return (host == _headerFields.end() ? "" : host->second);
+    }
     const int&                      HTTPHead::GetResponseCode() { return _responseCode;}
     const HTTPParseStatus&          HTTPHead::GetParseStatus() { return _parseStatus; }
     const std::string&              HTTPHead::GetRequestMethod() { return _requestMethod; }
@@ -98,7 +102,7 @@ namespace ft {
         // decide if header is complete (line break reached because \r\n is the first character)
         if (_save.find(DELIM) == 0) {
             _save.erase(0, DELIM.size()); 
-            _parseStatus = body;
+            _parseStatus = complete;
         }
     }
 
