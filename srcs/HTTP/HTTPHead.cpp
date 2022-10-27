@@ -23,17 +23,17 @@ namespace ft {
         return (_parseStatus > headerFields ? 0 : 1);
     }
 
-    const std::string&              HTTPHead::GetHost() {
+    const std::string&              HTTPHead::GetHost() const {
         header_type::const_iterator host = _headerFields.find("host");
         return (host == _headerFields.end() ? "" : host->second);
     }
-    const int&                      HTTPHead::GetResponseCode() { return _responseCode;}
-    const HTTPParseStatus&          HTTPHead::GetParseStatus() { return _parseStatus; }
-    const std::string&              HTTPHead::GetRequestMethod() { return _requestMethod; }
-    const std::string&              HTTPHead::GetRequestURI() { return _requestURI; }
-    const std::string&              HTTPHead::GetHTTPv() { return _HTTPv; }
-    const HTTPHead::header_type&    HTTPHead::GetHeaderFields() { return _headerFields; }
-    const std::string&              HTTPHead::getSave() { return _save; }
+    const int&                      HTTPHead::GetResponseCode() const { return _responseCode;}
+    const HTTPParseStatus&          HTTPHead::GetParseStatus() const { return _parseStatus; }
+    const std::string&              HTTPHead::GetRequestMethod() const { return _requestMethod; }
+    std::string&                    HTTPHead::GetRequestURI() { return _requestURI; }
+    const std::string&              HTTPHead::GetHTTPv() const { return _HTTPv; }
+    HTTPHead::header_type&          HTTPHead::GetHeaderFields() { return _headerFields; }
+    const std::string&              HTTPHead::getSave() const { return _save; }
 
     void     HTTPHead::parseRequestLine() {
         size_t i;
@@ -104,6 +104,34 @@ namespace ft {
             _save.erase(0, DELIM.size()); 
             _parseStatus = complete;
         }
+    }
+
+    void    HTTPHead::FilterRequestURI(){
+
+        std::string http = "http://";
+
+        if (_requestURI[0] != '/') {
+            size_t i = _requestURI.find(http);
+            if (i == std::string::npos) {
+                _throw(400, "Bad Request - absolute path does not contain http://");
+            }
+            _requestURI = _requestURI.erase(0, http.size());
+            if (_requestURI.empty() || _requestURI[0] == '/') {
+                _throw(400, "Bad Request - bad URI");
+            }
+            i = _requestURI.find('/');
+            if (i != std::string::npos) {
+                _requestURI.erase(0, i);
+            }
+        }
+        // GET ////////////////////// HTTP/1.1   OK
+        // GET http://a////////////// HTTP/1.1   OK
+        // GET http://index8080.html             OK
+        // GET http://a                          OK
+
+        // GET http://                           NOT OK
+        // GET http:///////////////// HTTP/1.1   NOT OK
+        // GET http:///index8080.html HTTP/1.1   NOT OK
     }
 
     void        HTTPHead::toLower(std::string& str) {

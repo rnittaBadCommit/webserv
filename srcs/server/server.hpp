@@ -52,10 +52,7 @@ namespace ft
 		void setup_();
 		bool recieve_request_();
 		void run_cgi_();
-		ServerChild&	decide_server_config_(const std::string& host, in_port_t port);
-
-
-
+		ServerChild&	decide_serverChild_config_(const std::string& host, in_port_t port);
 	};
 
 }

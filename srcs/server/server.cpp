@@ -62,15 +62,15 @@ namespace ft
 				if (head.Parse(recieved_msg.content) == 0) {
 					serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
 					serverChild.SetUp(head);
-					serverChild.parse("");
+					serverChild.Parse("");
 				}
-			} else if (serverChild.getParseStatus() != complete) {
-				serverChild.parse(clientmssg);
-			}
-			if (serverChild.getParseStatus() == complete) {
-				// complete request
-				// remove this pair
-			}
+			} else if (serverChild.get_parse_status() != complete) {
+				serverChild.Parse(recieved_msg.content);
+				if (serverChild.get_parse_status() == complete) {
+					// complete request
+					httpRequest_pair_map_.erase(recieved_msg.client_id);
+				}
+			}			
 
 			return (true);
 		}

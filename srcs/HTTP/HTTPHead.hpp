@@ -51,16 +51,16 @@ namespace ft {
         ~HTTPHead();
 
         int     Parse(const std::string& request);
-        bool    HTTPRequestComplete();
+        void    FilterRequestURI();
     
-        const std::string&      GetHost();
-        const int&              GetResponseCode();
-        const HTTPParseStatus&  GetParseStatus();
-        const std::string&      GetRequestMethod();
-        const std::string&      GetRequestURI();
-        const std::string&      GetHTTPv();
-        const header_type&      GetHeaderFields();
-        const std::string&      getSave();
+        const std::string&      GetHost() const;
+        const int&              GetResponseCode() const;
+        const HTTPParseStatus&  GetParseStatus() const;
+        const std::string&      GetRequestMethod() const;
+        std::string&            GetRequestURI();
+        const std::string&      GetHTTPv() const;
+        header_type&            GetHeaderFields();
+        const std::string&      getSave() const;
 
 
     private:
@@ -70,7 +70,6 @@ namespace ft {
         void    toLower(std::string& str);
         bool    multiInclusion();  
         void    _throw(int responseCode, const std::string& message);
-
     public:
         void    PrintRequest();
     };
