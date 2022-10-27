@@ -10,6 +10,7 @@ add_subdirectory(UnitTests)
 add_subdirectory(srcs/httpMethod)
 add_subdirectory(srcs/httpResponse)
 add_subdirectory(srcs/HTTP)
+add_subdirectory(srcs/utils)
 
 add_executable(webserv
         main.cpp
@@ -34,6 +35,7 @@ add_executable(webserv
 
         srcs/httpMethod/HTTPMethod.cpp
         srcs/HTTP/HTTPRequest.cpp
+        srcs/utils/utils.cpp
         )
 
 target_link_libraries(webserv
