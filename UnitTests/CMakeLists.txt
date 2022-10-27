@@ -5,6 +5,7 @@ include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 # add Test files
 add_executable(Google_Tests_run
+        AutoIndexTests.cpp
         HttpMethodTests.cpp
         HttpRequestTests.cpp
         UtilsTests.cpp
