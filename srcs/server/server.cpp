@@ -66,11 +66,11 @@ namespace ft
 				}
 			} else if (serverChild.get_parse_status() != complete) {
 				serverChild.Parse(recieved_msg.content);
-				if (serverChild.get_parse_status() == complete) {
-					// complete request
-					httpRequest_pair_map_.erase(recieved_msg.client_id);
-				}
-			}			
+			}
+			if (serverChild.get_parse_status() == complete) {
+				// complete request
+				httpRequest_pair_map_.erase(recieved_msg.client_id);
+			}
 
 			return (true);
 		}

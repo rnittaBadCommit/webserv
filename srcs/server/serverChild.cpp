@@ -47,14 +47,31 @@ namespace ft
 	const std::string&		ServerChild::get_body() const { return body_; }
 
 	void	ServerChild::SetUp(HTTPHead& head) {
+		// set up httRequest head
 		HTTP_head_ = head;
 		save_ = HTTP_head_.getSave();
 		max_body_size_ = strBase_to_UI_(server_config_.getClientMaxBodySize(), std::dec);
-		HTTP_head_.FilterRequestURI(server_config_.getListen());
+		HTTP_head_.FilterRequestURI();
+
+		// Find location conf
 		setUp_locationConfig_();
+
+		// validate request method and headers
+		check_method_();
 		check_headers_();
+
+		// decide parse status and get content-length if needed
 		decide_parse_status_();
-		
+
+		if (parse_status_ == readStraight) {
+			header_map::iterator content_length = HTTP_head_.GetHeaderFields().find("content-length");
+
+          	content_length_ = strBase_to_UI_(content_length->second, std::dec);
+           	if (content_length_ > max_body_size_) {
+               	throw_(413, "Payload Too Large");
+           	}
+           	read_bytes_ = content_length_;
+		}
 	}
 	
 	void	ServerChild::Parse(const std::string& content) {
@@ -62,7 +79,7 @@ namespace ft
         if (parse_status_ == readChunks) {
             read_chunks_();
         } else if (parse_status_ == readStraight) {
-            read_body_();
+            read_straight_();
         }
 	}
 
@@ -84,7 +101,6 @@ namespace ft
     }
 
 	void    ServerChild::setUp_locationConfig_() {
-        // this function expects _requestURI to start with / and does not have final / (FilterRequestURI() will handle)
         /*
         POST /aaa/bbb/eee/fff HTTP/1.1
         locaiton / {
@@ -98,7 +114,6 @@ namespace ft
 
        // ***location config parser:
        // location uri must have beginning / and no ending /
-       // if no default / location exists, create it and put it in the map
        // alias beginning is decided by user, but please erase ending /
 
         std::string     httpReqURI = HTTP_head_.GetRequestURI();
@@ -117,40 +132,132 @@ namespace ft
         }
          
         if (locConfIt == serverLocMap.end()) {
-			throw_(404, "Not Found");
-        } else {
-            location_config_ = locConfIt->second;
+			locConfIt = serverLocMap.find("/");
+			if (locConfIt == serverLocMap.end()) {
+				throw_(404, "Not Found - no default server exists");
+			}
+
         }
+
+        location_config_ = locConfIt->second;
 
         path_ = location_config_.getAlias() + pathParts;
     }
+
+	void	ServerChild::check_method_ () {
+		std::set<std::string> valid_methods = location_config_.getAllowMethod();
+		std::set<std::string>::iterator end = valid_methods.end();
+
+		if (std::find(valid_methods.begin(), end, HTTP_head_.GetRequestMethod()) == end) {
+            throw_(501, "Not Implemented - invalid request method");
+        }
+	}
+
 	void	ServerChild::check_headers_() {
 		header_map headers = HTTP_head_.GetHeaderFields();
 		for (header_map::iterator it = headers.begin(); it != headers.end(); ++it) {
 			// check for WSP in key
         	if (isspace(it->first[it->first.size() - 1])) {
-            	TrimWSP(it->first);// maybe we don't need to worry abou it........ 
             	throw_(400, "Bad Request - trailing white space after header key");
 			}
         	// Check for obs-fold in value
         	if (it->second[it->second.size() - 1] == '\\') {
             	throw_(400, "Bad Request - obs-fold in header value");
         	}
-			// check content-length
-			if (it->first == "content-length") {
-            	if (it->second.find(',') != std::string::npos) {
-                	throw_(400, "Bad Request - comma separated content-length");
-            	}
-            	content_length_ = strBase_to_UI_(it->second, std::dec);
-            	if (content_length_ > max_body_size_) {
-                	throw_(413, "Payload Too Large");
-            	}
-            	read_bytes_ = content_length_;
+			// Check for Trailer
+			if (it->first == "trailer") {
+				throw_(400, "Bad Request - Trailer included");
+			}
+			// check transfer-encoding
+			if (it->first == "transfer-encoding" && it->second != "chunked") {
+                throw_(501, "Not Implemented - does not understand transfer-encoding");
+            }
+			// check and set content-length and read_bytes
+			if (it->first == "content-length" && it->second.find(',') != std::string::npos) {
+                throw_(400, "Bad Request - comma separated content-length");
 			}
 		}
-		// check valid methods
 	}
-	void	ServerChild::decide_parse_status_() {}
-    void	ServerChild::read_chunks_() {}
-    void	ServerChild::read_body_() {}
+
+	void	ServerChild::decide_parse_status_() {
+		header_map headers = HTTP_head_.GetHeaderFields();
+		header_map::iterator transfer_encoding = headers.find("transfer-encoding");
+        header_map::iterator content_length = headers.find("content-length");
+
+        if (transfer_encoding != headers.end() && content_length != headers.end()) {
+            headers.erase(content_length); 
+            throw_(400, "Bad Request - both transfer-encoding and content-length exist");
+        } else if (transfer_encoding != headers.end()) {
+            parse_status_ = readChunks;
+        } else if (content_length!= headers.end()) { 
+            parse_status_ = readStraight;
+        } else {
+            /*if (HTTP_head_.GetRequestMethod() == "POST") {
+                throw_(400, "Bad Request - POST expects content-length or transfer-encoding");
+            }*/
+            response_code_ = 200;
+            parse_status_ = complete;
+        }
+	}
+
+    void	ServerChild::read_straight_() {
+		if (read_bytes_ >= save_.size()) {
+            read_bytes_ -= save_.size();
+            body_ += save_;
+            save_.clear();
+        } else {
+            body_ += save_.substr(0, read_bytes_);
+            save_.erase(0, read_bytes_);
+            read_bytes_ = 0;
+            throw_(400, "Bad Request - unexpected body bytes");
+        } 
+        if (read_bytes_ == 0) {
+            response_code_ = 200;
+            parse_status_ = complete;
+        }
+		/* if read_bytes doesn't become 0, but no more message comes*/
+	}
+
+    void	ServerChild::read_chunks_() {
+		size_t i = 0;
+        while (save_.find(DELIM) != std::string::npos) { // while delim can be found in save
+    		if (!read_bytes_) { 
+				get_hex_read_bytes_();
+		        if (read_bytes_ == 0) {
+					response_code_ = 200;
+					parse_status_ = complete;
+					break ;
+				}
+				/* if never recieve 0?? */
+            }
+
+            i = save_.find(DELIM);
+			// if no DELIM, get more content from client
+            if (i == std::string::npos) {
+                break ;
+            }
+
+			// extract chunked message from save
+            std::string chunked_message = save_.substr(0, i);
+            save_.erase(0, i + DELIM.size());
+            if (read_bytes_ != chunked_message.size()) {
+                throw_(400, "Bad Request - hex does not match line size");
+            }
+
+			// add chunked message to body and reset read_bytes
+            body_ += chunked_message;
+            read_bytes_ = 0;
+        }
+	}
+
+	bool	ServerChild::get_hex_read_bytes_() {
+        size_t i = save_.find(DELIM);
+
+        read_bytes_ = strBase_to_UI_(save_.substr(0, i), std::hex);
+		save_.erase(0, i + DELIM.size());
+
+        if (read_bytes_ > max_body_size_) {
+            throw_(413, "Payload Too Large");
+		}
+	}
 } // namespace ft

@@ -5,6 +5,7 @@
 #include "../HTTP/HTTPHead.hpp"
 #include "Location.hpp"
 #include <map>
+#include <set>
 #include <sstream>
 #include <limits>
 
@@ -55,9 +56,12 @@ namespace ft
 		void    throw_(int responseCode, const std::string& message);
 		void	setUp_locationConfig_();
 		void	check_headers_();
+		void	check_method_();
 		void	decide_parse_status_();
+        void	read_straight_();
         void	read_chunks_();
-        void	read_body_();
+		bool	get_hex_read_bytes_();
+
 	};
 }
 
