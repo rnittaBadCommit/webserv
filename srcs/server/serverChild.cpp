@@ -42,7 +42,10 @@ namespace ft
 
 	ServerChild& ServerChild::operator=(const ServerChild &rhs){
 		if (this != &rhs) {
+			std::cout << "server child eqopover\n";
+			std::cout << "head\n";
 			HTTP_head_ = rhs.HTTP_head_;
+			std::cout << "server_config\n";
 			server_config_ = rhs.server_config_;
 			location_config_ = rhs.location_config_;	
 			location_config_ = rhs.location_config_;	
