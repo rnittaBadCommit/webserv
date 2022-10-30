@@ -18,12 +18,8 @@ namespace ft {
         if (this != &rhs) {
             _responseCode = rhs._responseCode;
             _parseStatus = rhs._parseStatus;
-            std::cout << "before rmethod\n";
-            std::cout << "rhs: " << rhs._requestMethod << std::endl;
             _requestURI = rhs._requestURI;
             _requestMethod = rhs._requestMethod;
-            std::cout << "after rmethod\n";
-
             _HTTPv = rhs._HTTPv;
             _headerFields = rhs._headerFields;
             _currentHeader = rhs._currentHeader; 

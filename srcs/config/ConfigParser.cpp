@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstdlib>
 
-ConfigParser::ConfigParser()
+ConfigParser::ConfigParser() : parser_line(), config(), server_config(), location_config(), nowBlock()
 {
 }
 

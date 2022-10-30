@@ -5,8 +5,8 @@ namespace ft
 	Server::Server(const std::string config_path)
 	{
 		import_config_(config_path);
-
 		socket_.setup(server_config_);
+		create_serverChild_map_();
 	}
 
 	void Server::start_server()
@@ -27,12 +27,12 @@ namespace ft
 
 	void Server::create_serverChild_map_()
 	{
-		std::vector<ServerConfig>::const_iterator end = server_config_.begin();
+		std::vector<ServerConfig>::const_iterator end = server_config_.end();
 		for (std::vector<ServerConfig>::const_iterator it = server_config_.begin(); it != end; ++it)
 		{
 			std::pair<std::string, in_port_t> key_to_insert = std::make_pair((*it).getServerName(), (in_port_t)(*it).getListen());
 			serverChild_map_.insert(std::make_pair(key_to_insert, ServerChild(*it)));
-			if (default_serverChild_map_.count((in_port_t)(*it).getListen()))
+			if (default_serverChild_map_.count((in_port_t)(*it).getListen()) == 0)
 				default_serverChild_map_.insert(std::make_pair((in_port_t)(*it).getListen(), (*(serverChild_map_.find(key_to_insert))).second));
 		}
 	}
@@ -112,6 +112,10 @@ namespace ft
         if (confIt != serverChild_map_.end()) {
             return (confIt->second);
         } else {
+			std::cout << "4\n";
+			DefaultServerChildMap::iterator it = default_serverChild_map_.find(port);
+			ServerChild sc = it->second;
+			std::cout << "5\n";
             return (default_serverChild_map_.find(port)->second);
         }
 

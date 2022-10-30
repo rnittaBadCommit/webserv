@@ -42,11 +42,8 @@ namespace ft
 
 	ServerChild& ServerChild::operator=(const ServerChild &rhs){
 		if (this != &rhs) {
-			std::cout << "head\n";
 			HTTP_head_ = rhs.HTTP_head_;
-			std::cout << "before server conf eq op in server child eq op\n";	
 			server_config_ = rhs.server_config_;
-			std::cout << "after server conf eq op in server child eq op\n";
 			location_config_ = rhs.location_config_;	
 			location_config_ = rhs.location_config_;	
 			redirectList_map_ = rhs.redirectList_map_;
