@@ -63,6 +63,7 @@ namespace ft
 		void	check_headers_();
 		void	check_method_();
 		void	decide_parse_status_();
+		void	read_body_();
         void	read_straight_();
         void	read_chunks_();
 		void	get_hex_read_bytes_();

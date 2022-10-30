@@ -63,7 +63,9 @@ namespace ft
 					std::cout << "HEADER RECIEVED\n";
 					head.PrintRequest();
 					head.ParseRequestURI();
+					std::cout << "here\n";
 					serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
+					std::cout << "after\n";
 					serverChild.SetUp(head);
 					serverChild.Parse("");
 				}

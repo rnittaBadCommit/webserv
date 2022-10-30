@@ -18,8 +18,12 @@ namespace ft {
         if (this != &rhs) {
             _responseCode = rhs._responseCode;
             _parseStatus = rhs._parseStatus;
-            _requestMethod = rhs._requestMethod;
+            std::cout << "before rmethod\n";
+            std::cout << "rhs: " << rhs._requestMethod << std::endl;
             _requestURI = rhs._requestURI;
+            _requestMethod = rhs._requestMethod;
+            std::cout << "after rmethod\n";
+
             _HTTPv = rhs._HTTPv;
             _headerFields = rhs._headerFields;
             _currentHeader = rhs._currentHeader; 
@@ -131,9 +135,7 @@ namespace ft {
             _parseStatus = complete;
         }
     }
-        // scheme:     authority    / path
-        //        user @ host : port
-        // http://userinfo@host:port/path
+
     void    HTTPHead::ParseRequestURI(){
         if (_requestURI[0] == '/') {
             return ;
@@ -173,16 +175,6 @@ namespace ft {
 
         // set host
         _headerFields["host"] = host;        
-        
-        // GET ////////////////////// HTTP/1.1       OK
-        // GET http://a////////////// HTTP/1.1       OK
-        // GET http://index8081.html                 OK   index8080.html is the host, but it doesn't exist so we get default server
-        // GET http://index8080.html/index8081.html  OK
-        // GET http://a                              OK
-
-        // GET http://                           NOT OK
-        // GET http:///////////////// HTTP/1.1   NOT OK
-        // GET http:///index8080.html HTTP/1.1   NOT OK
     }
 
     void        HTTPHead::toLower(std::string& str) {

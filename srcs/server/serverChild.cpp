@@ -3,7 +3,7 @@
 namespace ft
 {
 
-	ServerChild::ServerChild()
+	ServerChild::ServerChild(): server_config_(ServerConfig())
 	{
 	}
 
@@ -42,15 +42,16 @@ namespace ft
 
 	ServerChild& ServerChild::operator=(const ServerChild &rhs){
 		if (this != &rhs) {
-			std::cout << "before server conf eq op in server child eq op\n";
-			location_config_ = rhs.location_config_;	
+			std::cout << "head\n";
+			HTTP_head_ = rhs.HTTP_head_;
+			std::cout << "before server conf eq op in server child eq op\n";	
 			server_config_ = rhs.server_config_;
 			std::cout << "after server conf eq op in server child eq op\n";
+			location_config_ = rhs.location_config_;	
 			location_config_ = rhs.location_config_;	
 			redirectList_map_ = rhs.redirectList_map_;
 			response_code_ = rhs.response_code_;
 			parse_status_ = rhs.parse_status_;
-			HTTP_head_ = rhs.HTTP_head_;
 			content_length_ = rhs.content_length_;
 			read_bytes_ = rhs.read_bytes_;
 			max_body_size_ = rhs.max_body_size_;
@@ -223,17 +224,21 @@ namespace ft
         }
 	}
 
+	void	ServerChild::read_body_() {
+ 	    read_bytes_ -= save_.size();
+     	body_ += save_;
+       	save_.clear();
+	}
+
     void	ServerChild::read_straight_() {
 		if (read_bytes_ >= save_.size()) {
-            read_bytes_ -= save_.size();
-            body_ += save_;
-            save_.clear();
-        } else {
+			read_body_();
+		} else {
             body_ += save_.substr(0, read_bytes_);
             save_.erase(0, read_bytes_);
             read_bytes_ = 0;
             throw_(400, "Bad Request - unexpected body bytes");
-        } 
+        }	
         if (read_bytes_ == 0) {
             response_code_ = 200;
             parse_status_ = complete;
@@ -242,7 +247,7 @@ namespace ft
 	}
 
     void	ServerChild::read_chunks_() {
-		size_t i = 0;
+		//size_t i = 0;
         while (save_.find(DELIM) != std::string::npos) { // while delim can be found in save
     		if (!read_bytes_) { 
 				get_hex_read_bytes_();
@@ -253,24 +258,21 @@ namespace ft
 				}
 				/* if never recieve 0?? */
             }
-
-			/******** should read by bytes, not by delim*******/
-            i = save_.find(DELIM);
-			// if no DELIM, get more content from client
-            if (i == std::string::npos) {
-                break ;
-            }
-
-			// extract chunked message from save
-            std::string chunked_message = save_.substr(0, i);
-            save_.erase(0, i + DELIM.size());
-            if (read_bytes_ != chunked_message.size()) {
-                throw_(400, "Bad Request - hex does not match line size");
-            }
-
-			// add chunked message to body and reset read_bytes
-            body_ += chunked_message;
-            read_bytes_ = 0;
+			if (read_bytes_ >= save_.size() - DELIM.size()) {
+				if (read_bytes_ == save_.size() - DELIM.size()) {// rb=1   save= a\r\n
+					save_.erase(read_bytes_, DELIM.size()); // from read_bytes index to end 
+				}
+				read_body_();
+			} else {
+	            body_ += save_.substr(0, read_bytes_);
+            	save_.erase(0, read_bytes_);
+            	read_bytes_ = 0;
+            	throw_(400, "Bad Request - unexpected body bytes");			
+			}
+	        if (read_bytes_ == 0) {
+   	        	response_code_ = 200;
+  	        	parse_status_ = complete;
+ 	       }
         }
 	}
 

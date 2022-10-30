@@ -26,6 +26,8 @@ ServerConfig& ServerConfig::operator=(const ServerConfig& rhs) {
 		std::cout << "before directive\n";
 		is_set = rhs.is_set;
 		std::cout << "after directive\n";
+		std::cout << "server name: " << server_name << std::endl;
+		std::cout << "rhs server name: " << rhs.server_name << std::endl;
 		server_name = rhs.server_name;
 		std::cout << "1\n";
 		listen = rhs.listen;
