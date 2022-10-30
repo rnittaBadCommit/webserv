@@ -4,6 +4,30 @@ namespace ft {
     HTTPHead::HTTPHead() : _responseCode(), _parseStatus(requestLine),
         _requestMethod(), _requestURI(), _HTTPv(), _headerFields(), _currentHeader(), _save() {}
 
+    HTTPHead::HTTPHead(const HTTPHead& src) {
+        _responseCode = src._responseCode;
+        _parseStatus = src._parseStatus;
+        _requestMethod = src._requestMethod;
+        _requestURI = src._requestURI;
+        _HTTPv = src._HTTPv;
+        _headerFields = src._headerFields;
+        _currentHeader = src._currentHeader; 
+        _save = src._save;
+    }
+    HTTPHead& HTTPHead::operator=(const HTTPHead& rhs) {
+        if (this != &rhs) {
+            _responseCode = rhs._responseCode;
+            _parseStatus = rhs._parseStatus;
+            _requestMethod = rhs._requestMethod;
+            _requestURI = rhs._requestURI;
+            _HTTPv = rhs._HTTPv;
+            _headerFields = rhs._headerFields;
+            _currentHeader = rhs._currentHeader; 
+            _save = rhs._save;
+        }
+        return (*this);
+    }
+
     HTTPHead::~HTTPHead(){}
 
     int      HTTPHead::Parse(const std::string& request) {
@@ -23,7 +47,7 @@ namespace ft {
         return (_parseStatus > headerFields ? 0 : 1);
     }
 
-    const std::string&              HTTPHead::GetHost() const {
+    const std::string              HTTPHead::GetHost() const {
         header_type::const_iterator host = _headerFields.find("host");
         return (host == _headerFields.end() ? "" : host->second);
     }
@@ -64,6 +88,7 @@ namespace ft {
                 const std::string versionComp = "HTTP/1.";
                 _HTTPv = _save.substr(0, i);
                 _save.erase(0, i + DELIM.size());
+                std::cerr << "CHANGING STATUS\n";
                 _parseStatus = headerFields;
                 if (_HTTPv.size() != HTTPV.size() || _HTTPv.compare(0, versionComp.size(), versionComp) != 0 || !isdigit(_HTTPv[_HTTPv.size() - 1])) {
                     _throw(505, "HTTP Version Not Supported");
@@ -101,33 +126,59 @@ namespace ft {
         }
         // decide if header is complete (line break reached because \r\n is the first character)
         if (_save.find(DELIM) == 0) {
+
             _save.erase(0, DELIM.size()); 
             _parseStatus = complete;
         }
     }
-
-    void    HTTPHead::FilterRequestURI(){
+        // scheme:     authority    / path
+        //        user @ host : port
+        // http://userinfo@host:port/path
+    void    HTTPHead::ParseRequestURI(){
+        if (_requestURI[0] == '/') {
+            return ;
+        }
 
         std::string http = "http://";
+        std::string host;
 
-        if (_requestURI[0] != '/') {
-            size_t i = _requestURI.find(http);
-            if (i == std::string::npos) {
-                _throw(400, "Bad Request - absolute path does not contain http://");
-            }
-            _requestURI = _requestURI.erase(0, http.size());
-            if (_requestURI.empty() || _requestURI[0] == '/') {
-                _throw(400, "Bad Request - bad URI");
-            }
-            i = _requestURI.find('/');
-            if (i != std::string::npos) {
-                _requestURI.erase(0, i);
-            }
+        // GET scheme and remove
+        size_t i = _requestURI.find(http);
+        if (i == std::string::npos) {
+            _throw(400, "Bad Request - unrecognize URL scheme");
         }
-        // GET ////////////////////// HTTP/1.1   OK
-        // GET http://a////////////// HTTP/1.1   OK
-        // GET http://index8080.html             OK
-        // GET http://a                          OK
+        _requestURI.erase(0, http.size());
+
+        // split authority (host) and path
+        i = _requestURI.find('/');
+        if (i == 0) {
+            _throw(400, "Bad Request - no host provided in URI");
+        }
+        if (i == std::string::npos) { // no '/' exists 
+            host = _requestURI;
+            _requestURI.clear();
+        } else {
+            host = _requestURI.substr(0, i);
+            _requestURI.erase(0, i);
+        }
+
+        // check for user info
+        if (host.find('@') != std::string::npos) {
+            _throw(400, "Bad Request - this server does not handle user info in URI");
+        }
+        // remove port info if it exists
+        if ((i = host.find(':')) != std::string::npos) {
+            host.erase(i);
+        }
+
+        // set host
+        _headerFields["host"] = host;        
+        
+        // GET ////////////////////// HTTP/1.1       OK
+        // GET http://a////////////// HTTP/1.1       OK
+        // GET http://index8081.html                 OK   index8080.html is the host, but it doesn't exist so we get default server
+        // GET http://index8080.html/index8081.html  OK
+        // GET http://a                              OK
 
         // GET http://                           NOT OK
         // GET http:///////////////// HTTP/1.1   NOT OK

@@ -26,6 +26,8 @@ namespace ft
 		// typedef std::pair<const int, const std::string> redirectConf;
 		ServerChild();
 		ServerChild(const ServerConfig &server_config);
+		ServerChild(const ServerChild &src);
+		ServerChild& operator=(const ServerChild &rhs);
 
 		void	SetUp(HTTPHead& head);
 		void	Parse(const std::string& content);
@@ -36,8 +38,11 @@ namespace ft
 		const HTTPHead&			get_HTTPHead() const;
 		const std::string&		get_body() const;
 
+		void	SetServerConf(const ServerConfig& serverConfig);
+
+		void	PrintBody();
 	private:
-		const ServerConfig &server_config_;
+		ServerConfig server_config_;
 		LocationConfig location_config_;
 		//std::map<const std::string, Location> location_map_;
 		std::map<const std::string, redirectConf> redirectList_map_;
@@ -60,8 +65,7 @@ namespace ft
 		void	decide_parse_status_();
         void	read_straight_();
         void	read_chunks_();
-		bool	get_hex_read_bytes_();
-
+		void	get_hex_read_bytes_();
 	};
 }
 

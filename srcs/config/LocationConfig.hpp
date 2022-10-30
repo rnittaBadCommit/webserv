@@ -25,6 +25,8 @@ public:
 	static const int NO_REDIRECT = -1;
 	LocationConfig();
 	~LocationConfig();
+	LocationConfig(const LocationConfig& src);
+	LocationConfig& operator=(const LocationConfig& rhs);
 
 	void setUri(const std::string &uri);
 	void setAlias(const std::string &alias);

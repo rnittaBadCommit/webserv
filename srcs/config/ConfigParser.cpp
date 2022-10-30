@@ -11,7 +11,25 @@ ConfigParser::ConfigParser()
 ConfigParser::~ConfigParser()
 {
 }
-
+ConfigParser::ConfigParser(const ConfigParser& src)
+{
+	parser_line = src.parser_line;
+	config = src.config;
+	server_config = src.server_config;
+	location_config = src.location_config;
+	nowBlock = src.nowBlock;	
+}
+ConfigParser& ConfigParser::operator=(const ConfigParser& rhs)
+{
+	if (this != &rhs) {
+		parser_line = rhs.parser_line;
+		config = rhs.config;
+		server_config = rhs.server_config;
+		location_config = rhs.location_config;
+		nowBlock = rhs.nowBlock;	
+	}
+	return (*this);
+}
 void ConfigParser::printParserLine()
 {
 	for (size_t i = 0; i < this->parser_line.size(); i++)

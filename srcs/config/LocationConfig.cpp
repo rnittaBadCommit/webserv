@@ -10,6 +10,35 @@ LocationConfig::LocationConfig()
 LocationConfig::~LocationConfig()
 {
 }
+LocationConfig::LocationConfig(const LocationConfig& src)
+{
+	is_set = src.is_set;
+	uri = src.uri;
+	alias = src.alias;
+	autoindex = src.autoindex;
+	allow_method = src.allow_method;
+	index = src.index;
+	cgi_extension = src.cgi_extension;
+	redirect = src.redirect;
+	upload_filepath = src.upload_filepath;
+}
+
+#include <iostream>
+LocationConfig& LocationConfig::operator=(const LocationConfig& rhs)
+{
+	if (this != &rhs) {
+		is_set = rhs.is_set;
+		uri = rhs.uri;
+		alias = rhs.alias;
+		autoindex = rhs.autoindex;
+		allow_method = rhs.allow_method;
+		index = rhs.index;
+		cgi_extension = rhs.cgi_extension;
+		redirect = rhs.redirect;
+		upload_filepath = rhs.upload_filepath;
+	}
+	return (*this);
+}
 
 void LocationConfig::setUri(const std::string &uri)
 {

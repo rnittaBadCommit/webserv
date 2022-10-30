@@ -48,7 +48,7 @@ namespace ft
 		try
 		{
 			recieved_msg = socket_.recieve_msg();
-			socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");
+			//socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");
 			//if (cd)
 			httpRequest_map_[recieved_msg.client_id] = recieved_msg.content;
 			std::cout << "===============================" << std::endl
@@ -60,6 +60,9 @@ namespace ft
 
 			if (head.GetParseStatus() != complete) {
 				if (head.Parse(recieved_msg.content) == 0) {
+					std::cout << "HEADER RECIEVED\n";
+					head.PrintRequest();
+					head.ParseRequestURI();
 					serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
 					serverChild.SetUp(head);
 					serverChild.Parse("");
@@ -68,6 +71,8 @@ namespace ft
 				serverChild.Parse(recieved_msg.content);
 			}
 			if (serverChild.get_parse_status() == complete) {
+				std::cout << "BODY RECEIVED: ";
+				serverChild.PrintBody();
 				// complete request
 				httpRequest_pair_map_.erase(recieved_msg.client_id);
 			}
@@ -88,14 +93,14 @@ namespace ft
 		}
 		catch (const std::exception &e)
 		{
-			std::cerr << "Error: undetermined" << std::endl;
+			std::cerr << "Error: undetermined" << e.what() << std::endl;
 			exit(1);
 		}
 
 		return (false);
 	}
 
-	void run_cgi(const int fd)
+	void run_cgi()
 	{
 	}
 
@@ -107,5 +112,6 @@ namespace ft
         } else {
             return (default_serverChild_map_.find(port)->second);
         }
+
 	}
 }

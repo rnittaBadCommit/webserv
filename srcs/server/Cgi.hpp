@@ -13,7 +13,7 @@ namespace ft
 	{
 	public:
 		Cgi(const std::string cgi_path);
-		void run(const int fd);
+		void run(/*const int fd*/);
 
 	private:
 		const std::string cgi_path_;

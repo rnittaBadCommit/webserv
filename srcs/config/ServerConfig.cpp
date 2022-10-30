@@ -10,6 +10,37 @@ ServerConfig::~ServerConfig()
 {
 }
 
+ServerConfig::ServerConfig(const ServerConfig& src) {
+	is_set = src.is_set;
+	server_name = src.server_name;
+	listen = src.listen;
+	client_max_body_size = src.client_max_body_size;
+	error_page = src.error_page;
+	location_config = src.location_config;
+}
+	
+#include <iostream>
+ServerConfig& ServerConfig::operator=(const ServerConfig& rhs) {
+	std::cout << "before all eqs in server conf eq op overload\n";
+	if (this != &rhs) {
+		std::cout << "before directive\n";
+		is_set = rhs.is_set;
+		std::cout << "after directive\n";
+		server_name = rhs.server_name;
+		std::cout << "1\n";
+		listen = rhs.listen;
+		std::cout << "2\n";
+		client_max_body_size = rhs.client_max_body_size;
+		std::cout << "3\n";
+		error_page = rhs.error_page;
+		std::cout << "4\n";
+		location_config = rhs.location_config;
+		std::cout << "5\n";
+	}	
+	std::cout << "after all eqs in server conf eq op overload\n";
+	return (*this);
+}
+
 void ServerConfig::setServerName(const std::string &server_name)
 {
 	this->is_set.insert(SERVER_NAME);

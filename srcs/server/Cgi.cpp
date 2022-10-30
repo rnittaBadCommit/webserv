@@ -10,7 +10,7 @@ namespace ft
 		envp.push_back(NULL);
 	}
 
-	void Cgi::run(const int fd)
+	void Cgi::run(/*const int fd*/)
 	{
 		if (pipe(pipefd) == -1)
 			throw std::runtime_error("Cgi: pipe fail");

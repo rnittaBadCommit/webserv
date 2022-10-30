@@ -4,7 +4,6 @@ namespace ft
 {
 
 	ServerChild::ServerChild()
-		: server_config_(ServerConfig()) 
 	{
 	}
 
@@ -24,6 +23,42 @@ namespace ft
 				redirectList_map_[redirect_uri].dest_uri = tmp.second;
 			}
 		}
+	}
+
+	ServerChild::ServerChild(const ServerChild &src) {
+		server_config_ = src.server_config_;
+		location_config_ = src.location_config_;	
+		redirectList_map_ = src.redirectList_map_;
+		response_code_ = src.response_code_;
+		parse_status_ = src.parse_status_;
+		HTTP_head_ = src.HTTP_head_;
+		content_length_ = src.content_length_;
+		read_bytes_ = src.read_bytes_;
+		max_body_size_ = src.max_body_size_;
+		body_ = src.body_;
+		save_ = src.save_;
+		path_ = src.path_;
+	}
+
+	ServerChild& ServerChild::operator=(const ServerChild &rhs){
+		if (this != &rhs) {
+			std::cout << "before server conf eq op in server child eq op\n";
+			location_config_ = rhs.location_config_;	
+			server_config_ = rhs.server_config_;
+			std::cout << "after server conf eq op in server child eq op\n";
+			location_config_ = rhs.location_config_;	
+			redirectList_map_ = rhs.redirectList_map_;
+			response_code_ = rhs.response_code_;
+			parse_status_ = rhs.parse_status_;
+			HTTP_head_ = rhs.HTTP_head_;
+			content_length_ = rhs.content_length_;
+			read_bytes_ = rhs.read_bytes_;
+			max_body_size_ = rhs.max_body_size_;
+			body_ = rhs.body_;
+			save_ = rhs.save_;
+			path_ = rhs.path_;	
+		}
+		return (*this);
 	}
 
 	bool ServerChild::is_redirect_(const std::string &url)
@@ -51,14 +86,15 @@ namespace ft
 		HTTP_head_ = head;
 		save_ = HTTP_head_.getSave();
 		max_body_size_ = strBase_to_UI_(server_config_.getClientMaxBodySize(), std::dec);
-		HTTP_head_.FilterRequestURI();
 
 		// Find location conf
 		setUp_locationConfig_();
+		// redirect?
 
 		// validate request method and headers
 		check_method_();
 		check_headers_();
+		// check IS CGI?
 
 		// decide parse status and get content-length if needed
 		decide_parse_status_();
@@ -101,26 +137,10 @@ namespace ft
     }
 
 	void    ServerChild::setUp_locationConfig_() {
-        /*
-        POST /aaa/bbb/eee/fff HTTP/1.1
-        locaiton / {
-            alias ./hoge
-        }
-        location /aaa/bbb { ***
-            alias /var/www
-        }
-        /var/www/eee/fff
-        */
-
        // ***location config parser:
        // location uri must have beginning / and no ending /
-       // alias beginning is decided by user, but please erase ending /
 
-        std::string     httpReqURI = HTTP_head_.GetRequestURI();
-		if (is_redirect_(httpReqURI)) {
-
-		}
-
+        std::string     httpReqURI = HTTP_head_.GetRequestURI();	
         std::map<std::string, LocationConfig>           serverLocMap = server_config_.getLocationConfig();
         std::map<std::string, LocationConfig>::iterator locConfIt;
         std::string     pathParts;
@@ -136,12 +156,15 @@ namespace ft
 			if (locConfIt == serverLocMap.end()) {
 				throw_(404, "Not Found - no default server exists");
 			}
-
         }
 
         location_config_ = locConfIt->second;
+		if (location_config_.getRedirect().first != LocationConfig::NO_REDIRECT) {
+			// create redirect response
+		} else {
+	        path_ = location_config_.getAlias() + pathParts;
+		}
 
-        path_ = location_config_.getAlias() + pathParts;
     }
 
 	void	ServerChild::check_method_ () {
@@ -192,9 +215,9 @@ namespace ft
         } else if (content_length!= headers.end()) { 
             parse_status_ = readStraight;
         } else {
-            /*if (HTTP_head_.GetRequestMethod() == "POST") {
+            if (HTTP_head_.GetRequestMethod() == "POST") {
                 throw_(400, "Bad Request - POST expects content-length or transfer-encoding");
-            }*/
+            }
             response_code_ = 200;
             parse_status_ = complete;
         }
@@ -231,6 +254,7 @@ namespace ft
 				/* if never recieve 0?? */
             }
 
+			/******** should read by bytes, not by delim*******/
             i = save_.find(DELIM);
 			// if no DELIM, get more content from client
             if (i == std::string::npos) {
@@ -250,7 +274,7 @@ namespace ft
         }
 	}
 
-	bool	ServerChild::get_hex_read_bytes_() {
+	void	ServerChild::get_hex_read_bytes_() {
         size_t i = save_.find(DELIM);
 
         read_bytes_ = strBase_to_UI_(save_.substr(0, i), std::hex);
@@ -259,5 +283,9 @@ namespace ft
         if (read_bytes_ > max_body_size_) {
             throw_(413, "Payload Too Large");
 		}
+	}
+
+	void	ServerChild::PrintBody() {
+		std::cout << body_ << std::endl;
 	}
 } // namespace ft

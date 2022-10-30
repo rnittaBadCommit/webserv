@@ -2,7 +2,7 @@
 #include <sstream>
 #include <limits>
 #include <set>
-#include "srcs/HTTP/HTTPRequst.hpp"
+#include "srcs/HTTP/HTTPHead.hpp"
 #include "srcs/utils.hpp"
 #include <cerrno>
 
@@ -11,8 +11,8 @@ void    testUtils();
 
 int main() {
     try {
-        //testParser();
-        testUtils();
+        testParser();
+        //testUtils();
     } catch (const std::exception& e) {
         std::cout << "[exception]: " << e.what() << std::endl;
     }
@@ -21,18 +21,23 @@ int main() {
 }
 
 void    testParser() {
-    ft::HTTPRequest req("1000000");
+    ft::HTTPHead    reqHead;
     std::string     line;
     int             rlt = 1;
 
     while(rlt && std::getline(std::cin, line, '|')) {
         // how to handle too much body
         //std::cout << "sending:\n" << line << std::endl;
-        rlt = req.Parse(std::string(line)); 
+        rlt = reqHead.Parse(std::string(line)); 
     }  
-    std::cout << "\n\nHere is your Request" << std::endl;
-    req.PrintRequest();
-    req.PrintBody();
+    std::cout << "\n\nBefore" << std::endl;
+    reqHead.PrintRequest();
+
+    reqHead.ParseRequestURI();
+    
+    std::cout << "\nafter\n";
+    reqHead.PrintRequest();
+
 }
 
 template <typename T>
