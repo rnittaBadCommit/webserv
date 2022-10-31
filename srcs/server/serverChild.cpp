@@ -42,12 +42,8 @@ namespace ft
 
 	ServerChild& ServerChild::operator=(const ServerChild &rhs){
 		if (this != &rhs) {
-			std::cout << "server child eqopover\n";
-			std::cout << "head\n";
 			HTTP_head_ = rhs.HTTP_head_;
-			std::cout << "server_config\n";
 			server_config_ = rhs.server_config_;
-			location_config_ = rhs.location_config_;	
 			location_config_ = rhs.location_config_;	
 			redirectList_map_ = rhs.redirectList_map_;
 			response_code_ = rhs.response_code_;
@@ -105,6 +101,7 @@ namespace ft
 
           	content_length_ = strBase_to_UI_(content_length->second, std::dec);
            	if (content_length_ > max_body_size_) {
+				std::cout << "cl: " << content_length_ << "mbs: " << max_body_size_ << std::endl;
                	throw_(413, "Payload Too Large");
            	}
            	read_bytes_ = content_length_;
@@ -226,8 +223,8 @@ namespace ft
 
 	void	ServerChild::read_body_() {
  	    read_bytes_ -= save_.size();
-     	body_ += save_;
-       	save_.clear();
+    	body_ += save_;
+     	save_.clear();	
 	}
 
     void	ServerChild::read_straight_() {
@@ -237,7 +234,7 @@ namespace ft
             body_ += save_.substr(0, read_bytes_);
             save_.erase(0, read_bytes_);
             read_bytes_ = 0;
-            throw_(400, "Bad Request - unexpected body bytes");
+            throw_(400, "Bad Request - unexpected body bytes(straight)");
         }	
         if (read_bytes_ == 0) {
             response_code_ = 200;
@@ -252,27 +249,33 @@ namespace ft
     		if (!read_bytes_) { 
 				get_hex_read_bytes_();
 		        if (read_bytes_ == 0) {
+					if (!save_.empty()) {
+						
+					}
 					response_code_ = 200;
 					parse_status_ = complete;
 					break ;
 				}
+				if (save_.find(DELIM) == std::string::npos) {
+					break ;
+				}
 				/* if never recieve 0?? */
             }
+
 			if (read_bytes_ >= save_.size() - DELIM.size()) {
-				if (read_bytes_ == save_.size() - DELIM.size()) {// rb=1   save= a\r\n
-					save_.erase(read_bytes_, DELIM.size()); // from read_bytes index to end 
+				if (read_bytes_ == save_.size() - DELIM.size()) {
+					save_.erase(read_bytes_, DELIM.size());
 				}
 				read_body_();
 			} else {
-	            body_ += save_.substr(0, read_bytes_);
-            	save_.erase(0, read_bytes_);
-            	read_bytes_ = 0;
-            	throw_(400, "Bad Request - unexpected body bytes");			
+				body_ += save_.substr(0, read_bytes_);
+				save_.erase(0, read_bytes_);
+				read_bytes_ = 0;
+				if (save_.find(DELIM) != 0) {
+		            throw_(400, "Bad Request - unexpected body bytes (chunked)");
+				}
+				save_.erase(0, DELIM.size());
 			}
-	        if (read_bytes_ == 0) {
-   	        	response_code_ = 200;
-  	        	parse_status_ = complete;
- 	       }
         }
 	}
 

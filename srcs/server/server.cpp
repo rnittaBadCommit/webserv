@@ -61,9 +61,8 @@ namespace ft
 			if (head.GetParseStatus() != complete) {
 				if (head.Parse(recieved_msg.content) == 0) {
 					std::cout << "HEADER RECIEVED\n";
-					//head.PrintRequest();
+					head.PrintRequest();
 					head.ParseRequestURI();
-					std::cout << "PORT BEFR: " << recieved_msg.port << std::endl;
 					serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
 					serverChild.SetUp(head);
 					serverChild.Parse("");
@@ -94,7 +93,7 @@ namespace ft
 		}
 		catch (const std::exception &e)
 		{
-			std::cerr << "Error: undetermined" << e.what() << std::endl;
+			std::cerr << "Error: " << e.what() << std::endl;
 			exit(1);
 		}
 
@@ -108,16 +107,12 @@ namespace ft
 	ServerChild& Server::decide_serverChild_config_(const std::string& host, in_port_t port) {
         ServerChildMap::iterator confIt = serverChild_map_.find(std::make_pair(host, port));
 
-		std::cout << "printing dft server child map info for each deflt map\n";
-		for (DefaultServerChildMap::iterator it = default_serverChild_map_.begin(); it != default_serverChild_map_.end(); ++it) {
-			std::cout << "dflt server ports" << it->first << std::endl;
-		}
-
         if (confIt != serverChild_map_.end()) {
 			ServerChild sc = confIt->second;
             return (confIt->second);
         } else {
 			std::cout << "port: " << port << std::endl;
+			return (default_serverChild_map_.begin()->second);
 			DefaultServerChildMap::iterator it = default_serverChild_map_.find(port);
 			if (it == default_serverChild_map_.end()) {
 				std::cout << "YES\n";

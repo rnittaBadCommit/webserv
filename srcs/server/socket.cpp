@@ -14,7 +14,7 @@ namespace ft
 	}
 
 	Socket::RecievedMsg::RecievedMsg()
-		: content(""), client_id(0)
+		: content(""), client_id(0), port(0)
 	{
 	}
 
