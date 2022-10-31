@@ -9,8 +9,7 @@
 #include "HTTPMethod.hpp"
 #include "httpResponse/HttpResponse.hpp"
 
-
-std::string get_table_line(std::string path) {
+static std::string get_table_line(const std::string &path) {
   std::stringstream return_sentence;
 
   return_sentence << " <tbody>" CRLF
@@ -30,7 +29,8 @@ std::string get_table_line(std::string path) {
   return return_sentence.str();
 }
 
-std::string render_html(std::string dirpath_root, std::set<std::string> dirpath_list) {
+std::string render_html(const std::string &dirpath_root,
+                        const std::set<std::string> &dirpath_list) {
   std::stringstream return_sentence;
 
   return_sentence << "<html>" CRLF
@@ -48,13 +48,14 @@ std::string render_html(std::string dirpath_root, std::set<std::string> dirpath_
                   << " <thead>" CRLF
                   << "  <tr>" CRLF
                   << "   <th>Name</th>" CRLF
-//                  << "   <th>Last modified</th>" CRLF
-//                  << "   <th>Size</th>" CRLF
+//                << "   <th>Last modified</th>" CRLF
+//                << "   <th>Size</th>" CRLF
                   << "  </tr>" CRLF
                   << " </thead>" CRLF;
 
   // get table line
-  for (std::set<std::string>::iterator iter = dirpath_list.begin(); iter != dirpath_list.end(); ++iter) {
+  for (std::set<std::string>::iterator iter = dirpath_list.begin();
+       iter != dirpath_list.end(); ++iter) {
     // "./" is not printed
     if (*iter == "./")
       continue;
