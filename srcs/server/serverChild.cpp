@@ -247,12 +247,10 @@ namespace ft
         while (save_.find(DELIM) != std::string::npos) {
     		if (!read_bytes_) { 
 				get_hex_read_bytes_();
-		        if (read_bytes_ == 0) {
-					if (!save_.empty()) {
-						
-					}
+		        if (read_bytes_ == 0) {	
 					response_code_ = 200;
 					parse_status_ = complete;
+					//HTTP_head_.GetHeaderFields()['transfer-encoding'] = "";
 					break ;
 				}
 				if (save_.find(DELIM) == std::string::npos) {
@@ -287,5 +285,7 @@ namespace ft
         if (read_bytes_ > max_body_size_) {
             throw_(413, "Payload Too Large");
 		}
-	}	
+	}
+
+	
 } // namespace ft
