@@ -40,7 +40,6 @@ namespace ft
 
 		void	SetServerConf(const ServerConfig& serverConfig);
 
-		void	PrintBody();
 	private:
 		ServerConfig server_config_;
 		LocationConfig location_config_;

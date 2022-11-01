@@ -72,7 +72,7 @@ namespace ft
 			}
 			if (serverChild.get_parse_status() == complete) {
 				std::cout << "BODY RECEIVED: ";
-				serverChild.PrintBody();
+				std::cout << serverChild.get_body() << std::endl;
 				// complete request
 				httpRequest_pair_map_.erase(recieved_msg.client_id);
 			}
@@ -108,18 +108,16 @@ namespace ft
         ServerChildMap::iterator confIt = serverChild_map_.find(std::make_pair(host, port));
 
         if (confIt != serverChild_map_.end()) {
-			ServerChild sc = confIt->second;
             return (confIt->second);
         } else {
-			std::cout << "port: " << port << std::endl;
+			//std::cout << "port: " << port << std::endl;
 			return (default_serverChild_map_.begin()->second);
+
 			DefaultServerChildMap::iterator it = default_serverChild_map_.find(port);
 			if (it == default_serverChild_map_.end()) {
-				std::cout << "YES\n";
-				exit(1);
+				throw std::runtime_error("port does not match any default servers");
 			}
-            return (default_serverChild_map_.find(port)->second);
+            return (it->second);
         }
-
 	}
 }

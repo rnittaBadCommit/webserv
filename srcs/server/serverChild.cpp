@@ -244,8 +244,7 @@ namespace ft
 	}
 
     void	ServerChild::read_chunks_() {
-		//size_t i = 0;
-        while (save_.find(DELIM) != std::string::npos) { // while delim can be found in save
+        while (save_.find(DELIM) != std::string::npos) {
     		if (!read_bytes_) { 
 				get_hex_read_bytes_();
 		        if (read_bytes_ == 0) {
@@ -288,9 +287,5 @@ namespace ft
         if (read_bytes_ > max_body_size_) {
             throw_(413, "Payload Too Large");
 		}
-	}
-
-	void	ServerChild::PrintBody() {
-		std::cout << body_ << std::endl;
-	}
+	}	
 } // namespace ft
