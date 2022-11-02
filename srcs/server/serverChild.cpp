@@ -247,8 +247,6 @@ namespace ft
 
     void	ServerChild::read_chunks_() {
 		// if read_bytes == 0, remove leading delim if it exists, and reset hex_bytes to 0
-		if (save_.empty())
-			std::cout << "YES>>> BUT WHY?\n";
 		if (hex_bytes_ && !read_bytes_) {
 			if (save_.find(DELIM) == 0) {
 				save_.erase(0, DELIM.size());
@@ -273,9 +271,6 @@ namespace ft
 				}
 				read_body_(save_.size());
 			} else { // if save_ is larger than remaining readbytes read remaining readbytes from save into body
-				/*body_ += save_.substr(0, read_bytes_);
-				save_.erase(0, read_bytes_);
-				read_bytes_ = 0;*/
 				read_body_(read_bytes_);
 				if (save_.find(DELIM) != 0) { // if delim is not first, there are unexpected body bytes
 		            throw_(400, "Bad Request - unexpected body bytes (chunked)");
