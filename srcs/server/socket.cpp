@@ -18,8 +18,8 @@ namespace ft
 	{
 	}
 
-	Socket::RecievedMsg::RecievedMsg(const std::string content, const int client_id)
-		: content(content), client_id(client_id)
+	Socket::RecievedMsg::RecievedMsg(const std::string content, const int client_id, in_port_t port)
+		: content(content), client_id(client_id), port(port)
 	{
 	}
 
@@ -30,6 +30,7 @@ namespace ft
 
 		content = other.content;
 		client_id = other.client_id;
+		port = other.port;
 		return (*this);
 	}
 
@@ -47,6 +48,8 @@ namespace ft
 			set_sockaddr_(server_sockaddr, "127.0.0.1", server_config_vec[i].getListen());
 			std::cout << "127.0.0.1"
 					  << " " << server_config_vec[i].getListen() << std::endl;
+
+			fd_to_port_map_[sockfd_vec_.back()] = server_config_vec[i].getListen();
 
 			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr,
 					 sizeof(server_sockaddr)) < 0)
@@ -191,6 +194,7 @@ namespace ft
 		used_fd_set_.insert(connection);
 
 		last_recieve_time_map_[connection] = time(NULL);
+		fd_to_port_map_[connection] = fd_to_port_map_[sock_fd];
 	}
 
 	Socket::RecievedMsg Socket::recieve_msg_from_connected_client_(int connection)
@@ -200,7 +204,7 @@ namespace ft
 		last_recieve_time_map_[connection] = time(NULL);
 		int recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
 		buf[recv_ret] = '\0';
-		return (RecievedMsg(std::string(buf), connection));
+		return (RecievedMsg(std::string(buf), connection, fd_to_port_map_[connection]));
 	}
 
 	void Socket::close_fd_(const int fd, const int i_poll_fd)
