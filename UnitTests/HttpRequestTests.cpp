@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "../srcs/HTTP/HTTPRequst.hpp"
+#include "../srcs/HTTP/HTTPHead.hpp"
 
 namespace {
  class HTTPRequestTest : public ::testing::Test {
@@ -11,7 +11,7 @@ namespace {
  };
 
 TEST_F(HTTPRequestTest, Case1) {
-  ft::HTTPRequest req("1000000");
+  ft::HTTPHead req;
   std::string     line = "GET /private/index.html HTTP/1.1";
 
   int rlt = req.Parse(std::string(line));

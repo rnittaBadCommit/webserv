@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "../srcs/httpMethod/HTTPMethod.hpp"
 #include "../srcs/httpMethod/MethodUtils.hpp"
-#include "../srcs/HTTP/HTTPRequst.hpp"
+#include "../srcs/HTTP/HTTPHead.hpp"
 
 namespace DoGet{
  class DoGet : public ::testing::Test {
@@ -29,7 +29,7 @@ namespace DoGet{
 
 TEST_F(DoGet, SuccessCase1) {
   std::string path;
-  ft::HTTPRequest http_request("10000");
+  ft::HTTPHead http_request;
   std::string response_message_str;
 
   EXPECT_EQ(do_get(http_request, file_path, response_message_str), 200);
@@ -41,7 +41,7 @@ TEST_F(DoGet, SuccessCase1) {
 
 TEST_F(DoGet, Case404_wrong_path) {
   std::string path;
-  ft::HTTPRequest http_request("10000");
+  ft::HTTPHead http_request;
   std::string response_message_str;
 
   EXPECT_EQ(do_get(http_request, wrong_path, response_message_str), 404);
@@ -53,7 +53,7 @@ TEST_F(DoGet, Case404_wrong_path) {
 
 TEST_F(DoGet, Case404_dir_path) {
   std::string path;
-  ft::HTTPRequest http_request("10000");
+  ft::HTTPHead http_request;
   std::string response_message_str;
 
   EXPECT_EQ(do_get(http_request, dir_path, response_message_str), 404);

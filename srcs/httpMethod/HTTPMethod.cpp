@@ -14,7 +14,7 @@
 #include <cstring>
 
 #include "../httpResponse/HttpResponse.hpp"
-#include "../HTTP/HTTPRequst.hpp"
+#include "../HTTP/HTTPHead.hpp"
 
 
 /*
@@ -94,7 +94,7 @@ std::string CreateErrorSentence(int status_code) {
  * @param response_message_str
  * @return
  */
-int do_get(ft::HTTPRequest &http_request,
+int do_get(ft::HTTPHead &http_request,
            std::string &file_path,
            std::string &response_message_str) {
   int response_status;

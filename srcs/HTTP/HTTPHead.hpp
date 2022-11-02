@@ -14,7 +14,7 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
-#include "../utils.hpp"
+#include "../utils/utils.hpp"
 
 namespace ft {
     enum            HTTPParseStatus { requestLine, headerFields, readChunks, readStraight, complete };
