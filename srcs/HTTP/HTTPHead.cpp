@@ -98,7 +98,7 @@ namespace ft {
     }
 
     void    HTTPHead::parseHeaderFields() {
-        while (_save.find(DELIM) != 0 && _save.find(DELIM) != std::string::npos) {
+        while (_save.find(DELIM) != 0 && _save.find(DELIM) != std::string::npos && _save.find(CN) != std::string::npos) {
             // get header key
             if (_currentHeader.first == "") {
                 size_t i = _save.find(CN);
@@ -126,7 +126,6 @@ namespace ft {
         }
         // decide if header is complete (line break reached because \r\n is the first character)
         if (_save.find(DELIM) == 0) {
-
             _save.erase(0, DELIM.size()); 
             _parseStatus = complete;
         }
