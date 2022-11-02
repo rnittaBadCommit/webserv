@@ -10,6 +10,28 @@ ServerConfig::~ServerConfig()
 {
 }
 
+ServerConfig::ServerConfig(const ServerConfig& src) {
+	is_set = src.is_set;
+	server_name = src.server_name;
+	listen = src.listen;
+	client_max_body_size = src.client_max_body_size;
+	error_page = src.error_page;
+	location_config = src.location_config;
+}
+	
+#include <iostream>
+ServerConfig& ServerConfig::operator=(const ServerConfig& rhs) {
+	if (this != &rhs) {
+		is_set = rhs.is_set;
+		server_name = rhs.server_name;
+		listen = rhs.listen;
+		client_max_body_size = rhs.client_max_body_size;
+		error_page = rhs.error_page;
+		location_config = rhs.location_config;
+	}
+	return (*this);
+}
+
 void ServerConfig::setServerName(const std::string &server_name)
 {
 	this->is_set.insert(SERVER_NAME);

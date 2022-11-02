@@ -6,7 +6,7 @@ namespace ft
 	{
 		import_config_(config_path);
 
-		socket_.setup(config_.getServerConfig());
+		socket_.setup(server_config_);
 	}
 
 	void Server::start_server()
@@ -22,7 +22,19 @@ namespace ft
 	void Server::import_config_(const std::string config_path)
 	{
 		ConfigParser configParser;
-		config_ = configParser.readFile(config_path);
+		server_config_ = configParser.readFile(config_path).getServerConfig();
+	}
+
+	void Server::create_serverChild_map_()
+	{
+		std::vector<ServerConfig>::const_iterator end = server_config_.begin();
+		for (std::vector<ServerConfig>::const_iterator it = server_config_.begin(); it != end; ++it)
+		{
+			std::pair<std::string, in_port_t> key_to_insert = std::make_pair((*it).getServerName(), (in_port_t)(*it).getListen());
+			serverChild_map_.insert(std::make_pair(key_to_insert, ServerChild(*it)));
+			if (default_serverChild_map_.count((in_port_t)(*it).getListen()))
+				default_serverChild_map_.insert(std::make_pair((in_port_t)(*it).getListen(), (*(serverChild_map_.find(key_to_insert))).second));
+		}
 	}
 
 	void setup_()

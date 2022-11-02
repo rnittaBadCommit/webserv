@@ -14,6 +14,8 @@ private:
 public:
 	Config();
 	~Config();
+	Config(const Config& src);
+	Config& operator=(const Config& rhs);
 
 	void addServerConfig(const ServerConfig server_config);
 	const std::vector<ServerConfig> &getServerConfig() const;

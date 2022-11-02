@@ -23,6 +23,8 @@ private:
 public:
 	ServerConfig();
 	~ServerConfig();
+	ServerConfig(const ServerConfig& src);
+	ServerConfig& operator=(const ServerConfig& rhs);
 
 	void setServerName(const std::string &server_name);
 	void setListen(const int port);
