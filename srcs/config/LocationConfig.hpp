@@ -18,12 +18,15 @@ private:
 	std::set<std::string> allow_method;
 	std::vector<std::string> index;
 	std::vector<std::string> cgi_extension;
-	std::map<int, std::string> redirect;
+	std::pair<int, std::string> redirect;
 	std::string upload_filepath;
 
 public:
+	static const int NO_REDIRECT = -1;
 	LocationConfig();
 	~LocationConfig();
+	LocationConfig(const LocationConfig& src);
+	LocationConfig& operator=(const LocationConfig& rhs);
 
 	void setUri(const std::string &uri);
 	void setAlias(const std::string &alias);
@@ -40,7 +43,7 @@ public:
 	const std::set<std::string> &getAllowMethod() const;
 	const std::vector<std::string> &getIndex() const;
 	const std::vector<std::string> &getCgiExtension() const;
-	const std::map<int, std::string> &getRedirect() const;
+	const std::pair<int, std::string> &getRedirect() const;
 	const std::string &getUploadFilepath() const;
 
 	const bool &isSet(E_DirectiveType type);

@@ -23,6 +23,8 @@ private:
 public:
 	ConfigParser();
 	~ConfigParser();
+	ConfigParser(const ConfigParser& src);
+	ConfigParser& operator=(const ConfigParser& rhs);
 
 	Config readFile(const std::string &filepath);
 	std::vector<std::string> splitLine(const std::string line);
