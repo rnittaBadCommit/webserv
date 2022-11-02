@@ -13,6 +13,11 @@ typedef std::map<std::string, std::string> http_header_t;
 
 int return1();
 
+int do_put(ft::HTTPHead &http_head,
+           std::string &http_body,
+           std::string &file_path,
+           std::string &response_message_str);
+
 int do_get(ft::HTTPHead& http_request,
            std::string &file_path,
            std::string &response_message_str);

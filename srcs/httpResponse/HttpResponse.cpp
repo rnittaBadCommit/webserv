@@ -49,6 +49,7 @@ std::string HttpResponse::GetResponseLine(int status_code) {
     case HTTP_OK:return "200 OK";
     case HTTP_CREATED:return "201 Created";
     case HTTP_ACCEPTED:return "202 Accepted";
+    case HTTP_NO_CONTENT:return "204 No Content";
     case HTTP_PARTIAL_CONTENT:return "206 Partial Content";
     case HTTP_MOVED_PERMANENTLY:
       return "301 Moved Permanently";

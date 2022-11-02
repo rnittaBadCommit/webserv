@@ -87,37 +87,45 @@ std::string CreateErrorSentence(int status_code) {
   return error_sentence.str();
 }
 
-int do_put(ft::HTTPRequest &http_request,
+
+int do_put(ft::HTTPHead &http_head,
+           std::string &http_body,
            std::string &file_path,
-           std::string &cgi,
            std::string &response_message_str) {
+  int response_status;
+  std::stringstream response_message_stream;
 
-    std::string location;
+  // MUST
 
-    if (!file_path.empty()) {
-        location = file_path;
-    }
+  struct stat stat_buf = {};
+  int ret_val = stat(file_path.c_str(), &stat_buf);
 
-    size_t received_length = 0;
-    size_t content_length = 424242; // tmp val
-    std::stringstream received_content;
+  // MUST
+  if (ret_val == 0) {
+    // file is already exist
+    // overwrite
+    // 204 No Content
+    response_message_stream << "HTTP/1.1 " << HttpResponse::GetResponseLine(204) << CRLF;
+    response_status = 204;
+  } else {
+    // file is new added
+    // 201 content created
+    response_message_stream << "HTTP/1.1 " << HttpResponse::GetResponseLine(201) << CRLF;
+    response_status = 201;
+  }
 
-    for (size_t i = 0; i < content_length; i = i + received_length) {
-        // write received content to receive_content.
-        //
-    }
+  // create file
+  std::ofstream contents_file;
+  contents_file.open(file_path.c_str());
+  contents_file << http_body;
+  contents_file.close();
 
-    struct stat stat_buf = {};
-    int ret_val = stat(location.c_str(), &stat_buf);
+  response_message_stream << "Server: " << "42webserv" << "/1.0" << CRLF;
+  response_message_stream << "Date: " << CreateDate() << CRLF;
 
-    if (ret_val == 0) {
-        // file is already exist
-        // overwrite
-        // 204 No Content
-    } else {
-        // file is new added
-        // 201 content created
-    }
+  response_message_str = response_message_stream.str();
+
+  return response_status;
 }
 
 /**
