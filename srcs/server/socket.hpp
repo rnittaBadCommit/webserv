@@ -44,7 +44,7 @@ namespace ft
 		{
 		public:
 			RecievedMsg();
-			RecievedMsg(const std::string content, const int client_id);
+			RecievedMsg(const std::string content, const int client_id, in_port_t port);
 			RecievedMsg operator=(const RecievedMsg &other);
 			std::string content;
 			int client_id;
@@ -105,6 +105,7 @@ namespace ft
 		// std::vector<int> recieve_fd_vec_;
 		std::map<int, time_t> last_recieve_time_map_; // sockfd => -1
 		std::map<int, std::string> msg_to_send_map_;
+		std::map<int, in_port_t> fd_to_port_map_;
 
 		std::set<int> used_fd_set_;
 
