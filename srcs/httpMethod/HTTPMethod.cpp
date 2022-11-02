@@ -87,6 +87,39 @@ std::string CreateErrorSentence(int status_code) {
   return error_sentence.str();
 }
 
+int do_put(ft::HTTPRequest &http_request,
+           std::string &file_path,
+           std::string &cgi,
+           std::string &response_message_str) {
+
+    std::string location;
+
+    if (!file_path.empty()) {
+        location = file_path;
+    }
+
+    size_t received_length = 0;
+    size_t content_length = 424242; // tmp val
+    std::stringstream received_content;
+
+    for (size_t i = 0; i < content_length; i = i + received_length) {
+        // write received content to receive_content.
+        //
+    }
+
+    struct stat stat_buf = {};
+    int ret_val = stat(location.c_str(), &stat_buf);
+
+    if (ret_val == 0) {
+        // file is already exist
+        // overwrite
+        // 204 No Content
+    } else {
+        // file is new added
+        // 201 content created
+    }
+}
+
 /**
  *
  * @param http_header
