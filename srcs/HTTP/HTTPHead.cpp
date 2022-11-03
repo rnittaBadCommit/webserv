@@ -88,7 +88,6 @@ namespace ft {
                 const std::string versionComp = "HTTP/1.";
                 _HTTPv = _save.substr(0, i);
                 _save.erase(0, i + DELIM.size());
-                std::cerr << "CHANGING STATUS\n";
                 _parseStatus = headerFields;
                 if (_HTTPv.size() != HTTPV.size() || _HTTPv.compare(0, versionComp.size(), versionComp) != 0 || !isdigit(_HTTPv[_HTTPv.size() - 1])) {
                     _throw(505, "HTTP Version Not Supported");
@@ -125,7 +124,7 @@ namespace ft {
             }
         }
         // decide if header is complete (line break reached because \r\n is the first character)
-        if (_save.find(DELIM) == 0) {
+        if (_save.find(DELIM) == 0 || _save.find(BREAK) != std::string::npos) {
             _save.erase(0, DELIM.size()); 
             _parseStatus = complete;
         }
