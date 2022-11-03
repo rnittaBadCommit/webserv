@@ -1,9 +1,14 @@
 #include "srcs/server/server.hpp"
 
-int main()
+int main(int argc, char** argv)
 {
-	ft::Server server("config/basic.conf");
-
-	server.start_server();
+	if (argc == 2) {
+		try {
+			ft::Server server(argv[1]);
+			server.start_server();	
+		} catch (const std::exception &e) {
+			std::cout << "[exception]: " << e.what();
+		}
+	}
 	return 0;
 }
