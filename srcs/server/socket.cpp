@@ -4,7 +4,7 @@
 
 namespace ft
 {
-	Socket::Socket() : keep_connect_time_len_(100)
+	Socket::Socket() : keep_connect_time_len_(10)
 	{
 	}
 
@@ -157,7 +157,7 @@ namespace ft
 		poll_fd_vec_[fd_to_index_nap_[fd]].events = POLLOUT;
 	}
 
-	void Socket::check_keep_time_and_close_fd()
+	std::vector<int>& Socket::check_keep_time_and_close_fd()
 	{
 		time_t current_time = time(NULL);
 		time_t tmp_last_recieve_time;
@@ -172,11 +172,12 @@ namespace ft
 				if (current_time - tmp_last_recieve_time > keep_connect_time_len_)
 				{
 					std::cerr << "keep alive close" << std::endl;
+					closedfd_vec_.push_back(poll_fd_vec_[i].fd);
 					close_fd_(poll_fd_vec_[i].fd, i);
 				}
 			}
 		}
-		// return closed fds vector
+		return(closedfd_vec_);
 	}
 
 	void Socket::register_new_client_(int sock_fd)

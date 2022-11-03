@@ -63,7 +63,7 @@ namespace ft
 
 		void send_msg(int fd, const std::string msg);
 
-		void check_keep_time_and_close_fd();
+		std::vector<int>& check_keep_time_and_close_fd();
 
 		class SetUpFailException : public std::exception
 		{
@@ -100,6 +100,7 @@ namespace ft
 
 	private:
 		std::vector<int> sockfd_vec_;
+		std::vector<int> closedfd_vec_;
 		std::vector<struct pollfd> poll_fd_vec_;
 		std::map<int, int> fd_to_index_nap_;
 		// std::vector<int> recieve_fd_vec_;

@@ -46,9 +46,12 @@ namespace ft
 		Socket::RecievedMsg recieved_msg;
 
 		try
-		{
-			// remove all fds from closed fd vector
-			// socket_.check_keep_time_and_close_fd();
+		{	
+			std::vector<int>& closedfd_vec = socket_.check_keep_time_and_close_fd();
+			for (std::vector<int>::iterator it = closedfd_vec.begin(); it != closedfd_vec.end(); ++it) {
+				httpRequest_pair_map_.erase(*it);
+			}
+			closedfd_vec.clear();
 
 			recieved_msg = socket_.recieve_msg();
 			std::cout << "port: " << recieved_msg.port << std::endl;
