@@ -114,9 +114,6 @@ namespace ft
         if (confIt != serverChild_map_.end()) {
             return (confIt->second);
         } else {
-			//std::cout << "port: " << port << std::endl;
-			return (default_serverChild_map_.begin()->second);
-
 			DefaultServerChildMap::iterator it = default_serverChild_map_.find(port);
 			if (it == default_serverChild_map_.end()) {
 				throw std::runtime_error("port does not match any default servers");
