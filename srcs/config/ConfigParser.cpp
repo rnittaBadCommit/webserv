@@ -152,6 +152,13 @@ void ConfigParser::setConfigServer(std::vector<std::string> line)
 	else if (line[0] == "location" && line[2] == "{")
 	{
 		this->nowBlock = LOCATION;
+		if (line[1][0] != '/') {
+			line[1].insert(0, 1, '/');
+		}
+		if (line[1][line[1].size() - 1] == '/') {
+			line[1].erase(line[1].size() - 1);
+		}
+		std::cout << "location parser: " << line[1] << std::endl;
 		this->location_config.setUri(line[1]);
 	}
 	else if (line[0] == "}")

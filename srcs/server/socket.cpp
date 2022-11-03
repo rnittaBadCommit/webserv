@@ -4,7 +4,7 @@
 
 namespace ft
 {
-	Socket::Socket() : keep_connect_time_len_(10)
+	Socket::Socket() : keep_connect_time_len_(100)
 	{
 	}
 
@@ -52,7 +52,7 @@ namespace ft
 			fd_to_port_map_[sockfd_vec_.back()] = server_config_vec[i].getListen();
 
 			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr,
-					 sizeof(server_sockaddr)) < 0)
+					 sizeof(server_sockaddr)) < 0 && errno != EADDRINUSE)
 				throw SetUpFailException("Error: bind()");
 
 			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)

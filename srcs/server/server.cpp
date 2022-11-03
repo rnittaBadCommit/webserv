@@ -68,11 +68,12 @@ namespace ft
 			if (head.GetParseStatus() != complete) {
 				if (head.Parse(recieved_msg.content) == 0) {
 					std::cout << "HEADER RECIEVED\n";
-					head.PrintRequest();
 					head.ParseRequestURI();
+					head.PrintRequest();
 					serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
 					serverChild.SetUp(head);
-					serverChild.Parse("");
+					if (serverChild.get_parse_status() != complete)
+						serverChild.Parse("");
 				}
 			} else if (serverChild.get_parse_status() != complete) {
 				serverChild.Parse(recieved_msg.content);
@@ -80,7 +81,9 @@ namespace ft
 			if (serverChild.get_parse_status() == complete) {
 				std::cout << "BODY RECEIVED: ";
 				std::cout << serverChild.get_body() << std::endl;
-				// complete request
+
+				// complete request and send response
+				
 				httpRequest_pair_map_.erase(recieved_msg.client_id);
 			}
 
@@ -115,8 +118,10 @@ namespace ft
         ServerChildMap::iterator confIt = serverChild_map_.find(std::make_pair(host, port));
 
         if (confIt != serverChild_map_.end()) {
+			std::cout << "found serverChild by httpRequest host\n";
             return (confIt->second);
         } else {
+			std::cout << "could not find serverchild, using default\n";
 			DefaultServerChildMap::iterator it = default_serverChild_map_.find(port);
 			if (it == default_serverChild_map_.end()) {
 				throw std::runtime_error("port does not match any default servers");

@@ -114,7 +114,9 @@ namespace ft {
                     _currentHeader.second = _save.substr(0, i);
                     _save.erase(0, i + DELIM.size());
                     TrimWSP(_currentHeader.second);
-                    toLower(_currentHeader.second);
+                    if (_currentHeader.first != "host") {
+                        toLower(_currentHeader.second);
+                    }
                     if (!multiInclusion()) {
                         _headerFields.insert(std::make_pair(_currentHeader.first, _currentHeader.second));
                     }

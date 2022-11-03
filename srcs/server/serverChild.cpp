@@ -85,15 +85,23 @@ namespace ft
 		HTTP_head_ = head;
 		save_ = HTTP_head_.getSave();
 		max_body_size_ = strBase_to_UI_(server_config_.getClientMaxBodySize(), std::dec);
+		/** if httphead response code != 200 this.parse status = head response code? **/
 
 		// Find location conf
 		setUp_locationConfig_();
-		// redirect?
+		if (parse_status_ == complete) {
+			std::cout << "parse is complete before checking anything" << std::endl;
+			return ;
+		}
 
 		// validate request method and headers
 		check_method_();
 		check_headers_();
-		// check IS CGI?
+		/** check IS CGI? **/
+		if (HTTP_head_.GetRequestURI().find('?') != std::string::npos) {
+			parse_status_ = complete;
+			return ;
+		}
 
 		// decide parse status and get content-length if needed
 		decide_parse_status_();
@@ -103,7 +111,6 @@ namespace ft
 
           	content_length_ = strBase_to_UI_(content_length->second, std::dec);
            	if (content_length_ > max_body_size_) {
-				std::cout << "cl: " << content_length_ << "mbs: " << max_body_size_ << std::endl;
                	throw_(413, "Payload Too Large");
            	}
            	read_bytes_ = content_length_;
@@ -137,9 +144,6 @@ namespace ft
     }
 
 	void    ServerChild::setUp_locationConfig_() {
-       // ***location config parser:
-       // location uri must have beginning / and no ending /
-
         std::string     httpReqURI = HTTP_head_.GetRequestURI();	
         std::map<std::string, LocationConfig>           serverLocMap = server_config_.getLocationConfig();
         std::map<std::string, LocationConfig>::iterator locConfIt;
@@ -160,11 +164,12 @@ namespace ft
 
         location_config_ = locConfIt->second;
 		if (location_config_.getRedirect().first != LocationConfig::NO_REDIRECT) {
-			// create redirect response
+			parse_status_ = complete;
+			response_code_ = location_config_.getRedirect().first;
+			path_ = location_config_.getRedirect().second;
 		} else {
 	        path_ = location_config_.getAlias() + pathParts;
 		}
-
     }
 
 	void	ServerChild::check_method_ () {
@@ -242,7 +247,6 @@ namespace ft
             response_code_ = 200;
             parse_status_ = complete;
         }
-		/* if read_bytes doesn't become 0, but no more message comes*/
 	}
 
     void	ServerChild::read_chunks_() {
