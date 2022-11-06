@@ -6,7 +6,7 @@ namespace ft
 	{
 		import_config_(config_path);
 		socket_.setup(server_config_);
-		create_serverChild_map_();	
+		create_serverChild_map_();
 	}
 
 	void Server::start_server()
@@ -103,8 +103,7 @@ namespace ft
 		}
 		catch (const std::exception &e)
 		{
-			std::cerr << "Error: " << e.what() << std::endl;
-			exit(1);
+			throw e;
 		}
 
 		return (false);

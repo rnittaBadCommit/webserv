@@ -99,6 +99,7 @@ namespace ft
 		check_headers_();
 		/** check IS CGI? **/
 		if (HTTP_head_.GetRequestURI().find('?') != std::string::npos) {
+			// read body??
 			parse_status_ = complete;
 			return ;
 		}

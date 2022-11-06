@@ -1,4 +1,5 @@
 #include "ConfigParser.hpp"
+#include "../utils.hpp"
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -50,7 +51,9 @@ Config ConfigParser::readFile(const std::string &filepath)
 	// conf の一行ずつを読み込む
 	while (std::getline(ifs, line))
 	{
-		// 空行やコメントアウト行は無視
+		// 空行やコメントアウト行は無視	
+
+		ft::TrimWSP(line);
 		if (line.length() == 0 || (line.length() != 0 && line[0] == '#'))
 		{
 			continue;
@@ -158,7 +161,6 @@ void ConfigParser::setConfigServer(std::vector<std::string> line)
 		if (line[1][line[1].size() - 1] == '/') {
 			line[1].erase(line[1].size() - 1);
 		}
-		std::cout << "location parser: " << line[1] << std::endl;
 		this->location_config.setUri(line[1]);
 	}
 	else if (line[0] == "}")

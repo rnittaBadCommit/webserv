@@ -4,7 +4,8 @@
 
 namespace ft
 {
-	Socket::Socket() : keep_connect_time_len_(100)
+	Socket::Socket() : sockfd_vec_(), closedfd_vec_(), poll_fd_vec_(), fd_to_index_nap_(), last_recieve_time_map_(),
+		msg_to_send_map_(), fd_to_port_map_(), used_fd_set_(), port_num_(), keep_connect_time_len_(100)
 	{
 	}
 

@@ -6,8 +6,8 @@ int main(int argc, char** argv)
 		try {
 			ft::Server server(argv[1]);
 			server.start_server();	
-		} catch (const std::exception &e) {
-			std::cout << "[exception]: " << e.what();
+		} catch (const std::exception& e) {		
+			std::cout << "[exception]: " << e.what() << std::endl;
 		}
 	}
 	return 0;
