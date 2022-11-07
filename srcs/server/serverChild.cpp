@@ -3,12 +3,14 @@
 namespace ft
 {
 
-	ServerChild::ServerChild(): server_config_(ServerConfig())
+	ServerChild::ServerChild(): server_config_(ServerConfig()), location_config_(), redirectList_map_(), response_code_(),
+		parse_status_(), HTTP_head_(), content_length_(), read_bytes_(), max_body_size_(), body_(), save_(), path_(), hex_bytes_()
 	{
 	}
 
 	ServerChild::ServerChild(const ServerConfig &server_config)
-		: server_config_(server_config)
+		: server_config_(server_config), location_config_(), redirectList_map_(), response_code_(),
+		parse_status_(), HTTP_head_(), content_length_(), read_bytes_(), max_body_size_(), body_(), save_(), path_(), hex_bytes_()
 	{
 		std::map<std::string, LocationConfig>::const_iterator itend = server_config.getLocationConfig().end();
 		for (std::map<std::string, LocationConfig>::const_iterator it = server_config.getLocationConfig().begin(); it != itend; ++it)
@@ -110,7 +112,7 @@ namespace ft
 	
 	void	ServerChild::Parse(const std::string& content) {
 		save_ += content;
-        if (parse_status_ == readChunks) {
+        if (parse_status_ == readChunks && !save_.empty()) {
             read_chunks_();
         } else if (parse_status_ == readStraight) {
             read_straight_();
@@ -221,15 +223,15 @@ namespace ft
         }
 	}
 
-	void	ServerChild::read_body_() {
- 	    read_bytes_ -= save_.size();
-    	body_ += save_;
-     	save_.clear();	
+	void	ServerChild::read_body_(unsigned int len) {
+ 	    read_bytes_ -= len;
+    	body_ += save_.substr(0, len);
+     	save_.erase(0, len);	
 	}
 
     void	ServerChild::read_straight_() {
 		if (read_bytes_ >= save_.size()) {
-			read_body_();
+			read_body_(save_.size());
 		} else {
             body_ += save_.substr(0, read_bytes_);
             save_.erase(0, read_bytes_);
@@ -244,36 +246,52 @@ namespace ft
 	}
 
     void	ServerChild::read_chunks_() {
-        while (save_.find(DELIM) != std::string::npos) {
-    		if (!read_bytes_) { 
-				get_hex_read_bytes_();
-		        if (read_bytes_ == 0) {	
-					response_code_ = 200;
-					parse_status_ = complete;
-					//HTTP_head_.GetHeaderFields()['transfer-encoding'] = "";
-					break ;
-				}
-				if (save_.find(DELIM) == std::string::npos) {
-					break ;
-				}
-				/* if never recieve 0?? */
-            }
-
-			if (read_bytes_ >= save_.size() - DELIM.size()) {
-				if (read_bytes_ == save_.size() - DELIM.size()) {
-					save_.erase(read_bytes_, DELIM.size());
-				}
-				read_body_();
-			} else {
-				body_ += save_.substr(0, read_bytes_);
-				save_.erase(0, read_bytes_);
-				read_bytes_ = 0;
-				if (save_.find(DELIM) != 0) {
-		            throw_(400, "Bad Request - unexpected body bytes (chunked)");
-				}
+		// if read_bytes == 0, remove leading delim if it exists, and reset hex_bytes to 0
+		if (hex_bytes_ && !read_bytes_) {
+			if (save_.find(DELIM) == 0) {
 				save_.erase(0, DELIM.size());
 			}
+			hex_bytes_ = 0;
+			if (save_.empty())
+				return;
+		}	
+		// get hex bytes if == 0
+		if (!hex_bytes_){
+			get_hex_read_bytes_();
+			hex_bytes_ = read_bytes_;
+		}
+        while (hex_bytes_ && !save_.empty()) {
+			// if save_ is smaller/equal to readbytes, read all bytes from save into body 
+			if (read_bytes_ >= save_.size() - DELIM.size()) {
+				if (read_bytes_ == save_.size() - DELIM.size()) { // if save includes delim (not for reading), remove it
+					if (save_.substr(read_bytes_) != DELIM) { // if last bytes not == delim, chunk is larger than hex
+						throw_(400, "Bad Request - unexpected body bytes DELIM doesn't match");
+					}
+					save_.erase(read_bytes_, DELIM.size());
+				}
+				read_body_(save_.size());
+			} else { // if save_ is larger than remaining readbytes read remaining readbytes from save into body
+				read_body_(read_bytes_);
+				if (save_.find(DELIM) != 0) { // if delim is not first, there are unexpected body bytes
+		            throw_(400, "Bad Request - unexpected body bytes (chunked)");
+				}
+				save_.erase(0, DELIM.size()); // remove delim
+			}
+			// if no save left or no delim, return. must retrive more string for reading, or next hex
+			if (save_.empty() || (save_.find(DELIM) == std::string::npos)) {
+				break;
+			}
+			// get next hex 
+			if (read_bytes_ == 0) {
+				get_hex_read_bytes_();
+				hex_bytes_ = read_bytes_;
+			}
         }
+	    if (hex_bytes_ == 0) {	
+			response_code_ = 200;
+			parse_status_ = complete;
+			//HTTP_head_.GetHeaderFields()['transfer-encoding'] = "";
+		}
 	}
 
 	void	ServerChild::get_hex_read_bytes_() {

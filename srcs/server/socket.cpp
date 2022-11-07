@@ -85,8 +85,7 @@ namespace ft
 	}
 
 	Socket::RecievedMsg Socket::recieve_msg()
-	{
-		check_keep_time_and_close_fd();
+	{	
 		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
 		std::cout << "poll" << std::endl;
 		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), 1000);
@@ -177,6 +176,7 @@ namespace ft
 				}
 			}
 		}
+		// return closed fds vector
 	}
 
 	void Socket::register_new_client_(int sock_fd)
