@@ -3,7 +3,6 @@
 
 #include "../config/Config.hpp"
 #include "../HTTP/HTTPHead.hpp"
-#include "Location.hpp"
 #include <map>
 #include <set>
 #include <sstream>
@@ -25,6 +24,7 @@ namespace ft
 		} redirectConf;
 		// typedef std::pair<const int, const std::string> redirectConf;
 		ServerChild();
+		~ServerChild();
 		ServerChild(const ServerConfig &server_config);
 		ServerChild(const ServerChild &src);
 		ServerChild& operator=(const ServerChild &rhs);

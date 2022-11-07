@@ -1,7 +1,7 @@
 #include "LocationConfig.hpp"
 
 LocationConfig::LocationConfig()
-	: uri(), alias(), autoindex(), allow_method(),
+	: is_set(), uri(), alias(), autoindex(), allow_method(),
 	  index(), cgi_extension(), redirect(-1, ""),
 	  upload_filepath()
 {
@@ -10,6 +10,7 @@ LocationConfig::LocationConfig()
 LocationConfig::~LocationConfig()
 {
 }
+
 LocationConfig::LocationConfig(const LocationConfig& src)
 {
 	is_set = src.is_set;
@@ -23,7 +24,6 @@ LocationConfig::LocationConfig(const LocationConfig& src)
 	upload_filepath = src.upload_filepath;
 }
 
-#include <iostream>
 LocationConfig& LocationConfig::operator=(const LocationConfig& rhs)
 {
 	if (this != &rhs) {

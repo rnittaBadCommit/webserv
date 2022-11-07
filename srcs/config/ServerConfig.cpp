@@ -1,7 +1,7 @@
 #include "ServerConfig.hpp"
 
 ServerConfig::ServerConfig()
-	: server_name(), listen(), client_max_body_size(),
+	: is_set(), server_name(), listen(), client_max_body_size(),
 	  error_page(), location_config()
 {
 }
@@ -18,8 +18,7 @@ ServerConfig::ServerConfig(const ServerConfig& src) {
 	error_page = src.error_page;
 	location_config = src.location_config;
 }
-	
-#include <iostream>
+
 ServerConfig& ServerConfig::operator=(const ServerConfig& rhs) {
 	if (this != &rhs) {
 		is_set = rhs.is_set;

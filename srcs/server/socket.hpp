@@ -44,8 +44,10 @@ namespace ft
 		{
 		public:
 			RecievedMsg();
-			RecievedMsg(const std::string content, const int client_id, in_port_t port);
+			RecievedMsg(const RecievedMsg& src);
 			RecievedMsg operator=(const RecievedMsg &other);
+			RecievedMsg(const std::string content, const int client_id, in_port_t port);
+			~RecievedMsg();
 			std::string content;
 			int client_id;
 			in_port_t port;
@@ -99,6 +101,9 @@ namespace ft
 		};
 
 	private:
+		Socket(const Socket& src);
+		Socket& operator=(const Socket& rhs);
+
 		std::vector<int> sockfd_vec_;
 		std::vector<int> closedfd_vec_;
 		std::vector<struct pollfd> poll_fd_vec_;

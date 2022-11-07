@@ -8,6 +8,10 @@ namespace ft
 	{
 	}
 
+	ServerChild::~ServerChild()
+	{
+	}
+
 	ServerChild::ServerChild(const ServerConfig &server_config)
 		: server_config_(server_config), location_config_(), redirectList_map_(), response_code_(),
 		parse_status_(), HTTP_head_(), content_length_(), read_bytes_(), max_body_size_(), body_(), save_(), path_(), hex_bytes_()
@@ -40,6 +44,7 @@ namespace ft
 		body_ = src.body_;
 		save_ = src.save_;
 		path_ = src.path_;
+		hex_bytes_ = src.hex_bytes_;
 	}
 
 	ServerChild& ServerChild::operator=(const ServerChild &rhs){
@@ -56,6 +61,7 @@ namespace ft
 			body_ = rhs.body_;
 			save_ = rhs.save_;
 			path_ = rhs.path_;	
+			hex_bytes_ = rhs.hex_bytes_;
 		}
 		return (*this);
 	}

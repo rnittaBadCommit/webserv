@@ -19,6 +19,11 @@ namespace ft
 	{
 	}
 
+	Socket::RecievedMsg::RecievedMsg(const RecievedMsg& src)
+		: content(src.content), client_id(src.client_id), port(src.port)
+	{
+	}
+
 	Socket::RecievedMsg::RecievedMsg(const std::string content, const int client_id, in_port_t port)
 		: content(content), client_id(client_id), port(port)
 	{
@@ -33,6 +38,10 @@ namespace ft
 		client_id = other.client_id;
 		port = other.port;
 		return (*this);
+	}
+	
+	Socket::RecievedMsg::~RecievedMsg()
+	{
 	}
 
 	void Socket::setup(const std::vector<ServerConfig> &server_config_vec)

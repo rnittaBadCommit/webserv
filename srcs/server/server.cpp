@@ -2,11 +2,15 @@
 
 namespace ft
 {
-	Server::Server(const std::string config_path)
+	Server::Server(const std::string config_path) : server_config_(), socket_(), serverChild_map_(),
+		default_serverChild_map_(), httpRequest_map_(), httpRequest_pair_map_()
 	{
 		import_config_(config_path);
 		socket_.setup(server_config_);
 		create_serverChild_map_();
+	}
+	Server::~Server()
+	{
 	}
 
 	void Server::start_server()
