@@ -55,6 +55,7 @@ namespace ft
 		std::string		body_;
 		std::string		save_;
 		std::string		path_;
+		unsigned int	hex_bytes_;
 
     	unsigned int	strBase_to_UI_(const std::string& str, std::ios_base& (*base)(std::ios_base&));
 		void    throw_(int responseCode, const std::string& message);
@@ -62,7 +63,7 @@ namespace ft
 		void	check_headers_();
 		void	check_method_();
 		void	decide_parse_status_();
-		void	read_body_();
+		void	read_body_(unsigned int len);
         void	read_straight_();
         void	read_chunks_();
 		void	get_hex_read_bytes_();

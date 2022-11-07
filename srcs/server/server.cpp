@@ -47,7 +47,11 @@ namespace ft
 
 		try
 		{
+			// remove all fds from closed fd vector
+			// socket_.check_keep_time_and_close_fd();
+
 			recieved_msg = socket_.recieve_msg();
+			std::cout << "port: " << recieved_msg.port << std::endl;
 			//socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");
 			//if (cd)
 			httpRequest_map_[recieved_msg.client_id] = recieved_msg.content;
