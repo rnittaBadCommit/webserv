@@ -33,10 +33,11 @@ namespace ft
 		void	Parse(const std::string& content);
 
 		bool	is_redirect_(const std::string &url);
-		int		get_response_code() const;
-		const HTTPParseStatus&	get_parse_status() const;
-		const HTTPHead&			get_HTTPHead() const;
-		const std::string&		get_body() const;
+		int		Get_response_code() const;
+		const HTTPParseStatus&	Get_parse_status() const;
+		const HTTPHead&			Get_HTTPHead() const;
+		const std::string&		Get_body() const;
+		const std::string&		Get_path() const;
 
 		void	SetServerConf(const ServerConfig& serverConfig);
 

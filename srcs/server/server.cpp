@@ -76,15 +76,17 @@ namespace ft
 					head.PrintRequest();
 					serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
 					serverChild.SetUp(head);
-					if (serverChild.get_parse_status() != complete)
+					if (serverChild.Get_parse_status() != complete)
 						serverChild.Parse("");
 				}
-			} else if (serverChild.get_parse_status() != complete) {
+			} else if (serverChild.Get_parse_status() != complete) {
 				serverChild.Parse(recieved_msg.content);
 			}
-			if (serverChild.get_parse_status() == complete) {
+			if (serverChild.Get_parse_status() == complete) {
+				std::cout << "PATH: " << serverChild.Get_path() << std::endl;
 				std::cout << "BODY RECEIVED: ";
-				std::cout << serverChild.get_body() << std::endl;
+				std::cout << serverChild.Get_body() << std::endl;
+
 
 				// complete request and send response
 				
@@ -107,7 +109,7 @@ namespace ft
 		}
 		catch (const std::exception &e)
 		{
-			throw e;
+			throw std::runtime_error(e.what());
 		}
 
 		return (false);

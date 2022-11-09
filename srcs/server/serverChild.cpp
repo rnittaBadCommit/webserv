@@ -81,10 +81,11 @@ namespace ft
 		return (false);
 	}
 
-	int		ServerChild::get_response_code() const { return response_code_; }
-	const HTTPParseStatus&	ServerChild::get_parse_status() const { return parse_status_;}
-	const HTTPHead&			ServerChild::get_HTTPHead() const { return HTTP_head_; }
-	const std::string&		ServerChild::get_body() const { return body_; }
+	int		ServerChild::Get_response_code() const { return response_code_; }
+	const HTTPParseStatus&	ServerChild::Get_parse_status() const { return parse_status_;}
+	const HTTPHead&			ServerChild::Get_HTTPHead() const { return HTTP_head_; }
+	const std::string&		ServerChild::Get_body() const { return body_; }
+	const std::string&		ServerChild::Get_path() const { return path_; }
 
 	void	ServerChild::SetUp(HTTPHead& head) {
 		// set up httRequest head
@@ -96,7 +97,7 @@ namespace ft
 		// Find location conf
 		setUp_locationConfig_();
 		if (parse_status_ == complete) {
-			std::cout << "parse is complete before checking anything" << std::endl;
+			//std::cout << "parse is complete before checking anything" << std::endl;
 			return ;
 		}
 
@@ -104,11 +105,11 @@ namespace ft
 		check_method_();
 		check_headers_();
 		/** check IS CGI? **/
-		if (HTTP_head_.GetRequestURI().find('?') != std::string::npos) {
+		/*if (HTTP_head_.GetRequestURI().find('?') != std::string::npos) {
 			// read body??
 			parse_status_ = complete;
 			return ;
-		}
+		}*/
 
 		// decide parse status and get content-length if needed
 		decide_parse_status_();
