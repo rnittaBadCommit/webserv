@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+#include "../utils.hpp"
 
 ConfigParser::ConfigParser() : parser_line(), config(), server_config(), location_config(), nowBlock()
 {
@@ -225,13 +226,14 @@ void ConfigParser::setConfigServerName(E_BlockType block_type, std::vector<std::
 
 void ConfigParser::setConfigListen(E_BlockType block_type, std::vector<std::string> line)
 {
+	unsigned int port = this->validateListen(line);	
 	switch (block_type)
 	{
 	case ROOT:
 		throw std::exception();
 		break;
 	case SERVER:
-		this->server_config.setListen(std::atoi(line[1].c_str()));
+		this->server_config.setListen(port);
 		break;
 	case LOCATION:
 		throw std::exception();
@@ -241,19 +243,22 @@ void ConfigParser::setConfigListen(E_BlockType block_type, std::vector<std::stri
 
 void ConfigParser::setConfigErrorPage(E_BlockType block_type, std::vector<std::string> line)
 {
+	this->validateErrorPage(line);
+	std::string uri = line[line.size() - 2];
+
 	switch (block_type)
 	{
 	case ROOT:
 		throw std::exception();
 		break;
 	case SERVER:
-		throw std::exception();
+		for (std::vector<std::string>::iterator it = line.begin() + 1; (*it)[0] != '/'; ++it)
+		{
+			this->server_config.addErrorPage(ft::StrBase_to_UI_(*it, std::dec), uri);
+		}
 		break;
 	case LOCATION:
-		for (size_t i = 1; i < line.size() - 1; i++)
-		{
-			this->location_config.addRedirect(atoi(line[1].c_str()), line[2]);
-		}
+		throw std::exception();
 		break;
 	}
 }
@@ -414,13 +419,34 @@ void ConfigParser::validateServerName(std::vector<std::string> line)
 	}
 }
 
-/*void ConfigParser::validateListen(std::vector<std::string> line)
-{
-}
-
 void ConfigParser::validateErrorPage(std::vector<std::string> line)
 {
+	std::vector<std::string>::reverse_iterator it = line.rbegin();
+	if (*it != ";" || (*(++it))[0] != '/' || line.size() < 4) {
+		throw std::invalid_argument("Error: must fix error_page");
+	}
 }
+
+unsigned int ConfigParser::validateListen(std::vector<std::string> line)
+{
+	if (!(line[2] == ";" && line.size() == 3))
+	{
+		throw std::invalid_argument("Error: must fix listen");
+	}
+	for (std::string::iterator it = line[1].begin(); it != line[1].end(); ++it) {
+		if (!isdigit(*it)) {
+			throw std::invalid_argument("Error: listen is not digit");
+		}
+	}
+	unsigned int port = ft::StrBase_to_UI_(line[1], std::dec);
+	if (port > 65535) {
+		throw std::runtime_error("Error: listen port number is too high");
+	}
+	return (port);
+}
+/*
+
+
 
 void ConfigParser::validateClientMaxBodySize(std::vector<std::string> line)
 {
