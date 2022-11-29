@@ -265,13 +265,14 @@ void ConfigParser::setConfigErrorPage(E_BlockType block_type, std::vector<std::s
 
 void ConfigParser::setConfigClientMaxBodySize(E_BlockType block_type, std::vector<std::string> line)
 {
+	this->validateClientMaxBodySize(line);
 	switch (block_type)
 	{
 	case ROOT:
 		throw std::exception();
 		break;
 	case SERVER:
-		this->server_config.setClientMaxBodySize(line[1]);
+		this->server_config.setClientMaxBodySize(ft::StrBase_to_UI_(line[1], std::dec));
 		break;
 	case LOCATION:
 		throw std::exception();
@@ -413,7 +414,7 @@ void ConfigParser::setConfigUploadFilepath(E_BlockType block_type, std::vector<s
 
 void ConfigParser::validateServerName(std::vector<std::string> line)
 {
-	if (!(line[0] == "server_name" && line[2] == ";" && line.size() == 3))
+	if (!(line.size() == 3 && line[0] == "server_name" && line[2] == ";"))
 	{
 		throw std::invalid_argument("Error: must fix server_name");
 	}
@@ -422,20 +423,20 @@ void ConfigParser::validateServerName(std::vector<std::string> line)
 void ConfigParser::validateErrorPage(std::vector<std::string> line)
 {
 	std::vector<std::string>::reverse_iterator it = line.rbegin();
-	if (*it != ";" || (*(++it))[0] != '/' || line.size() < 4) {
+	if (line.size() < 4 || *it != ";" || (*(++it))[0] != '/') {
 		throw std::invalid_argument("Error: must fix error_page");
 	}
 }
 
 unsigned int ConfigParser::validateListen(std::vector<std::string> line)
 {
-	if (!(line[2] == ";" && line.size() == 3))
+	if (!(line.size() == 3 && line[2] == ";"))
 	{
 		throw std::invalid_argument("Error: must fix listen");
 	}
 	for (std::string::iterator it = line[1].begin(); it != line[1].end(); ++it) {
 		if (!isdigit(*it)) {
-			throw std::invalid_argument("Error: listen is not digit");
+			throw std::invalid_argument("Error: listen is not a valid number");
 		}
 	}
 	unsigned int port = ft::StrBase_to_UI_(line[1], std::dec);
@@ -444,14 +445,20 @@ unsigned int ConfigParser::validateListen(std::vector<std::string> line)
 	}
 	return (port);
 }
-/*
-
-
 
 void ConfigParser::validateClientMaxBodySize(std::vector<std::string> line)
 {
+	if (!(line.size() == 3 && line[2] == ";"))
+	{
+		throw std::invalid_argument("Error: must fix max body size");
+	}
+	for (std::string::iterator it = line[1].begin(); it != line[1].end(); ++it) {
+		if (!isdigit(*it)) {
+			throw std::invalid_argument("Error: max body size is not a valid number");
+		}
+	}
 }
-
+/*
 void ConfigParser::validateAllowMethod(std::vector<std::string> line)
 {
 }

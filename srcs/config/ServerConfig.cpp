@@ -43,7 +43,7 @@ void ServerConfig::setListen(const int port)
 	this->listen = port;
 }
 
-void ServerConfig::setClientMaxBodySize(const std::string &client_max_body_size)
+void ServerConfig::setClientMaxBodySize(const unsigned int client_max_body_size)
 {
 	this->is_set.insert(CLIENT_MAX_BODY_SIZE);
 	this->client_max_body_size = client_max_body_size;
@@ -70,7 +70,7 @@ const int &ServerConfig::getListen() const
 	return this->listen;
 }
 
-const std::string &ServerConfig::getClientMaxBodySize() const
+const unsigned int &ServerConfig::getClientMaxBodySize() const
 {
 	return this->client_max_body_size;
 }

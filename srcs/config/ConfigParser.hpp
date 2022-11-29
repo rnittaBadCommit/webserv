@@ -49,9 +49,10 @@ public:
 	void validateServerName(std::vector<std::string> line);
 	void validateErrorPage(std::vector<std::string> line);
 	unsigned int validateListen(std::vector<std::string> line);
+	void validateClientMaxBodySize(std::vector<std::string> line);
 	/*
 
-	void validateClientMaxBodySize(std::vector<std::string> line);
+
 	void validateAllowMethod(std::vector<std::string> line);
 	void validateRedirect(std::vector<std::string> line);
 	void validateAlias(std::vector<std::string> line);

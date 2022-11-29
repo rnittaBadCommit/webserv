@@ -91,7 +91,7 @@ namespace ft
 		// set up httRequest head
 		HTTP_head_ = head;
 		save_ = HTTP_head_.getSave();
-		max_body_size_ = strBase_to_UI_(server_config_.getClientMaxBodySize(), std::dec);
+		max_body_size_ = server_config_.getClientMaxBodySize();
 		/** if httphead response code != 200 this.parse status = head response code? **/
 
 		// Find location conf

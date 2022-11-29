@@ -16,7 +16,7 @@ private:
 
 	std::string server_name;
 	int listen;
-	std::string client_max_body_size;
+	unsigned int client_max_body_size;
 	std::map<int, std::string> error_page;
 	std::map<std::string, LocationConfig> location_config;
 
@@ -28,13 +28,13 @@ public:
 
 	void setServerName(const std::string &server_name);
 	void setListen(const int port);
-	void setClientMaxBodySize(const std::string &client_max_body_size);
+	void setClientMaxBodySize(const unsigned int client_max_body_size);
 	void addErrorPage(const int error_status, const std::string &uri);
 	void addLocationConfig(const std::string &path, const LocationConfig location_config);
 
 	const std::string &getServerName() const;
 	const int &getListen() const;
-	const std::string &getClientMaxBodySize() const;
+	const unsigned int &getClientMaxBodySize() const;
 	const std::map<int, std::string> &getErrorPage() const;
 	const std::map<std::string, LocationConfig> &getLocationConfig() const;
 
