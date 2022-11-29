@@ -282,6 +282,7 @@ void ConfigParser::setConfigClientMaxBodySize(E_BlockType block_type, std::vecto
 
 void ConfigParser::setConfigAllowMethod(E_BlockType block_type, std::vector<std::string> line)
 {
+	this->validateAllowMethod(line);
 	switch (block_type)
 	{
 	case ROOT:
@@ -458,10 +459,21 @@ void ConfigParser::validateClientMaxBodySize(std::vector<std::string> line)
 		}
 	}
 }
-/*
+
 void ConfigParser::validateAllowMethod(std::vector<std::string> line)
 {
+	if (line.size() < 3 || line[line.size() - 1] != ";")
+	{
+		throw std::invalid_argument("Error: must fix allow method");
+	}
+	for (std::vector<std::string>::iterator it = ++line.begin(); it != --line.end(); ++it) {
+		if (*it != "GET" && *it != "POST" && *it != "DELETE") {
+			throw std::invalid_argument("Error: unkown allow method");
+		}
+	}
 }
+/*
+
 
 void ConfigParser::validateRedirect(std::vector<std::string> line)
 {
