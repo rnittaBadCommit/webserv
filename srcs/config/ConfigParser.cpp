@@ -74,6 +74,8 @@ std::vector<std::string> ConfigParser::splitLine(const std::string line)
 	size_t start = 0;
 	size_t end = 0;
 
+	if (!isParamDelimiter(*(--line.end())))
+		throw std::runtime_error("invalid line delimiter in configuration file");
 	while (line[start])
 	{
 		while (isspace(line[start]))
@@ -302,6 +304,7 @@ void ConfigParser::setConfigAllowMethod(E_BlockType block_type, std::vector<std:
 
 void ConfigParser::setConfigRedirect(E_BlockType block_type, std::vector<std::string> line)
 {
+	validateRedirect(line);
 	switch (block_type)
 	{
 	case ROOT:
@@ -313,7 +316,7 @@ void ConfigParser::setConfigRedirect(E_BlockType block_type, std::vector<std::st
 	case LOCATION:
 		for (size_t i = 1; i < line.size() - 1; i++)
 		{
-			this->location_config.addRedirect(atoi(line[1].c_str()), line[2]);
+			this->location_config.addRedirect(ft::StrBase_to_UI_(line[1], std::dec), line[2]);
 		}
 		break;
 	}
@@ -321,6 +324,7 @@ void ConfigParser::setConfigRedirect(E_BlockType block_type, std::vector<std::st
 
 void ConfigParser::setConfigAlias(E_BlockType block_type, std::vector<std::string> line)
 {
+	this->validateAlias(line);
 	switch (block_type)
 	{
 	case ROOT:
@@ -338,12 +342,14 @@ void ConfigParser::setConfigAlias(E_BlockType block_type, std::vector<std::strin
 void ConfigParser::setConfigAutoIndex(E_BlockType block_type, std::vector<std::string> line)
 {
 	bool autoindex;
+	this->validateAutoIndex(line);
+
 	if (line[1] == "on")
 		autoindex = true;
 	else if (line[1] == "off")
 		autoindex = false;
 	else
-		throw std::exception();
+		throw std::runtime_error("Please set autoindex setting");
 
 	switch (block_type)
 	{
@@ -361,6 +367,7 @@ void ConfigParser::setConfigAutoIndex(E_BlockType block_type, std::vector<std::s
 
 void ConfigParser::setConfigIndex(E_BlockType block_type, std::vector<std::string> line)
 {
+	this->validateIndex(line);
 	switch (block_type)
 	{
 	case ROOT:
@@ -380,6 +387,7 @@ void ConfigParser::setConfigIndex(E_BlockType block_type, std::vector<std::strin
 
 void ConfigParser::setConfigCgiExtension(E_BlockType block_type, std::vector<std::string> line)
 {
+	this->validateCgiExtension(line);
 	switch (block_type)
 	{
 	case ROOT:
@@ -391,6 +399,8 @@ void ConfigParser::setConfigCgiExtension(E_BlockType block_type, std::vector<std
 	case LOCATION:
 		for (size_t i = 1; i < line.size() - 1; i++)
 		{
+			line[i].erase(line[i].begin());
+			line[i].erase(--line[i].end());
 			this->location_config.addCgiExtension(line[i]);
 		}
 		break;
@@ -399,6 +409,7 @@ void ConfigParser::setConfigCgiExtension(E_BlockType block_type, std::vector<std
 
 void ConfigParser::setConfigUploadFilepath(E_BlockType block_type, std::vector<std::string> line)
 {
+	this->validateUploadFilepath(line);
 	switch (block_type)
 	{
 	case ROOT:
@@ -472,29 +483,60 @@ void ConfigParser::validateAllowMethod(std::vector<std::string> line)
 		}
 	}
 }
-/*
-
-
-void ConfigParser::validateRedirect(std::vector<std::string> line)
-{
-}
 
 void ConfigParser::validateAlias(std::vector<std::string> line)
 {
+	if (line.size() != 3 || line[2] != ";")
+	{
+		throw std::invalid_argument("Error: must fix alias");
+	}
 }
 
 void ConfigParser::validateAutoIndex(std::vector<std::string> line)
 {
+	if (line.size() != 3 || line[2] != ";" || (line[1] != "on" && line[1] != "off"))
+	{
+		throw std::invalid_argument("Error: must fix alias");
+	}
 }
 
 void ConfigParser::validateIndex(std::vector<std::string> line)
 {
+	if (line.size() < 3 || line[line.size() - 1] != ";")
+	{
+		throw std::invalid_argument("Error: must fix index");
+	}
 }
 
 void ConfigParser::validateCgiExtension(std::vector<std::string> line)
 {
+	if (line.size() != 4 || line[3] != ";")
+	{
+		throw std::invalid_argument("Error: must fix cgi_extension");
+	}
+	if (line[1] != "\".py\"")
+	{
+		throw std::invalid_argument("Error: Only .py extension available");
+	}
 }
-
 void ConfigParser::validateUploadFilepath(std::vector<std::string> line)
 {
-}*/
+	if (line.size() != 3 || line[2] != ";")
+	{
+		throw std::invalid_argument("Error: must fix upload_filepath");
+	}
+}
+
+void ConfigParser::validateRedirect(std::vector<std::string> line)
+{
+	if (line.size() != 4 || line[3] != ";")
+	{
+		throw std::invalid_argument("Error: must fix redirect");
+	}
+	for (std::string::iterator it = line[1].begin(); it != line[1].end(); ++it)
+	{
+		if (!isdigit(*it)) {
+			throw std::invalid_argument("Error: return error code is not a valid number");
+		}
+	}
+}
