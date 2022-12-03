@@ -39,6 +39,7 @@ namespace ft
 		// Server(const ServerConfig server_config);
 
 		void start_server();
+		void print_server_config();
 
 	private:
 		Server(); // default conf

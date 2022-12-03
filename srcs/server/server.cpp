@@ -27,6 +27,7 @@ namespace ft
 	{
 		ConfigParser configParser;
 		server_config_ = configParser.readFile(config_path).getServerConfig();
+		//print_server_config();
 	}
 
 	void Server::create_serverChild_map_()
@@ -133,5 +134,16 @@ namespace ft
 			}
             return (it->second);
         }
+	}
+
+	void Server::print_server_config() {
+		for (std::vector<ServerConfig>::iterator it = server_config_.begin(); it != server_config_.end(); ++it) {
+			std::cout << "\t\t-----------SERVER-----------" << std::endl;
+			it->print();
+			for (std::map<std::string, LocationConfig>::const_iterator lIt = it->getLocationConfig().begin(); lIt != it->getLocationConfig().end(); ++lIt) {
+				std::cout << "\t------loc: " << lIt->first << " ------" << std::endl;
+				lIt->second.print();
+			}
+		}
 	}
 }

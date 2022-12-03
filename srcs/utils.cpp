@@ -138,4 +138,15 @@ namespace ft {
         }
         return (static_cast<unsigned int>(num));
     }
+   	int     StrBase_to_I_(const std::string& str, std::ios_base& (*base)(std::ios_base&)) {
+        std::stringstream  stream(str);
+        long int  num;
+
+        stream >> base >> num;
+
+        if (num > std::numeric_limits<int>::max()) {
+            throw std::runtime_error("invalid number");
+        }
+        return (static_cast<int>(num));
+    }
 }
