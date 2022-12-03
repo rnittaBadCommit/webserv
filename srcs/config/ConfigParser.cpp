@@ -203,7 +203,7 @@ void ConfigParser::setConfigServer(std::vector<std::string> line)
 		if (line[1][0] != '/') {
 			line[1].insert(0, 1, '/');
 		}
-		if (line[1][line[1].size() - 1] == '/') {
+		if (line[1].size() > 1 && line[1][line[1].size() - 1] == '/') {
 			line[1].erase(line[1].size() - 1);
 		}
 		this->location_config.setUri(line[1]);

@@ -162,13 +162,16 @@ namespace ft
             pathParts.insert(0, httpReqURI.substr(i)); // from index to npos
             httpReqURI.erase(i); // from index to npos
         }
-         
+ 
         if (locConfIt == serverLocMap.end()) {
+			std::cout << "could not find LocationConfig, using default\n";
 			locConfIt = serverLocMap.find("/");
 			if (locConfIt == serverLocMap.end()) {
 				throw_(404, "Not Found - no default server exists");
 			}
-        }
+        } else {
+			std::cout << "found location config: " + locConfIt->first << std::endl;;
+		}
 
         location_config_ = locConfIt->second;
 		if (location_config_.getRedirect().first != LocationConfig::NO_REDIRECT) {
