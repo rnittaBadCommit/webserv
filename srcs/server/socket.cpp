@@ -5,7 +5,7 @@
 namespace ft
 {
 	Socket::Socket() : sockfd_vec_(), closedfd_vec_(), poll_fd_vec_(), fd_to_index_nap_(), last_recieve_time_map_(),
-		msg_to_send_map_(), fd_to_port_map_(), used_fd_set_(), port_num_(), keep_connect_time_len_(100)
+		msg_to_send_map_(), fd_to_port_map_(), used_fd_set_(), port_num_(), keep_connect_time_len_(10)
 	{
 	}
 
@@ -48,25 +48,33 @@ namespace ft
 	{
 		struct sockaddr_in server_sockaddr;
 		struct pollfd poll_fd;
+		std::set<unsigned int> boundPorts;
+		unsigned int listenPort = 0;
 
 		for (size_t i = 0; i < server_config_vec.size(); ++i)
 		{
+			listenPort = server_config_vec[i].getListen();
+			if (boundPorts.find(listenPort) != boundPorts.end()) {
+				continue ;
+			}
+
 			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
 			if (sockfd_vec_.back() < 0)
 				throw SetUpFailException("Error: socket()");
 
-			set_sockaddr_(server_sockaddr, "127.0.0.1", server_config_vec[i].getListen());
-			std::cout << "127.0.0.1"
-					  << " " << server_config_vec[i].getListen() << std::endl;
+			set_sockaddr_(server_sockaddr, "127.0.0.1", listenPort);
+			std::cout << "127.0.0.1 " << listenPort << std::endl;
 
-			fd_to_port_map_[sockfd_vec_.back()] = server_config_vec[i].getListen();
+			fd_to_port_map_[sockfd_vec_.back()] = listenPort;
 
 			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr,
-					 sizeof(server_sockaddr)) < 0 && errno != EADDRINUSE)
+					sizeof(server_sockaddr)) < 0)
 				throw SetUpFailException("Error: bind()");
 
 			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)
 				throw SetUpFailException("Error: listen()");
+
+			boundPorts.insert(listenPort);
 
 			poll_fd.fd = sockfd_vec_.back();
 			poll_fd.events = POLLIN;
