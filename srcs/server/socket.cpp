@@ -65,6 +65,10 @@ namespace ft
 			set_sockaddr_(server_sockaddr, "127.0.0.1", listenPort);
 			std::cout << "127.0.0.1 " << listenPort << std::endl;
 
+			const int opt = 1;
+			setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+			setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
+
 			fd_to_port_map_[sockfd_vec_.back()] = listenPort;
 
 			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr,
