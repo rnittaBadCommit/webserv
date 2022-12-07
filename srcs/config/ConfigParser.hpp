@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
+#include <utility>
 
 #include "Config.hpp"
 #include "ConfigConstant.hpp"
@@ -19,6 +21,9 @@ private:
 
 	E_BlockType nowBlock;
 	bool isParamDelimiter(int c);
+	void throwIncorrectFormatError(const std::vector<std::string>& line, const std::string& directive);
+	unsigned int validateUnsignedInt(const std::string& number, const std::string& directive);
+	int validateInt(const std::string& number, const std::string& directive);
 
 public:
 	ConfigParser();
@@ -47,17 +52,16 @@ public:
 	void setConfigUploadFilepath(E_BlockType block_type, std::vector<std::string> line);
 
 	void validateServerName(std::vector<std::string> line);
-	/*void validateListen(std::vector<std::string> line);
-	void validateErrorPage(std::vector<std::string> line);
-	void validateClientMaxBodySize(std::vector<std::string> line);
-	void validateAllowMethod(std::vector<std::string> line);
-	void validateRedirect(std::vector<std::string> line);
+	std::map<unsigned int, std::string> validateErrorPage(std::vector<std::string> line);
+	unsigned int validateListen(std::vector<std::string> line);
+	unsigned int validateClientMaxBodySize(std::vector<std::string> line);
+	std::set<std::string> validateAllowMethod(std::vector<std::string> line);
 	void validateAlias(std::vector<std::string> line);
 	void validateAutoIndex(std::vector<std::string> line);
-	void validateIndex(std::vector<std::string> line);
-	void validateCgiExtension(std::vector<std::string> line);
-	void validateUploadFilepath(std::vector<std::string> line);*/
-
+	std::vector<std::string> validateIndex(std::vector<std::string> line);
+	std::pair<std::string, std::string> validateCgiExtension(std::vector<std::string> line);
+	void validateUploadFilepath(std::vector<std::string> line);
+	std::pair<int, std::string> validateRedirect(std::vector<std::string> line);
 	void printParserLine();
 };
 

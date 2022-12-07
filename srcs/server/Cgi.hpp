@@ -13,9 +13,14 @@ namespace ft
 	{
 	public:
 		Cgi(const std::string cgi_path);
+		~Cgi();
 		void run(/*const int fd*/);
 
 	private:
+		Cgi();
+		Cgi(const Cgi& src);
+		Cgi& operator=(const Cgi& rhs);
+
 		const std::string cgi_path_;
 		int pipefd[2];
 		std::vector<char *> argv;

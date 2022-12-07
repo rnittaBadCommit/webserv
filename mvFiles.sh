@@ -1,7 +1,6 @@
 #!/bin/bash
 
-sudo cp config/basic.conf /etc/nginx/conf.d
-sudo cp config/multiPort.conf /etc/nginx/conf.d
-sudo cp config/multiServ.conf /etc/nginx/conf.d
-sudo cp config/redirect.conf /etc/nginx/conf.d
-sudo cp -R inceptionHTML /var/www/
+sudo rm /etc/nginx/conf.d/*.conf
+sudo cp config/nginxInception.conf /etc/nginx/conf.d/
+sudo rm -rf /var/www/inception_server
+sudo cp -R ./var/www/inception_server /var/www/

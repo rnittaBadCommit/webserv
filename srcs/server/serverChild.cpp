@@ -8,6 +8,10 @@ namespace ft
 	{
 	}
 
+	ServerChild::~ServerChild()
+	{
+	}
+
 	ServerChild::ServerChild(const ServerConfig &server_config)
 		: server_config_(server_config), location_config_(), redirectList_map_(), response_code_(),
 		parse_status_(), HTTP_head_(), content_length_(), read_bytes_(), max_body_size_(), body_(), save_(), path_(), hex_bytes_()
@@ -40,6 +44,7 @@ namespace ft
 		body_ = src.body_;
 		save_ = src.save_;
 		path_ = src.path_;
+		hex_bytes_ = src.hex_bytes_;
 	}
 
 	ServerChild& ServerChild::operator=(const ServerChild &rhs){
@@ -56,6 +61,7 @@ namespace ft
 			body_ = rhs.body_;
 			save_ = rhs.save_;
 			path_ = rhs.path_;	
+			hex_bytes_ = rhs.hex_bytes_;
 		}
 		return (*this);
 	}
@@ -75,25 +81,35 @@ namespace ft
 		return (false);
 	}
 
-	int		ServerChild::get_response_code() const { return response_code_; }
-	const HTTPParseStatus&	ServerChild::get_parse_status() const { return parse_status_;}
-	const HTTPHead&			ServerChild::get_HTTPHead() const { return HTTP_head_; }
-	const std::string&		ServerChild::get_body() const { return body_; }
+	int		ServerChild::Get_response_code() const { return response_code_; }
+	const HTTPParseStatus&	ServerChild::Get_parse_status() const { return parse_status_;}
+	const HTTPHead&			ServerChild::Get_HTTPHead() const { return HTTP_head_; }
+	const std::string&		ServerChild::Get_body() const { return body_; }
+	const std::string&		ServerChild::Get_path() const { return path_; }
 
 	void	ServerChild::SetUp(HTTPHead& head) {
 		// set up httRequest head
 		HTTP_head_ = head;
 		save_ = HTTP_head_.getSave();
-		max_body_size_ = strBase_to_UI_(server_config_.getClientMaxBodySize(), std::dec);
+		max_body_size_ = server_config_.getClientMaxBodySize();
+		/** if httphead response code != 200 this.parse status = head response code? **/
 
 		// Find location conf
 		setUp_locationConfig_();
-		// redirect?
+		if (parse_status_ == complete) {
+			//std::cout << "parse is complete before checking anything" << std::endl;
+			return ;
+		}
 
 		// validate request method and headers
 		check_method_();
 		check_headers_();
-		// check IS CGI?
+		/** check IS CGI? **/
+		/*if (HTTP_head_.GetRequestURI().find('?') != std::string::npos) {
+			// read body??
+			parse_status_ = complete;
+			return ;
+		}*/
 
 		// decide parse status and get content-length if needed
 		decide_parse_status_();
@@ -103,7 +119,6 @@ namespace ft
 
           	content_length_ = strBase_to_UI_(content_length->second, std::dec);
            	if (content_length_ > max_body_size_) {
-				std::cout << "cl: " << content_length_ << "mbs: " << max_body_size_ << std::endl;
                	throw_(413, "Payload Too Large");
            	}
            	read_bytes_ = content_length_;
@@ -137,9 +152,6 @@ namespace ft
     }
 
 	void    ServerChild::setUp_locationConfig_() {
-       // ***location config parser:
-       // location uri must have beginning / and no ending /
-
         std::string     httpReqURI = HTTP_head_.GetRequestURI();	
         std::map<std::string, LocationConfig>           serverLocMap = server_config_.getLocationConfig();
         std::map<std::string, LocationConfig>::iterator locConfIt;
@@ -150,21 +162,25 @@ namespace ft
             pathParts.insert(0, httpReqURI.substr(i)); // from index to npos
             httpReqURI.erase(i); // from index to npos
         }
-         
+ 
         if (locConfIt == serverLocMap.end()) {
+			std::cout << "could not find LocationConfig, using default\n";
 			locConfIt = serverLocMap.find("/");
 			if (locConfIt == serverLocMap.end()) {
 				throw_(404, "Not Found - no default server exists");
 			}
-        }
+        } else {
+			std::cout << "found location config: " + locConfIt->first << std::endl;;
+		}
 
         location_config_ = locConfIt->second;
 		if (location_config_.getRedirect().first != LocationConfig::NO_REDIRECT) {
-			// create redirect response
+			parse_status_ = complete;
+			response_code_ = location_config_.getRedirect().first;
+			path_ = location_config_.getRedirect().second;
 		} else {
 	        path_ = location_config_.getAlias() + pathParts;
 		}
-
     }
 
 	void	ServerChild::check_method_ () {
@@ -242,7 +258,6 @@ namespace ft
             response_code_ = 200;
             parse_status_ = complete;
         }
-		/* if read_bytes doesn't become 0, but no more message comes*/
 	}
 
     void	ServerChild::read_chunks_() {

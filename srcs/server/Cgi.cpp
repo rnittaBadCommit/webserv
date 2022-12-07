@@ -6,8 +6,14 @@ namespace ft
 	Cgi::Cgi(const std::string cgi_path)
 		: cgi_path_(cgi_path)
 	{
+		pipefd[0] = 0;
+		pipefd[1] = 0;
 		argv.push_back(NULL);
 		envp.push_back(NULL);
+	}
+
+	Cgi::~Cgi()
+	{
 	}
 
 	void Cgi::run(/*const int fd*/)

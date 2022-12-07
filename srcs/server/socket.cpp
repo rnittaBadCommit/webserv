@@ -4,7 +4,8 @@
 
 namespace ft
 {
-	Socket::Socket() : keep_connect_time_len_(100)
+	Socket::Socket() : sockfd_vec_(), closedfd_vec_(), poll_fd_vec_(), fd_to_index_nap_(), last_recieve_time_map_(),
+		msg_to_send_map_(), fd_to_port_map_(), used_fd_set_(), port_num_(), keep_connect_time_len_(100)
 	{
 	}
 
@@ -15,6 +16,11 @@ namespace ft
 
 	Socket::RecievedMsg::RecievedMsg()
 		: content(""), client_id(0), port(0)
+	{
+	}
+
+	Socket::RecievedMsg::RecievedMsg(const RecievedMsg& src)
+		: content(src.content), client_id(src.client_id), port(src.port)
 	{
 	}
 
@@ -32,6 +38,10 @@ namespace ft
 		client_id = other.client_id;
 		port = other.port;
 		return (*this);
+	}
+	
+	Socket::RecievedMsg::~RecievedMsg()
+	{
 	}
 
 	void Socket::setup(const std::vector<ServerConfig> &server_config_vec)
@@ -52,7 +62,7 @@ namespace ft
 			fd_to_port_map_[sockfd_vec_.back()] = server_config_vec[i].getListen();
 
 			if (bind(sockfd_vec_.back(), (struct sockaddr *)&server_sockaddr,
-					 sizeof(server_sockaddr)) < 0)
+					 sizeof(server_sockaddr)) < 0 && errno != EADDRINUSE)
 				throw SetUpFailException("Error: bind()");
 
 			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)
@@ -157,7 +167,7 @@ namespace ft
 		poll_fd_vec_[fd_to_index_nap_[fd]].events = POLLOUT;
 	}
 
-	void Socket::check_keep_time_and_close_fd()
+	std::vector<int>& Socket::check_keep_time_and_close_fd()
 	{
 		time_t current_time = time(NULL);
 		time_t tmp_last_recieve_time;
@@ -172,11 +182,12 @@ namespace ft
 				if (current_time - tmp_last_recieve_time > keep_connect_time_len_)
 				{
 					std::cerr << "keep alive close" << std::endl;
+					closedfd_vec_.push_back(poll_fd_vec_[i].fd);
 					close_fd_(poll_fd_vec_[i].fd, i);
 				}
 			}
 		}
-		// return closed fds vector
+		return(closedfd_vec_);
 	}
 
 	void Socket::register_new_client_(int sock_fd)

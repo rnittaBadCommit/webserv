@@ -1,4 +1,4 @@
 #!/bin/bash
 
 make
-./webserv
+./webserv config/review.conf
