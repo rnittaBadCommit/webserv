@@ -44,8 +44,10 @@ namespace ft
 		{
 		public:
 			RecievedMsg();
-			RecievedMsg(const std::string content, const int client_id, in_port_t port);
+			RecievedMsg(const RecievedMsg& src);
 			RecievedMsg operator=(const RecievedMsg &other);
+			RecievedMsg(const std::string content, const int client_id, in_port_t port);
+			~RecievedMsg();
 			std::string content;
 			int client_id;
 			in_port_t port;
@@ -63,7 +65,7 @@ namespace ft
 
 		void send_msg(int fd, const std::string msg);
 
-		void check_keep_time_and_close_fd();
+		std::vector<int>& check_keep_time_and_close_fd();
 
 		class SetUpFailException : public std::exception
 		{
@@ -99,7 +101,11 @@ namespace ft
 		};
 
 	private:
+		Socket(const Socket& src);
+		Socket& operator=(const Socket& rhs);
+
 		std::vector<int> sockfd_vec_;
+		std::vector<int> closedfd_vec_;
 		std::vector<struct pollfd> poll_fd_vec_;
 		std::map<int, int> fd_to_index_nap_;
 		// std::vector<int> recieve_fd_vec_;

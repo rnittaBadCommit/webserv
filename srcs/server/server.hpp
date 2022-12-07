@@ -31,15 +31,21 @@ namespace ft
 		typedef std::map<in_port_t, ServerChild>	DefaultServerChildMap;
 		typedef std::pair<HTTPHead, ServerChild>	HTTPRequestPair;
 
-		Server(); // default conf
+
+		~Server();
 		// Server(const std::string conf_path); // custom conf
 		Server(const std::vector<in_port_t> port_vec);
 		Server(const std::string config_path);
 		// Server(const ServerConfig server_config);
 
 		void start_server();
+		void print_server_config();
 
 	private:
+		Server(); // default conf
+		Server(const Server& src);
+		Server& operator=(const Server&rhs);
+
 		std::vector<ServerConfig>	server_config_;
 		Socket 						socket_;
 		ServerChildMap			serverChild_map_;

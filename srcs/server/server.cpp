@@ -2,11 +2,15 @@
 
 namespace ft
 {
-	Server::Server(const std::string config_path)
+	Server::Server(const std::string config_path) : server_config_(), socket_(), serverChild_map_(),
+		default_serverChild_map_(), httpRequest_map_(), httpRequest_pair_map_()
 	{
 		import_config_(config_path);
 		socket_.setup(server_config_);
-		create_serverChild_map_();	
+		create_serverChild_map_();
+	}
+	Server::~Server()
+	{
 	}
 
 	void Server::start_server()
@@ -23,6 +27,7 @@ namespace ft
 	{
 		ConfigParser configParser;
 		server_config_ = configParser.readFile(config_path).getServerConfig();
+		//print_server_config();
 	}
 
 	void Server::create_serverChild_map_()
@@ -46,9 +51,12 @@ namespace ft
 		Socket::RecievedMsg recieved_msg;
 
 		try
-		{
-			// remove all fds from closed fd vector
-			// socket_.check_keep_time_and_close_fd();
+		{	
+			std::vector<int>& closedfd_vec = socket_.check_keep_time_and_close_fd();
+			for (std::vector<int>::iterator it = closedfd_vec.begin(); it != closedfd_vec.end(); ++it) {
+				httpRequest_pair_map_.erase(*it);
+			}
+			closedfd_vec.clear();
 
 			recieved_msg = socket_.recieve_msg();
 			std::cout << "port: " << recieved_msg.port << std::endl;
@@ -65,19 +73,24 @@ namespace ft
 			if (head.GetParseStatus() != complete) {
 				if (head.Parse(recieved_msg.content) == 0) {
 					std::cout << "HEADER RECIEVED\n";
-					head.PrintRequest();
 					head.ParseRequestURI();
+					head.PrintRequest();
 					serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
 					serverChild.SetUp(head);
-					serverChild.Parse("");
+					if (serverChild.Get_parse_status() != complete)
+						serverChild.Parse("");
 				}
-			} else if (serverChild.get_parse_status() != complete) {
+			} else if (serverChild.Get_parse_status() != complete) {
 				serverChild.Parse(recieved_msg.content);
 			}
-			if (serverChild.get_parse_status() == complete) {
+			if (serverChild.Get_parse_status() == complete) {
+				std::cout << "PATH: " << serverChild.Get_path() << std::endl;
 				std::cout << "BODY RECEIVED: ";
-				std::cout << serverChild.get_body() << std::endl;
-				// complete request
+				std::cout << serverChild.Get_body() << std::endl;
+
+
+				// complete request and send response
+				
 				httpRequest_pair_map_.erase(recieved_msg.client_id);
 			}
 
@@ -97,8 +110,7 @@ namespace ft
 		}
 		catch (const std::exception &e)
 		{
-			std::cerr << "Error: " << e.what() << std::endl;
-			exit(1);
+			throw std::runtime_error(e.what());
 		}
 
 		return (false);
@@ -112,16 +124,26 @@ namespace ft
         ServerChildMap::iterator confIt = serverChild_map_.find(std::make_pair(host, port));
 
         if (confIt != serverChild_map_.end()) {
+			std::cout << "found serverChild by httpRequest host\n";
             return (confIt->second);
         } else {
-			//std::cout << "port: " << port << std::endl;
-			return (default_serverChild_map_.begin()->second);
-
+			std::cout << "could not find serverchild, using default\n";
 			DefaultServerChildMap::iterator it = default_serverChild_map_.find(port);
 			if (it == default_serverChild_map_.end()) {
 				throw std::runtime_error("port does not match any default servers");
 			}
             return (it->second);
         }
+	}
+
+	void Server::print_server_config() {
+		for (std::vector<ServerConfig>::iterator it = server_config_.begin(); it != server_config_.end(); ++it) {
+			std::cout << "\t\t-----------SERVER-----------" << std::endl;
+			it->print();
+			for (std::map<std::string, LocationConfig>::const_iterator lIt = it->getLocationConfig().begin(); lIt != it->getLocationConfig().end(); ++lIt) {
+				std::cout << "\t------loc: " << lIt->first << " ------" << std::endl;
+				lIt->second.print();
+			}
+		}
 	}
 }
