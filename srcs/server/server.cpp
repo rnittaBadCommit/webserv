@@ -70,19 +70,28 @@ namespace ft
 			HTTPHead& head = httpRequest_pair_map_[recieved_msg.client_id].first;
 			ServerChild& serverChild = httpRequest_pair_map_[recieved_msg.client_id].second;
 
-			if (head.GetParseStatus() != complete) {
-				if (head.Parse(recieved_msg.content) == 0) {
-					std::cout << "HEADER RECIEVED\n";
-					head.ParseRequestURI();
-					head.PrintRequest();
-					serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
-					serverChild.SetUp(head);
-					if (serverChild.Get_parse_status() != complete)
-						serverChild.Parse("");
+			try {
+				if (head.GetParseStatus() != complete) {
+					if (head.Parse(recieved_msg.content) == 0) {
+						std::cout << "HEADER RECIEVED\n";
+						head.ParseRequestURI();
+						head.PrintRequest();
+						serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
+						serverChild.SetUp(head);
+						if (serverChild.Get_parse_status() != complete)
+							serverChild.Parse("");
+					}
+				} else if (serverChild.Get_parse_status() != complete) {
+					serverChild.Parse(recieved_msg.content);
 				}
-			} else if (serverChild.Get_parse_status() != complete) {
-				serverChild.Parse(recieved_msg.content);
+			} catch (const std::exception& e) {
+				if (head.GetParseStatus() != complete) {
+					serverChild.Set_response_code(head.GetResponseCode());
+					serverChild.Set_parse_status(complete);
+				}
+				std::cout << "error while parsing http request: " << e.what() << std::endl;
 			}
+
 			if (serverChild.Get_parse_status() == complete) {
 				std::cout << "PATH: " << serverChild.Get_path() << std::endl;
 				std::cout << "BODY RECEIVED: ";
@@ -92,6 +101,9 @@ namespace ft
 				// complete request and send response
 				
 				httpRequest_pair_map_.erase(recieved_msg.client_id);
+				if (serverChild.Get_response_code() != 200) {
+					socket_.close_fd_(recieved_msg.client_id, recieved_msg.i_poll_fd);
+				}
 			}
 
 			return (true);

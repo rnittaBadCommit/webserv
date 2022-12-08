@@ -39,6 +39,8 @@ namespace ft
 		const std::string&		Get_body() const;
 		const std::string&		Get_path() const;
 
+		void	Set_parse_status(HTTPParseStatus parse_status);
+		void	Set_response_code(int response_code);
 		void	SetServerConf(const ServerConfig& serverConfig);
 
 	private:

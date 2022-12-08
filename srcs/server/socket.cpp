@@ -15,17 +15,17 @@ namespace ft
 	}
 
 	Socket::RecievedMsg::RecievedMsg()
-		: content(""), client_id(0), port(0)
+		: content(""), client_id(0), port(0), i_poll_fd(0)
 	{
 	}
 
 	Socket::RecievedMsg::RecievedMsg(const RecievedMsg& src)
-		: content(src.content), client_id(src.client_id), port(src.port)
+		: content(src.content), client_id(src.client_id), port(src.port), i_poll_fd(src.i_poll_fd)
 	{
 	}
 
-	Socket::RecievedMsg::RecievedMsg(const std::string content, const int client_id, in_port_t port)
-		: content(content), client_id(client_id), port(port)
+	Socket::RecievedMsg::RecievedMsg(const std::string content, const int client_id, in_port_t port, size_t i_poll_fd)
+		: content(content), client_id(client_id), port(port), i_poll_fd(i_poll_fd)
 	{
 	}
 
@@ -37,6 +37,7 @@ namespace ft
 		content = other.content;
 		client_id = other.client_id;
 		port = other.port;
+		i_poll_fd = other.i_poll_fd;
 		return (*this);
 	}
 	
@@ -143,7 +144,7 @@ namespace ft
 				if (used_fd_set_.count(poll_fd_vec_[i].fd))
 				{
 					poll_fd_vec_[i].revents = 0;
-					return (recieve_msg_from_connected_client_(poll_fd_vec_[i].fd));
+					return (recieve_msg_from_connected_client_(poll_fd_vec_[i].fd, i));
 				}
 				else
 				{
@@ -220,14 +221,14 @@ namespace ft
 		fd_to_port_map_[connection] = fd_to_port_map_[sock_fd];
 	}
 
-	Socket::RecievedMsg Socket::recieve_msg_from_connected_client_(int connection)
+	Socket::RecievedMsg Socket::recieve_msg_from_connected_client_(int connection, size_t i_poll_fd)
 	{
 		char buf[BUFFER_SIZE + 1];
 
 		last_recieve_time_map_[connection] = time(NULL);
 		int recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
 		buf[recv_ret] = '\0';
-		return (RecievedMsg(std::string(buf), connection, fd_to_port_map_[connection]));
+		return (RecievedMsg(std::string(buf), connection, fd_to_port_map_[connection], i_poll_fd));
 	}
 
 	void Socket::close_fd_(const int fd, const int i_poll_fd)

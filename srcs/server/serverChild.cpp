@@ -87,6 +87,8 @@ namespace ft
 	const std::string&		ServerChild::Get_body() const { return body_; }
 	const std::string&		ServerChild::Get_path() const { return path_; }
 
+	void	ServerChild::Set_parse_status(HTTPParseStatus parse_status) { parse_status_ = parse_status; }
+	void	ServerChild::Set_response_code(int response_code) { response_code_ = response_code; }
 	void	ServerChild::SetUp(HTTPHead& head) {
 		// set up httRequest head
 		HTTP_head_ = head;

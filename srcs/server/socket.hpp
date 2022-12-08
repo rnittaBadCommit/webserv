@@ -47,11 +47,12 @@ namespace ft
 			RecievedMsg();
 			RecievedMsg(const RecievedMsg& src);
 			RecievedMsg operator=(const RecievedMsg &other);
-			RecievedMsg(const std::string content, const int client_id, in_port_t port);
+			RecievedMsg(const std::string content, const int client_id, in_port_t port, size_t i_poll_fd);
 			~RecievedMsg();
 			std::string content;
 			int client_id;
 			in_port_t port;
+			size_t i_poll_fd;
 		};
 
 		void setup(const std::vector<ServerConfig> &server_config);
@@ -67,6 +68,8 @@ namespace ft
 		void send_msg(int fd, const std::string msg);
 
 		std::vector<int>& check_keep_time_and_close_fd();
+
+		void close_fd_(const int fd, const int i_poll_fd);
 
 		class SetUpFailException : public std::exception
 		{
@@ -119,13 +122,12 @@ namespace ft
 		size_t port_num_;
 		time_t keep_connect_time_len_;// = 100;
 
-		RecievedMsg recieve_msg_from_connected_client_(int connection);
+		RecievedMsg recieve_msg_from_connected_client_(int connection, size_t i_poll_fd);
 		void register_new_client_(int sock_fd);
 
 		void initialize_();
 		void tmp_();
-
-		void close_fd_(const int fd, const int i_poll_fd);
+	
 		void closeAllSocket_();
 		void set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port);
 	};
