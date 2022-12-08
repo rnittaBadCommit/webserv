@@ -89,23 +89,26 @@ namespace ft
 
 	void	ServerChild::Set_parse_status(HTTPParseStatus parse_status) { parse_status_ = parse_status; }
 	void	ServerChild::Set_response_code(int response_code) { response_code_ = response_code; }
+
 	void	ServerChild::SetUp(HTTPHead& head) {
 		// set up httRequest head
 		HTTP_head_ = head;
 		save_ = HTTP_head_.getSave();
 		max_body_size_ = server_config_.getClientMaxBodySize();
-		/** if httphead response code != 200 this.parse status = head response code? **/
+		response_code_ = head.GetResponseCode();
 
 		// Find location conf
 		setUp_locationConfig_();
-		if (parse_status_ == complete) {
-			//std::cout << "parse is complete before checking anything" << std::endl;
-			return ;
-		}
 
 		// validate request method and headers
 		check_method_();
 		check_headers_();
+
+		// return in case of redirect
+		if (parse_status_ == complete) {
+			return ;
+		}
+
 		/** check IS CGI? **/
 		/*if (HTTP_head_.GetRequestURI().find('?') != std::string::npos) {
 			// read body??

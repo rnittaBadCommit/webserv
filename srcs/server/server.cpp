@@ -57,11 +57,10 @@ namespace ft
 				httpRequest_pair_map_.erase(*it);
 			}
 			closedfd_vec.clear();
-
+			//socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");			
 			recieved_msg = socket_.recieve_msg();
 			std::cout << "port: " << recieved_msg.port << std::endl;
-			//socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");
-			//if (cd)
+
 			httpRequest_map_[recieved_msg.client_id] = recieved_msg.content;
 			std::cout << "===============================" << std::endl
 					  << httpRequest_map_[recieved_msg.client_id] << std::endl
@@ -87,8 +86,8 @@ namespace ft
 			} catch (const std::exception& e) {
 				if (head.GetParseStatus() != complete) {
 					serverChild.Set_response_code(head.GetResponseCode());
-					serverChild.Set_parse_status(complete);
 				}
+				serverChild.Set_parse_status(complete);
 				std::cout << "error while parsing http request: " << e.what() << std::endl;
 			}
 
@@ -97,9 +96,13 @@ namespace ft
 				std::cout << "BODY RECEIVED: ";
 				std::cout << serverChild.Get_body() << std::endl;
 
+				// check status code
 
-				// complete request and send response
-				
+				// complete request
+
+				// send response
+				socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");	
+
 				httpRequest_pair_map_.erase(recieved_msg.client_id);
 				if (serverChild.Get_response_code() != 200) {
 					socket_.close_fd_(recieved_msg.client_id, recieved_msg.i_poll_fd);
