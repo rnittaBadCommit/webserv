@@ -54,6 +54,7 @@ namespace ft
 		{	
 			std::vector<int>& closedfd_vec = socket_.check_keep_time_and_close_fd();
 			for (std::vector<int>::iterator it = closedfd_vec.begin(); it != closedfd_vec.end(); ++it) {
+				std::cout << "removing: " << *it << std::endl;
 				httpRequest_pair_map_.erase(*it);
 			}
 			closedfd_vec.clear();
@@ -66,6 +67,7 @@ namespace ft
 					  << httpRequest_map_[recieved_msg.client_id] << std::endl
 					  << "===============================" << std::endl;
 
+			std::cout << "trying to use: " << recieved_msg.client_id << std::endl;
 			HTTPHead& head = httpRequest_pair_map_[recieved_msg.client_id].first;
 			ServerChild& serverChild = httpRequest_pair_map_[recieved_msg.client_id].second;
 
@@ -101,11 +103,11 @@ namespace ft
 				// complete request
 
 				// send response
-				socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");	
-
-				httpRequest_pair_map_.erase(recieved_msg.client_id);
+				std::cout << "sending to: " << recieved_msg.client_id << std::endl;
+				socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");
 				if (serverChild.Get_response_code() != 200) {
 					socket_.close_fd_(recieved_msg.client_id, recieved_msg.i_poll_fd);
+					httpRequest_pair_map_.erase(recieved_msg.client_id);
 				}
 			}
 

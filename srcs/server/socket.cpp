@@ -156,6 +156,7 @@ namespace ft
 			}
 			else if (poll_fd_vec_[i].revents & POLLOUT)
 			{
+				std::cout << "sending to: " << poll_fd_vec_[i].fd << std::endl;
 				poll_fd_vec_[i].revents = 0;
 				std::string &msg_to_send = msg_to_send_map_[poll_fd_vec_[i].fd];
 				size_t sent_num = send(poll_fd_vec_[i].fd, msg_to_send.c_str(),
