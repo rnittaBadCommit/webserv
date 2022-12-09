@@ -103,8 +103,9 @@ namespace ft
 				// complete request
 
 				// send response
-				std::cout << "sending to: " << recieved_msg.client_id << std::endl;
 				socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");
+				std::cout << "sent to: " << recieved_msg.client_id << std::endl;
+
 				if (serverChild.Get_response_code() != 200) {
 					socket_.close_fd_(recieved_msg.client_id, recieved_msg.i_poll_fd);
 					httpRequest_pair_map_.erase(recieved_msg.client_id);
