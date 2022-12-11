@@ -16,8 +16,8 @@ namespace CgiTest{
  };
 
 TEST_F(CgiTest, SuccessCase1) {
-  ft::Server s;
-  ft::Server::
+//  ft::Server s;
+//  ft::Server::
   Cgi c;
   c.Execute();
 }
