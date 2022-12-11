@@ -9,6 +9,8 @@
 #include <cstring>
 #include <iostream>
 #include <sys/socket.h>
+#include <cstdio>
+#include <sys/wait.h>
 #include "Cgi.hpp"
 
 Cgi::Cgi() {
@@ -108,14 +110,17 @@ void Cgi::Execute() {
       exit(ret_val_child);
     }
     ret_val_child = change_fd(child_socket, STDOUT_FILENO);
+    std::cerr << ret_val_child << std::endl; // D
     if (ret_val_child < 0) {
       exit(ret_val_child);
     }
 
+
     /*
      * Change directory
      */
-    ret_val_child = chdir("/var/www/cgi-bin");
+    ret_val_child = chdir("./");
+    std::cerr << ret_val_child << std::endl; // D
     if (ret_val_child != 0) {
       exit(ret_val_child);
     }
@@ -132,7 +137,8 @@ void Cgi::Execute() {
       free(argv);
       exit(1);
     }
-    argv[1] = strdup("test_utils/cgi/cgi-hello-python.cgi");
+//    argv[1] = strdup("test_utils/cgi/cgi-hello-python.cgi");
+    argv[1] = strdup("test_utils/cgi/new-file.py");
     if (argv[1] == NULL) {
       free(argv[0]);
       free(argv);
@@ -140,11 +146,15 @@ void Cgi::Execute() {
     }
     argv[2] = NULL;
 
+    std::cerr << ret_val_child << std::endl; // D
+
     /*
      * Execution CGI
      */
     errno = 0;
     ret_val_child = execve("/bin/python3", argv, environ);
+    perror("execve failed");
+    std::cerr << ret_val_child << std::endl; // D
 
     free(argv[0]);
     free(argv[1]);
@@ -153,5 +163,16 @@ void Cgi::Execute() {
     exit(ret_val_child);
   }
 
+  int status;
+  waitpid(pid, &status, 0);
+
+  if (WEXITSTATUS(status) != 0) {
+    std::cerr << "The child process exited with an error" << std::endl;
+  } else {
+    std::cerr << "The child process exited successfully" << std::endl;
+  }
+
   close(child_socket);
 }
+
+//TODO: void  Cgi::MakeDocumentResponse
