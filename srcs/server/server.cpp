@@ -54,7 +54,7 @@ namespace ft
 		{	
 			std::vector<int>& closedfd_vec = socket_.check_keep_time_and_close_fd();
 			for (std::vector<int>::iterator it = closedfd_vec.begin(); it != closedfd_vec.end(); ++it) {
-				std::cout << "removing: " << *it << std::endl;
+				//std::cout << "removing: " << *it << "due to timeout" << std::endl;
 				httpRequest_pair_map_.erase(*it);
 			}
 			closedfd_vec.clear();
@@ -63,20 +63,24 @@ namespace ft
 			std::cout << "port: " << recieved_msg.port << std::endl;
 
 			httpRequest_map_[recieved_msg.client_id] = recieved_msg.content;
-			std::cout << "===============================" << std::endl
-					  << httpRequest_map_[recieved_msg.client_id] << std::endl
-					  << "===============================" << std::endl;
+			//std::cout << "===============================" << std::endl
+			//		  << httpRequest_map_[recieved_msg.client_id] << std::endl
+			//		  << "===============================" << std::endl;
 
-			std::cout << "trying to use: " << recieved_msg.client_id << std::endl;
+			//std::cout << "trying to use: " << recieved_msg.client_id << std::endl;
 			HTTPHead& head = httpRequest_pair_map_[recieved_msg.client_id].first;
 			ServerChild& serverChild = httpRequest_pair_map_[recieved_msg.client_id].second;
 
+			//if (head.GetParseStatus() == complete && serverChild.Get_parse_status() == complete) {
+			//	head = HTTPHead();
+			//	serverChild = ServerChild();
+			//}
 			try {
 				if (head.GetParseStatus() != complete) {
 					if (head.Parse(recieved_msg.content) == 0) {
-						std::cout << "HEADER RECIEVED\n";
+						//std::cout << "HEADER RECIEVED\n";
 						head.ParseRequestURI();
-						head.PrintRequest();
+						//head.PrintRequest();
 						serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
 						serverChild.SetUp(head);
 						if (serverChild.Get_parse_status() != complete)
@@ -94,9 +98,9 @@ namespace ft
 			}
 
 			if (serverChild.Get_parse_status() == complete) {
-				std::cout << "PATH: " << serverChild.Get_path() << std::endl;
+				//std::cout << "PATH: " << serverChild.Get_path() << std::endl;
 				std::cout << "BODY RECEIVED: ";
-				std::cout << serverChild.Get_body() << std::endl;
+				//std::cout << serverChild.Get_body() << std::endl;
 
 				// check status code
 
@@ -104,9 +108,10 @@ namespace ft
 
 				// send response
 				socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");
-				std::cout << "sent to: " << recieved_msg.client_id << std::endl;
+				//std::cout << "sent to: " << recieved_msg.client_id << std::endl;
 
 				if (serverChild.Get_response_code() != 200) {
+					std::cout << "socket.close_fd_ due to response code != 200" << std::endl;
 					socket_.close_fd_(recieved_msg.client_id, recieved_msg.i_poll_fd);
 					httpRequest_pair_map_.erase(recieved_msg.client_id);
 				}
@@ -142,10 +147,10 @@ namespace ft
         ServerChildMap::iterator confIt = serverChild_map_.find(std::make_pair(host, port));
 
         if (confIt != serverChild_map_.end()) {
-			std::cout << "found serverChild by httpRequest host\n";
+			//std::cout << "found serverChild by httpRequest host\n";
             return (confIt->second);
         } else {
-			std::cout << "could not find serverchild, using default\n";
+			//std::cout << "could not find serverchild, using default\n";
 			DefaultServerChildMap::iterator it = default_serverChild_map_.find(port);
 			if (it == default_serverChild_map_.end()) {
 				throw std::runtime_error("port does not match any default servers");
@@ -156,10 +161,10 @@ namespace ft
 
 	void Server::print_server_config() {
 		for (std::vector<ServerConfig>::iterator it = server_config_.begin(); it != server_config_.end(); ++it) {
-			std::cout << "\t\t-----------SERVER-----------" << std::endl;
+			//std::cout << "\t\t-----------SERVER-----------" << std::endl;
 			it->print();
 			for (std::map<std::string, LocationConfig>::const_iterator lIt = it->getLocationConfig().begin(); lIt != it->getLocationConfig().end(); ++lIt) {
-				std::cout << "\t------loc: " << lIt->first << " ------" << std::endl;
+				//std::cout << "\t------loc: " << lIt->first << " ------" << std::endl;
 				lIt->second.print();
 			}
 		}
