@@ -4,14 +4,33 @@
 
 namespace ft
 {
-	Socket::Socket() : sockfd_vec_(), closedfd_vec_(), poll_fd_vec_(), fd_to_index_nap_(), last_recieve_time_map_(),
-		msg_to_send_map_(), fd_to_port_map_(), used_fd_set_(), port_num_(), keep_connect_time_len_(10)
+	Socket::Socket() : sockfd_vec_(), closedfd_vec_(), poll_fd_vec_(), last_recieve_time_map_(),
+		msg_to_send_map_(), fd_to_port_map_(), used_fd_set_(), keep_connect_time_len_(10)
 	{
 	}
 
 	Socket::~Socket()
 	{
 		closeAllSocket_();
+	}
+
+	Socket::Socket(const Socket& src) : sockfd_vec_(src.sockfd_vec_), closedfd_vec_(src.closedfd_vec_),
+		poll_fd_vec_(src.poll_fd_vec_), last_recieve_time_map_(src.last_recieve_time_map_),
+		msg_to_send_map_(src.msg_to_send_map_), fd_to_port_map_(src.fd_to_port_map_),
+		used_fd_set_(src.used_fd_set_), keep_connect_time_len_(src.keep_connect_time_len_)
+	{
+	}
+
+	Socket& Socket::operator=(const Socket& rhs) {
+		sockfd_vec_ = rhs.sockfd_vec_;
+		closedfd_vec_ = rhs.closedfd_vec_;
+		poll_fd_vec_ = rhs.poll_fd_vec_;
+		last_recieve_time_map_ = rhs.last_recieve_time_map_;
+		msg_to_send_map_ = rhs.msg_to_send_map_;
+		fd_to_port_map_ = rhs.fd_to_port_map_;
+		used_fd_set_ = rhs.used_fd_set_;
+		keep_connect_time_len_ = rhs.keep_connect_time_len_;
+		return (*this);
 	}
 
 	Socket::RecievedMsg::RecievedMsg()
@@ -106,7 +125,7 @@ namespace ft
 
 		int poll_rslt = poll(&poll_fd_vec_[0], poll_fd_vec_.size(), 1000);	
 		if (poll_rslt == -1)
-			throw std::runtime_error("Error: poll()");
+			throw SetUpFailException("Error: poll()");
 
 		for (size_t i = 0; poll_rslt > 0 && i < poll_fd_vec_.size(); ++i)
 		{
@@ -149,7 +168,7 @@ namespace ft
 				ssize_t sent_num = send(poll_fd_vec_[i].fd, msg_to_send.c_str(),
 									   msg_to_send.size(), 0);
 				if (sent_num == -1)
-					throw std::runtime_error("send() system error");
+					throw SetUpFailException("send() system error");
 				if (static_cast<size_t>(sent_num) != msg_to_send.size())
 					msg_to_send.erase(0, sent_num);
 				else {
@@ -243,7 +262,7 @@ namespace ft
 
 	void Socket::closeAllSocket_()
 	{
-		for (size_t i = 0; i < port_num_; ++i) {
+		for (size_t i = 0; i < poll_fd_vec_.size(); ++i) {
 			if (close(poll_fd_vec_[i].fd) == -1)
 				SetUpFailException("Error: close()");
 		}

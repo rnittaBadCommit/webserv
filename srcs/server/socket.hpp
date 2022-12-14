@@ -36,14 +36,6 @@ namespace ft
 		Socket();
 		virtual ~Socket();
 
-		// other constructors
-		// ft_socket(const char *ip_address, const in_port_t port);
-		Socket(const char *ip_address,
-			   const std::vector<in_port_t> portvec,
-			   time_t keep_connect_time_len);
-
-		Socket(const Config config);
-
 		class RecievedMsg
 		{
 		public:
@@ -108,22 +100,16 @@ namespace ft
 		std::vector<int> sockfd_vec_;
 		std::vector<int> closedfd_vec_;
 		std::vector<struct pollfd> poll_fd_vec_;
-		std::map<int, int> fd_to_index_nap_;
-		// std::vector<int> recieve_fd_vec_;
 		std::map<int, time_t> last_recieve_time_map_; // sockfd => -1
 		std::map<int, std::string> msg_to_send_map_;
 		std::map<int, in_port_t> fd_to_port_map_;
 
 		std::set<int> used_fd_set_;
 
-		size_t port_num_;
-		time_t keep_connect_time_len_;// = 100;
+		time_t keep_connect_time_len_;
 
 		RecievedMsg recieve_msg_from_connected_client_(int connection, size_t i_poll_fd);
 		void register_new_client_(int sock_fd);
-
-		void initialize_();
-		void tmp_();
 	
 		void closeAllSocket_();
 		void set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port);
