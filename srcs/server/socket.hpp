@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -57,10 +59,6 @@ namespace ft
 		};
 
 		void setup(const std::vector<ServerConfig> &server_config);
-
-		void erase_pollfd(const int fd);
-
-		void erase_pollfd_by_index(const int index);
 
 		RecievedMsg recieve_msg();
 
@@ -129,6 +127,7 @@ namespace ft
 	
 		void closeAllSocket_();
 		void set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port);
+		void set_nonblock_(int fd);
 	};
 
 }

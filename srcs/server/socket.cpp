@@ -55,9 +55,10 @@ namespace ft
 		for (size_t i = 0; i < server_config_vec.size(); ++i)
 		{
 			listenPort = server_config_vec[i].getListen();
-			if (boundPorts.find(listenPort) != boundPorts.end()) {
+
+			// if port is already bound to socket, skip
+			if (boundPorts.find(listenPort) != boundPorts.end())
 				continue ;
-			}
 
 			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
 			if (sockfd_vec_.back() < 0)
@@ -67,19 +68,13 @@ namespace ft
 			std::cout << "127.0.0.1 " << listenPort << " " << sockfd_vec_.back() << std::endl;
 
 			const int opt = 1;
-			if (setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-				throw SetUpFailException("Error: setsockopt");
-			}
-			if (setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) < 0) {
-				throw SetUpFailException("Error: setsockopt");
-			}
-	
-			int flags = fcntl(sockfd_vec_.back(), F_GETFL, 0);
-			if (flags == -1)
-				throw (std::runtime_error("fcntl() system error"));
-			if (!(flags & O_NONBLOCK)) {
-				fcntl(sockfd_vec_.back(), F_SETFL, (flags | O_NONBLOCK));
-			}
+			if (setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+				throw SetUpFailException("Error: setsockopt()");
+
+			if (setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) < 0)
+				throw SetUpFailException("Error: setsockopt()");
+
+			set_nonblock_(sockfd_vec_.back());
 
 			fd_to_port_map_[sockfd_vec_.back()] = listenPort;
 
@@ -87,10 +82,10 @@ namespace ft
 					sizeof(server_sockaddr)) < 0)
 				throw SetUpFailException("Error: bind()");
 
+			boundPorts.insert(listenPort);
+
 			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)
 				throw SetUpFailException("Error: listen()");
-
-			boundPorts.insert(listenPort);
 
 			poll_fd.fd = sockfd_vec_.back();
 			poll_fd.events = POLLIN;
@@ -99,19 +94,6 @@ namespace ft
 			last_recieve_time_map_[sockfd_vec_.back()] = -1;
 		}
 	}
-
-	/*void Socket::erase_pollfd(const int fd)
-	{
-		size_t index = 0;
-		for (; index < poll_fd_vec_.size() && poll_fd_vec_[index].fd != fd; ++index) { ; }
-		poll_fd_vec_.erase(poll_fd_vec_.begin() + index);	
-	}
-
-	void Socket::erase_pollfd_by_index(const int index)
-	{
-		fd_to_index_nap_.erase(poll_fd_vec_[index].fd);
-		poll_fd_vec_.erase(poll_fd_vec_.begin() + index);
-	}*/
 
 	Socket::RecievedMsg Socket::recieve_msg()
 	{	
@@ -122,30 +104,31 @@ namespace ft
 		}
 		std::cout << std::endl;
 
-		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), 1000);
+		int poll_rslt = poll(&poll_fd_vec_[0], poll_fd_vec_.size(), 1000);	
+		if (poll_rslt == -1)
+			throw std::runtime_error("Error: poll()");
 
-		std::cout << "poll done" << std::endl;
-		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
+		for (size_t i = 0; poll_rslt > 0 && i < poll_fd_vec_.size(); ++i)
 		{
-			if (poll_fd_vec_[i].revents & POLLERR)
+			if ((poll_fd_vec_[i].revents & POLLERR) == POLLERR)
 			{
 				std::cerr << "POLLERR: " << poll_fd_vec_[i].fd << std::endl;	
 				close_fd_(poll_fd_vec_[i].fd, i);
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
-			else if (poll_fd_vec_[i].revents & POLLHUP)
+			else if ((poll_fd_vec_[i].revents & POLLHUP) == POLLHUP)
 			{
 				std::cerr << "POLLHUP: " << poll_fd_vec_[i].fd << std::endl;
 				close_fd_(poll_fd_vec_[i].fd, i);
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
-			else if (poll_fd_vec_[i].revents & POLLRDHUP)
+			else if ((poll_fd_vec_[i].revents & POLLRDHUP) == POLLRDHUP)
 			{
 				std::cerr << "POLLRDHUP: " << poll_fd_vec_[i].fd << std::endl;
 				close_fd_(poll_fd_vec_[i].fd, i);	
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
-			else if (poll_fd_vec_[i].revents & POLLIN)
+			else if ((poll_fd_vec_[i].revents & POLLIN) == POLLIN)
 			{
 				poll_fd_vec_[i].revents = 0;
 				if (used_fd_set_.count(poll_fd_vec_[i].fd))
@@ -159,7 +142,7 @@ namespace ft
 					throw recieveMsgFromNewClient(*(--used_fd_set_.end()));
 				}
 			}
-			else if (poll_fd_vec_[i].revents & POLLOUT)
+			else if ((poll_fd_vec_[i].revents & POLLOUT) == POLLOUT)
 			{
 				poll_fd_vec_[i].revents = 0;
 				std::string &msg_to_send = msg_to_send_map_[poll_fd_vec_[i].fd];
@@ -167,13 +150,17 @@ namespace ft
 									   msg_to_send.size(), 0);
 				if (sent_num == -1)
 					throw std::runtime_error("send() system error");
-				msg_to_send_map_.erase(poll_fd_vec_[i].fd);
-				poll_fd_vec_[i].events = POLLIN;
+				if (static_cast<size_t>(sent_num) != msg_to_send.size())
+					msg_to_send.erase(0, sent_num);
+				else {
+					msg_to_send_map_.erase(poll_fd_vec_[i].fd);
+					poll_fd_vec_[i].events = POLLIN;
+				}
 				last_recieve_time_map_[poll_fd_vec_[i].fd] = time(NULL);
 			}
 		}
 		// throw recieveMsgException();	// pollにタイムアウトを設定するので除外
-		throw NoRecieveMsg();
+		throw NoRecieveMsg();	
 	}
 
 	void Socket::send_msg(int fd, const std::string msg)
@@ -211,15 +198,10 @@ namespace ft
 	void Socket::register_new_client_(int sock_fd)
 	{
 		int connection = accept(sock_fd, NULL, NULL);
-		if (connection < 0)
+		if (connection == -1)
 			throw SetUpFailException("Error: accept()");
 
-		int flags = fcntl(connection, F_GETFL, 0);
-		if (flags == -1)
-			throw (std::runtime_error("fcntl() system error"));
-		if (!(flags & O_NONBLOCK)) {
-			fcntl(connection, F_SETFL, (flags | O_NONBLOCK));
-		}
+		set_nonblock_(connection);
 
 		struct pollfd poll_fd;
 		poll_fd.fd = connection;
@@ -237,20 +219,23 @@ namespace ft
 		char buf[BUFFER_SIZE + 1];
 
 		last_recieve_time_map_[connection] = time(NULL);
-		int recv_ret = recv(connection, buf, BUFFER_SIZE, MSG_DONTWAIT);
-		buf[recv_ret] = '\0';
+
+		ssize_t recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
 		if (recv_ret == -1)
-			std::runtime_error("idk");
+			throw SetUpFailException("Error: recv()");
 		if (recv_ret == 0) {
 			close_fd_(connection, i_poll_fd);
 			throw connectionHangUp(connection);
 		}
+
+		buf[recv_ret] = '\0';
 		return (RecievedMsg(std::string(buf), connection, fd_to_port_map_[connection], i_poll_fd));
 	}
 
 	void Socket::close_fd_(const int fd, const int i_poll_fd)
 	{
-		close(fd);
+		if (close(fd) == -1)
+			SetUpFailException("Error: close()");
 		poll_fd_vec_.erase(poll_fd_vec_.begin() + i_poll_fd);
 		used_fd_set_.erase(fd);
 		fd_to_port_map_.erase(fd);
@@ -258,8 +243,10 @@ namespace ft
 
 	void Socket::closeAllSocket_()
 	{
-		for (size_t i = 0; i < port_num_; ++i)
-			close(poll_fd_vec_[i].fd);
+		for (size_t i = 0; i < port_num_; ++i) {
+			if (close(poll_fd_vec_[i].fd) == -1)
+				SetUpFailException("Error: close()");
+		}
 		poll_fd_vec_.clear();
 		used_fd_set_.clear();
 		fd_to_port_map_.clear();
@@ -271,6 +258,17 @@ namespace ft
 		server_sockaddr.sin_family = AF_INET;
 		server_sockaddr.sin_port = htons(port);
 		server_sockaddr.sin_addr.s_addr = inet_addr(ip);
+	}
+
+	void Socket::set_nonblock_(int fd)
+	{
+		int flags = fcntl(fd, F_GETFL, 0);
+		if (flags == -1)
+			throw SetUpFailException("Error: fcntl()");
+		if ((flags & O_NONBLOCK) != O_NONBLOCK) {	
+			if (fcntl(fd, F_SETFL, (flags | O_NONBLOCK)) == -1)
+				throw SetUpFailException("Error: fcntl()");
+		}
 	}
 
 	Socket::SetUpFailException::SetUpFailException(const std::string err_msg)
