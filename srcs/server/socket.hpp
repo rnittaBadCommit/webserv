@@ -58,8 +58,6 @@ namespace ft
 
 		void setup(const std::vector<ServerConfig> &server_config);
 
-		void add_pollfd(const pollfd pollfd);
-
 		void erase_pollfd(const int fd);
 
 		void erase_pollfd_by_index(const int index);

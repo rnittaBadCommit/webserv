@@ -83,7 +83,7 @@ namespace ft
 
 	int		ServerChild::Get_response_code() const { return response_code_; }
 	const HTTPParseStatus&	ServerChild::Get_parse_status() const { return parse_status_;}
-	const HTTPHead&			ServerChild::Get_HTTPHead() const { return HTTP_head_; }
+	HTTPHead&			ServerChild::Get_HTTPHead() { return HTTP_head_; }
 	const std::string&		ServerChild::Get_body() const { return body_; }
 	const std::string&		ServerChild::Get_path() const { return path_; }
 

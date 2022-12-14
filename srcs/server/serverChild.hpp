@@ -35,7 +35,7 @@ namespace ft
 		bool	is_redirect_(const std::string &url);
 		int		Get_response_code() const;
 		const HTTPParseStatus&	Get_parse_status() const;
-		const HTTPHead&			Get_HTTPHead() const;
+		HTTPHead&			Get_HTTPHead();
 		const std::string&		Get_body() const;
 		const std::string&		Get_path() const;
 

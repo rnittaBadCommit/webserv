@@ -73,10 +73,13 @@ namespace ft
 			if (setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) < 0) {
 				throw SetUpFailException("Error: setsockopt");
 			}
-
-			//int status = fcntl(sockfd_vec_.back(), F_SETFL, fcntl(sockfd_vec_.back(), F_GETFL, 0) | O_NONBLOCK);
-			//std::cout << "status: " << status << std::endl;
-			fcntl(sockfd_vec_.back(), F_SETFL, O_NONBLOCK);
+	
+			int flags = fcntl(sockfd_vec_.back(), F_GETFL, 0);
+			if (flags == -1)
+				throw (std::runtime_error("fcntl() system error"));
+			if (!(flags & O_NONBLOCK)) {
+				fcntl(sockfd_vec_.back(), F_SETFL, (flags | O_NONBLOCK));
+			}
 
 			fd_to_port_map_[sockfd_vec_.back()] = listenPort;
 
@@ -92,75 +95,54 @@ namespace ft
 			poll_fd.fd = sockfd_vec_.back();
 			poll_fd.events = POLLIN;
 			poll_fd.revents = 0;
-			add_pollfd(poll_fd);
+			poll_fd_vec_.push_back(poll_fd);
 			last_recieve_time_map_[sockfd_vec_.back()] = -1;
 		}
 	}
 
-	void Socket::add_pollfd(const pollfd pollfd)
+	/*void Socket::erase_pollfd(const int fd)
 	{
-		poll_fd_vec_.push_back(pollfd);
-		std::cout << "add_pollfd - fd: " << pollfd.fd << "index: " << poll_fd_vec_.size() - 1 << std::endl;
-		std::cout << "fd_vec: ";
-		for (size_t i = 0; i < poll_fd_vec_.size(); ++i) {
-			std::cout << poll_fd_vec_[i].fd << " ";
-		}
-		std::cout << std::endl;
-		fd_to_index_nap_[pollfd.fd] = poll_fd_vec_.size() - 1;
-	}
-
-	void Socket::erase_pollfd(const int fd)
-	{
-		std::cout << "erase_pollfd - fd: " << fd << " at index: " << fd_to_index_nap_[fd] << std::endl;
-		std::cout << "fd_vec: ";
-		for (size_t i = 0; i < poll_fd_vec_.size(); ++i) {
-			std::cout << poll_fd_vec_[i].fd << " ";
-		}
-		std::cout << std::endl;
-		poll_fd_vec_.erase(poll_fd_vec_.begin() + fd_to_index_nap_[fd]);
-		fd_to_index_nap_.erase(fd);
+		size_t index = 0;
+		for (; index < poll_fd_vec_.size() && poll_fd_vec_[index].fd != fd; ++index) { ; }
+		poll_fd_vec_.erase(poll_fd_vec_.begin() + index);	
 	}
 
 	void Socket::erase_pollfd_by_index(const int index)
 	{
 		fd_to_index_nap_.erase(poll_fd_vec_[index].fd);
 		poll_fd_vec_.erase(poll_fd_vec_.begin() + index);
-	}
+	}*/
 
 	Socket::RecievedMsg Socket::recieve_msg()
 	{	
-		/*std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
+		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
 		for (size_t i = 0; i < poll_fd_vec_.size(); ++i) {
-			std::cout << poll_fd_vec_[i].fd << ":e " << poll_fd_vec_[i].events << ": re" << poll_fd_vec_[i].revents << "--";
-		}*/
+			std::cout << poll_fd_vec_[i].fd << " e" << poll_fd_vec_[i].events << " re" << poll_fd_vec_[i].revents;
+			std::cout << (i < poll_fd_vec_.size() - 1 ? " : " : "");
+		}
 		std::cout << std::endl;
-		std::cout << "poll" << std::endl;
+
 		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), 1000);
 
 		std::cout << "poll done" << std::endl;
 		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
 		{
-			if ((poll_fd_vec_[i].revents & POLLERR) && (used_fd_set_.count(poll_fd_vec_[i].fd)))
+			if (poll_fd_vec_[i].revents & POLLERR)
 			{
-				std::cerr << "POLLERR: " << poll_fd_vec_[i].fd << std::endl;
+				std::cerr << "POLLERR: " << poll_fd_vec_[i].fd << std::endl;	
 				close_fd_(poll_fd_vec_[i].fd, i);
-
-				poll_fd_vec_[i].revents = 0;	
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
-			else if ((poll_fd_vec_[i].revents & POLLHUP) && (used_fd_set_.count(poll_fd_vec_[i].fd)))
+			else if (poll_fd_vec_[i].revents & POLLHUP)
 			{
 				std::cerr << "POLLHUP: " << poll_fd_vec_[i].fd << std::endl;
 				close_fd_(poll_fd_vec_[i].fd, i);
-			
-				poll_fd_vec_[i].revents = 0;
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
-			else if ((poll_fd_vec_[i].revents & POLLRDHUP) && (used_fd_set_.count(poll_fd_vec_[i].fd)))
+			else if (poll_fd_vec_[i].revents & POLLRDHUP)
 			{
 				std::cerr << "POLLRDHUP: " << poll_fd_vec_[i].fd << std::endl;
 				close_fd_(poll_fd_vec_[i].fd, i);	
-				poll_fd_vec_[i].revents = 0;
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
 			else if (poll_fd_vec_[i].revents & POLLIN)
@@ -168,33 +150,25 @@ namespace ft
 				poll_fd_vec_[i].revents = 0;
 				if (used_fd_set_.count(poll_fd_vec_[i].fd))
 				{
-					//std::cout << "fd: " << poll_fd_vec_[i].fd << "in pll_fd_vec_" << std::endl;
 					poll_fd_vec_[i].revents = 0;
 					return (recieve_msg_from_connected_client_(poll_fd_vec_[i].fd, i));
 				}
 				else
 				{
 					register_new_client_(poll_fd_vec_[i].fd);
-					//std::cout << "new client from: " << poll_fd_vec_[i].fd << ": e: " << poll_fd_vec_[i].events << ": re: " << poll_fd_vec_[i].revents << std::endl;
-					poll_fd_vec_[i].revents = 0;
-					//poll_fd_vec_[i].events = POLLIN | POLLERR;
-					throw recieveMsgFromNewClient(poll_fd_vec_[i].fd);
+					throw recieveMsgFromNewClient(*(--used_fd_set_.end()));
 				}
 			}
-			else if ((poll_fd_vec_[i].revents & POLLOUT) && (used_fd_set_.count(poll_fd_vec_[i].fd)))
+			else if (poll_fd_vec_[i].revents & POLLOUT)
 			{
-				//std::cout << "sending to: " << poll_fd_vec_[i].fd << std::endl;
 				poll_fd_vec_[i].revents = 0;
 				std::string &msg_to_send = msg_to_send_map_[poll_fd_vec_[i].fd];
-				size_t sent_num = send(poll_fd_vec_[i].fd, msg_to_send.c_str(),
+				ssize_t sent_num = send(poll_fd_vec_[i].fd, msg_to_send.c_str(),
 									   msg_to_send.size(), 0);
-				if (sent_num != msg_to_send.size()) // 送信未完了
-					msg_to_send.erase(0, sent_num);
-				else
-				{
-					msg_to_send_map_.erase(poll_fd_vec_[i].fd);
-					poll_fd_vec_[i].events = POLLIN | POLLERR;
-				}
+				if (sent_num == -1)
+					throw std::runtime_error("send() system error");
+				msg_to_send_map_.erase(poll_fd_vec_[i].fd);
+				poll_fd_vec_[i].events = POLLIN;
 				last_recieve_time_map_[poll_fd_vec_[i].fd] = time(NULL);
 			}
 		}
@@ -204,19 +178,11 @@ namespace ft
 
 	void Socket::send_msg(int fd, const std::string msg)
 	{
-		std::cout << "send_msg - fd: " << fd << std::endl;
 		msg_to_send_map_[fd].append(msg);	
 		size_t index = 0;
 		for (; index < poll_fd_vec_.size() && poll_fd_vec_[index].fd != fd; ++index) { ; }
-		std::cout << "making: " << poll_fd_vec_[index].fd << "POLLOUT..." << std::endl;
-		std::cout << "fd_vec: ";
-		for (size_t i = 0; i < poll_fd_vec_.size(); ++i) {
-			std::cout << poll_fd_vec_[i].fd << " ";
-		}
-		std::cout << std::endl;
 
 		poll_fd_vec_[index].events = POLLOUT;
-		//poll_fd_vec_[fd_to_index_nap_[fd]].events = POLLOUT;
 	}
 
 	std::vector<int>& Socket::check_keep_time_and_close_fd()
@@ -248,18 +214,18 @@ namespace ft
 		if (connection < 0)
 			throw SetUpFailException("Error: accept()");
 
+		int flags = fcntl(connection, F_GETFL, 0);
+		if (flags == -1)
+			throw (std::runtime_error("fcntl() system error"));
+		if (!(flags & O_NONBLOCK)) {
+			fcntl(connection, F_SETFL, (flags | O_NONBLOCK));
+		}
+
 		struct pollfd poll_fd;
 		poll_fd.fd = connection;
-		poll_fd.events = POLLIN | POLLRDHUP;
+		poll_fd.events = POLLIN;
 		poll_fd.revents = 0;
-		add_pollfd(poll_fd);
-		std::cout << "register new client: " << connection << " index: " << poll_fd_vec_.size() - 1 << std::endl;
-		std::cout << "fd_vec: ";
-		for (size_t i = 0; i < poll_fd_vec_.size(); ++i) {
-			std::cout << poll_fd_vec_[i].fd << " ";
-		}
-		std::cout << std::endl;
-		fd_to_index_nap_[connection] = poll_fd_vec_.size() - 1;
+		poll_fd_vec_.push_back(poll_fd);
 		used_fd_set_.insert(connection);
 
 		last_recieve_time_map_[connection] = time(NULL);
@@ -271,32 +237,32 @@ namespace ft
 		char buf[BUFFER_SIZE + 1];
 
 		last_recieve_time_map_[connection] = time(NULL);
-		int recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
+		int recv_ret = recv(connection, buf, BUFFER_SIZE, MSG_DONTWAIT);
 		buf[recv_ret] = '\0';
-		std::cout << "recieve from: " << connection << std::endl;
+		if (recv_ret == -1)
+			std::runtime_error("idk");
+		if (recv_ret == 0) {
+			close_fd_(connection, i_poll_fd);
+			throw connectionHangUp(connection);
+		}
 		return (RecievedMsg(std::string(buf), connection, fd_to_port_map_[connection], i_poll_fd));
 	}
 
 	void Socket::close_fd_(const int fd, const int i_poll_fd)
 	{
-		std::cout << "close_fd_: " << fd << std::endl;	
 		close(fd);
-		std::cout << "removing " << fd << "from index_nap:..... " << poll_fd_vec_[i_poll_fd].fd << std::endl;
-		std::cout << "fd_vec: ";
-		for (size_t i = 0; i < poll_fd_vec_.size(); ++i) {
-			std::cout << poll_fd_vec_[i].fd << " ";
-		}
-		std::cout << std::endl;
-		fd_to_index_nap_.erase(poll_fd_vec_[i_poll_fd].fd);	
 		poll_fd_vec_.erase(poll_fd_vec_.begin() + i_poll_fd);
 		used_fd_set_.erase(fd);
+		fd_to_port_map_.erase(fd);
 	}
 
 	void Socket::closeAllSocket_()
 	{
 		for (size_t i = 0; i < port_num_; ++i)
 			close(poll_fd_vec_[i].fd);
+		poll_fd_vec_.clear();
 		used_fd_set_.clear();
+		fd_to_port_map_.clear();
 	}
 
 	void Socket::set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port)
