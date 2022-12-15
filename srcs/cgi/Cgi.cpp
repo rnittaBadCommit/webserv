@@ -131,7 +131,6 @@ void Cgi::Execute() {
       exit(ret_val_child);
     }
     ret_val_child = change_fd(child_socket, STDOUT_FILENO);
-    std::cerr << ret_val_child << std::endl; // D
     if (ret_val_child < 0) {
       exit(ret_val_child);
     }
@@ -141,7 +140,6 @@ void Cgi::Execute() {
      * Change directory
      */
     ret_val_child = chdir("./");
-    std::cerr << ret_val_child << std::endl; // D
     if (ret_val_child != 0) {
       exit(ret_val_child);
     }
@@ -167,15 +165,12 @@ void Cgi::Execute() {
     }
     argv[2] = NULL;
 
-    std::cerr << ret_val_child << std::endl; // D
-
     /*
      * Execution CGI
      */
     errno = 0;
     ret_val_child = execve("/bin/python3", argv, environ);
     perror("execve failed");
-    std::cerr << ret_val_child << std::endl; // D
 
     free(argv[0]);
     free(argv[1]);
