@@ -11,7 +11,7 @@ namespace ft {
         _requestURI = src._requestURI;
         _HTTPv = src._HTTPv;
         _headerFields = src._headerFields;
-        _currentHeader = src._currentHeader; 
+        _currentHeader = src._currentHeader;
         _save = src._save;
     }
     HTTPHead& HTTPHead::operator=(const HTTPHead& rhs) {
@@ -128,6 +128,7 @@ namespace ft {
         // decide if header is complete (line break reached because \r\n is the first character)
         if (_save.find(DELIM) == 0 || _save.find(BREAK) != std::string::npos) {
             _save.erase(0, DELIM.size()); 
+            _responseCode = 200;
             _parseStatus = complete;
         }
     }
