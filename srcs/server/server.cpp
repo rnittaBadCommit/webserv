@@ -3,7 +3,7 @@
 namespace ft
 {
 	Server::Server(const std::string config_path) : server_config_(), socket_(), serverChild_map_(),
-		default_serverChild_map_(), httpRequest_map_(), httpRequest_pair_map_()
+		default_serverChild_map_(), httpRequest_pair_map_()
 	{
 		import_config_(config_path);
 		socket_.setup(server_config_);
@@ -54,29 +54,32 @@ namespace ft
 		{	
 			std::vector<int>& closedfd_vec = socket_.check_keep_time_and_close_fd();
 			for (std::vector<int>::iterator it = closedfd_vec.begin(); it != closedfd_vec.end(); ++it) {
-				std::cout << "removing: " << *it << std::endl;
 				httpRequest_pair_map_.erase(*it);
 			}
-			closedfd_vec.clear();
-			//socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");			
+			closedfd_vec.clear();	
+
+			std::cout << "httpRequest_pair_map_ size " << httpRequest_pair_map_.size() << std::endl;
+			for (std::map<int, HTTPRequestPair>::iterator it = httpRequest_pair_map_.begin(); it !=	httpRequest_pair_map_.end(); ++it) {
+				std::cout << it->first << " ";
+			}
+			std::cout << std::endl;
+
 			recieved_msg = socket_.recieve_msg();
-			std::cout << "port: " << recieved_msg.port << std::endl;
-
-			httpRequest_map_[recieved_msg.client_id] = recieved_msg.content;
 			std::cout << "===============================" << std::endl
-					  << httpRequest_map_[recieved_msg.client_id] << std::endl
+					  << "port " << recieved_msg.port
+					  << " - fd " << recieved_msg.client_id
+					  << " - msg " << recieved_msg.content << std::endl
 					  << "===============================" << std::endl;
-
-			std::cout << "trying to use: " << recieved_msg.client_id << std::endl;
+	
 			HTTPHead& head = httpRequest_pair_map_[recieved_msg.client_id].first;
 			ServerChild& serverChild = httpRequest_pair_map_[recieved_msg.client_id].second;
 
 			try {
 				if (head.GetParseStatus() != complete) {
 					if (head.Parse(recieved_msg.content) == 0) {
-						std::cout << "HEADER RECIEVED\n";
+						//std::cout << "HEADER RECIEVED\n";
 						head.ParseRequestURI();
-						head.PrintRequest();
+						//head.PrintRequest();
 						serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
 						serverChild.SetUp(head);
 						if (serverChild.Get_parse_status() != complete)
@@ -94,21 +97,26 @@ namespace ft
 			}
 
 			if (serverChild.Get_parse_status() == complete) {
-				std::cout << "PATH: " << serverChild.Get_path() << std::endl;
-				std::cout << "BODY RECEIVED: ";
-				std::cout << serverChild.Get_body() << std::endl;
+				//std::cout << "PATH: " << serverChild.Get_path() << std::endl;
+				//std::cout << "BODY RECEIVED: ";
+				//std::cout << serverChild.Get_body() << std::endl;
 
 				// check status code
 
 				// complete request
 
 				// send response
-				socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 11\nContent-Type: text/html\n\nHello World");
-				std::cout << "sent to: " << recieved_msg.client_id << std::endl;
+
+				if (serverChild.Get_HTTPHead().GetRequestURI() == "/foo")
+					socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 12\nContent-Type: text/html\n\nHello Foooo\n");		
+				else
+					socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 12\nContent-Type: text/html\n\nHello World\n");		
+
+				httpRequest_pair_map_.erase(recieved_msg.client_id);
 
 				if (serverChild.Get_response_code() != 200) {
-					socket_.close_fd_(recieved_msg.client_id, recieved_msg.i_poll_fd);
-					httpRequest_pair_map_.erase(recieved_msg.client_id);
+					std::cout << "socket.close_fd_ due to response code != 200" << std::endl;
+					socket_.close_fd_(recieved_msg.client_id, recieved_msg.i_poll_fd);	
 				}
 			}
 
@@ -116,11 +124,11 @@ namespace ft
 		}
 		catch (const ft::Socket::recieveMsgFromNewClient &new_client)
 		{
-			httpRequest_map_[new_client.client_id];
+			httpRequest_pair_map_[new_client.client_id];
 		}
 		catch (const ft::Socket::connectionHangUp &deleted_client)
 		{
-			httpRequest_map_.erase(deleted_client.client_id);
+			httpRequest_pair_map_.erase(deleted_client.client_id);
 		}
 		catch (const ft::Socket::NoRecieveMsg &e)
 		{

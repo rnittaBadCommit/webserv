@@ -4,14 +4,33 @@
 
 namespace ft
 {
-	Socket::Socket() : sockfd_vec_(), closedfd_vec_(), poll_fd_vec_(), fd_to_index_nap_(), last_recieve_time_map_(),
-		msg_to_send_map_(), fd_to_port_map_(), used_fd_set_(), port_num_(), keep_connect_time_len_(10)
+	Socket::Socket() : sockfd_vec_(), closedfd_vec_(), poll_fd_vec_(), last_recieve_time_map_(),
+		msg_to_send_map_(), fd_to_port_map_(), used_fd_set_(), keep_connect_time_len_(10)
 	{
 	}
 
 	Socket::~Socket()
 	{
 		closeAllSocket_();
+	}
+
+	Socket::Socket(const Socket& src) : sockfd_vec_(src.sockfd_vec_), closedfd_vec_(src.closedfd_vec_),
+		poll_fd_vec_(src.poll_fd_vec_), last_recieve_time_map_(src.last_recieve_time_map_),
+		msg_to_send_map_(src.msg_to_send_map_), fd_to_port_map_(src.fd_to_port_map_),
+		used_fd_set_(src.used_fd_set_), keep_connect_time_len_(src.keep_connect_time_len_)
+	{
+	}
+
+	Socket& Socket::operator=(const Socket& rhs) {
+		sockfd_vec_ = rhs.sockfd_vec_;
+		closedfd_vec_ = rhs.closedfd_vec_;
+		poll_fd_vec_ = rhs.poll_fd_vec_;
+		last_recieve_time_map_ = rhs.last_recieve_time_map_;
+		msg_to_send_map_ = rhs.msg_to_send_map_;
+		fd_to_port_map_ = rhs.fd_to_port_map_;
+		used_fd_set_ = rhs.used_fd_set_;
+		keep_connect_time_len_ = rhs.keep_connect_time_len_;
+		return (*this);
 	}
 
 	Socket::RecievedMsg::RecievedMsg()
@@ -55,20 +74,26 @@ namespace ft
 		for (size_t i = 0; i < server_config_vec.size(); ++i)
 		{
 			listenPort = server_config_vec[i].getListen();
-			if (boundPorts.find(listenPort) != boundPorts.end()) {
+
+			// if port is already bound to socket, skip
+			if (boundPorts.find(listenPort) != boundPorts.end())
 				continue ;
-			}
 
 			sockfd_vec_.push_back(socket(AF_INET, SOCK_STREAM, 0));
 			if (sockfd_vec_.back() < 0)
 				throw SetUpFailException("Error: socket()");
 
 			set_sockaddr_(server_sockaddr, "127.0.0.1", listenPort);
-			std::cout << "127.0.0.1 " << listenPort << std::endl;
+			std::cout << "127.0.0.1 " << listenPort << " " << sockfd_vec_.back() << std::endl;
 
 			const int opt = 1;
-			setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-			setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
+			if (setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+				throw SetUpFailException("Error: setsockopt()");
+
+			if (setsockopt(sockfd_vec_.back(), SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) < 0)
+				throw SetUpFailException("Error: setsockopt()");
+
+			set_nonblock_(sockfd_vec_.back());
 
 			fd_to_port_map_[sockfd_vec_.back()] = listenPort;
 
@@ -76,69 +101,53 @@ namespace ft
 					sizeof(server_sockaddr)) < 0)
 				throw SetUpFailException("Error: bind()");
 
+			boundPorts.insert(listenPort);
+
 			if (listen(sockfd_vec_.back(), SOMAXCONN) < 0)
 				throw SetUpFailException("Error: listen()");
-
-			boundPorts.insert(listenPort);
 
 			poll_fd.fd = sockfd_vec_.back();
 			poll_fd.events = POLLIN;
 			poll_fd.revents = 0;
-			add_pollfd(poll_fd);
+			poll_fd_vec_.push_back(poll_fd);
 			last_recieve_time_map_[sockfd_vec_.back()] = -1;
 		}
-	}
-
-	void Socket::add_pollfd(const pollfd pollfd)
-	{
-		poll_fd_vec_.push_back(pollfd);
-		fd_to_index_nap_[pollfd.fd] = poll_fd_vec_.size() - 1;
-	}
-
-	void Socket::erase_pollfd(const int fd)
-	{
-		poll_fd_vec_.erase(poll_fd_vec_.begin() + fd_to_index_nap_[fd]);
-		fd_to_index_nap_.erase(fd);
-	}
-
-	void Socket::erase_pollfd_by_index(const int index)
-	{
-		fd_to_index_nap_.erase(poll_fd_vec_[index].fd);
-		poll_fd_vec_.erase(poll_fd_vec_.begin() + index);
 	}
 
 	Socket::RecievedMsg Socket::recieve_msg()
 	{	
 		std::cout << "poll_fd_vec_.size(): " << poll_fd_vec_.size() << std::endl;
-		std::cout << "poll" << std::endl;
-		poll(&poll_fd_vec_[0], poll_fd_vec_.size(), 1000);
+		for (size_t i = 0; i < poll_fd_vec_.size(); ++i) {
+			std::cout << poll_fd_vec_[i].fd << " e" << poll_fd_vec_[i].events << " re" << poll_fd_vec_[i].revents;
+			std::cout << (i < poll_fd_vec_.size() - 1 ? " : " : "");
+		}
+		std::cout << std::endl;
 
-		std::cout << "poll done" << std::endl;
-		for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
+		int poll_rslt = poll(&poll_fd_vec_[0], poll_fd_vec_.size(), 1000);	
+		if (poll_rslt == -1)
+			throw SetUpFailException("Error: poll()");
+
+		for (size_t i = 0; poll_rslt > 0 && i < poll_fd_vec_.size(); ++i)
 		{
-			if (poll_fd_vec_[i].revents & POLLERR)
+			if ((poll_fd_vec_[i].revents & POLLERR) == POLLERR)
 			{
+				std::cerr << "POLLERR: " << poll_fd_vec_[i].fd << std::endl;	
 				close_fd_(poll_fd_vec_[i].fd, i);
-
-				poll_fd_vec_[i].revents = 0;
-				std::cerr << "POLLERR" << std::endl;
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
-			else if (poll_fd_vec_[i].revents & POLLHUP)
+			else if ((poll_fd_vec_[i].revents & POLLHUP) == POLLHUP)
 			{
+				std::cerr << "POLLHUP: " << poll_fd_vec_[i].fd << std::endl;
 				close_fd_(poll_fd_vec_[i].fd, i);
-				std::cerr << "POLLHUP" << std::endl;
-				poll_fd_vec_[i].revents = 0;
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
-			else if (poll_fd_vec_[i].revents & POLLRDHUP)
+			else if ((poll_fd_vec_[i].revents & POLLRDHUP) == POLLRDHUP)
 			{
-				close_fd_(poll_fd_vec_[i].fd, i);
-				std::cerr << "POLLRDHUP" << std::endl;
-				poll_fd_vec_[i].revents = 0;
+				std::cerr << "POLLRDHUP: " << poll_fd_vec_[i].fd << std::endl;
+				close_fd_(poll_fd_vec_[i].fd, i);	
 				throw connectionHangUp(poll_fd_vec_[i].fd);
 			}
-			else if (poll_fd_vec_[i].revents & POLLIN)
+			else if ((poll_fd_vec_[i].revents & POLLIN) == POLLIN)
 			{
 				poll_fd_vec_[i].revents = 0;
 				if (used_fd_set_.count(poll_fd_vec_[i].fd))
@@ -149,36 +158,37 @@ namespace ft
 				else
 				{
 					register_new_client_(poll_fd_vec_[i].fd);
-					poll_fd_vec_[i].revents = 0;
-					poll_fd_vec_[i].events = POLLIN | POLLERR;
-					throw recieveMsgFromNewClient(poll_fd_vec_[i].fd);
+					throw recieveMsgFromNewClient(*(--used_fd_set_.end()));
 				}
 			}
-			else if (poll_fd_vec_[i].revents & POLLOUT)
+			else if ((poll_fd_vec_[i].revents & POLLOUT) == POLLOUT)
 			{
-				std::cout << "sending to: " << poll_fd_vec_[i].fd << std::endl;
 				poll_fd_vec_[i].revents = 0;
 				std::string &msg_to_send = msg_to_send_map_[poll_fd_vec_[i].fd];
-				size_t sent_num = send(poll_fd_vec_[i].fd, msg_to_send.c_str(),
+				ssize_t sent_num = send(poll_fd_vec_[i].fd, msg_to_send.c_str(),
 									   msg_to_send.size(), 0);
-				if (sent_num != msg_to_send.size()) // 送信未完了
+				if (sent_num == -1)
+					throw SetUpFailException("send() system error");
+				if (static_cast<size_t>(sent_num) != msg_to_send.size())
 					msg_to_send.erase(0, sent_num);
-				else
-				{
+				else {
 					msg_to_send_map_.erase(poll_fd_vec_[i].fd);
-					poll_fd_vec_[i].events = POLLIN | POLLERR;
+					poll_fd_vec_[i].events = POLLIN;
 				}
 				last_recieve_time_map_[poll_fd_vec_[i].fd] = time(NULL);
 			}
 		}
 		// throw recieveMsgException();	// pollにタイムアウトを設定するので除外
-		throw NoRecieveMsg();
+		throw NoRecieveMsg();	
 	}
 
 	void Socket::send_msg(int fd, const std::string msg)
 	{
-		msg_to_send_map_[fd].append(msg);
-		poll_fd_vec_[fd_to_index_nap_[fd]].events = POLLOUT;
+		msg_to_send_map_[fd].append(msg);	
+		size_t index = 0;
+		for (; index < poll_fd_vec_.size() && poll_fd_vec_[index].fd != fd; ++index) { ; }
+
+		poll_fd_vec_[index].events = POLLOUT;
 	}
 
 	std::vector<int>& Socket::check_keep_time_and_close_fd()
@@ -207,15 +217,16 @@ namespace ft
 	void Socket::register_new_client_(int sock_fd)
 	{
 		int connection = accept(sock_fd, NULL, NULL);
-		if (connection < 0)
+		if (connection == -1)
 			throw SetUpFailException("Error: accept()");
+
+		set_nonblock_(connection);
 
 		struct pollfd poll_fd;
 		poll_fd.fd = connection;
-		poll_fd.events = POLLIN | POLLRDHUP;
+		poll_fd.events = POLLIN;
 		poll_fd.revents = 0;
-		add_pollfd(poll_fd);
-		fd_to_index_nap_[connection] = poll_fd_vec_.size() - 1;
+		poll_fd_vec_.push_back(poll_fd);
 		used_fd_set_.insert(connection);
 
 		last_recieve_time_map_[connection] = time(NULL);
@@ -227,24 +238,37 @@ namespace ft
 		char buf[BUFFER_SIZE + 1];
 
 		last_recieve_time_map_[connection] = time(NULL);
-		int recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
+
+		ssize_t recv_ret = recv(connection, buf, BUFFER_SIZE, 0);
+		if (recv_ret == -1)
+			throw SetUpFailException("Error: recv()");
+		if (recv_ret == 0) {
+			close_fd_(connection, i_poll_fd);
+			throw connectionHangUp(connection);
+		}
+
 		buf[recv_ret] = '\0';
 		return (RecievedMsg(std::string(buf), connection, fd_to_port_map_[connection], i_poll_fd));
 	}
 
 	void Socket::close_fd_(const int fd, const int i_poll_fd)
 	{
-		close(fd);
+		if (close(fd) == -1)
+			SetUpFailException("Error: close()");
 		poll_fd_vec_.erase(poll_fd_vec_.begin() + i_poll_fd);
 		used_fd_set_.erase(fd);
-		fd_to_index_nap_.erase(poll_fd_vec_[i_poll_fd].fd);
+		fd_to_port_map_.erase(fd);
 	}
 
 	void Socket::closeAllSocket_()
 	{
-		for (size_t i = 0; i < port_num_; ++i)
-			close(poll_fd_vec_[i].fd);
+		for (size_t i = 0; i < poll_fd_vec_.size(); ++i) {
+			if (close(poll_fd_vec_[i].fd) == -1)
+				SetUpFailException("Error: close()");
+		}
+		poll_fd_vec_.clear();
 		used_fd_set_.clear();
+		fd_to_port_map_.clear();
 	}
 
 	void Socket::set_sockaddr_(struct sockaddr_in &server_sockaddr, const char *ip, const in_port_t port)
@@ -253,6 +277,17 @@ namespace ft
 		server_sockaddr.sin_family = AF_INET;
 		server_sockaddr.sin_port = htons(port);
 		server_sockaddr.sin_addr.s_addr = inet_addr(ip);
+	}
+
+	void Socket::set_nonblock_(int fd)
+	{
+		int flags = fcntl(fd, F_GETFL, 0);
+		if (flags == -1)
+			throw SetUpFailException("Error: fcntl()");
+		if ((flags & O_NONBLOCK) != O_NONBLOCK) {	
+			if (fcntl(fd, F_SETFL, (flags | O_NONBLOCK)) == -1)
+				throw SetUpFailException("Error: fcntl()");
+		}
 	}
 
 	Socket::SetUpFailException::SetUpFailException(const std::string err_msg)
