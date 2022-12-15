@@ -4,13 +4,8 @@
 # ~yas/syspro/www/cgi-hello-python.cgi
 
 def main():
-    print_header()
     print_content()
     exit(0)
-
-def print_header():
-    print("Content-Type: text/html")
-    print("")
 
 def print_content():
     print("<HTML><HEAD></HEAD><BODY>")
