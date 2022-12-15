@@ -50,7 +50,6 @@ namespace ft
 		Socket 						socket_;
 		ServerChildMap			serverChild_map_;
 		DefaultServerChildMap	default_serverChild_map_;
-		std::map<int, std::string>		httpRequest_map_;
 		std::map<int, HTTPRequestPair>	httpRequest_pair_map_;
 
 		void create_serverChild_map_();
