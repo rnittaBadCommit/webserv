@@ -2,12 +2,19 @@
 // Created by yuumo on 2022/11/07.
 //
 
+/*
+ * According to RFC 3875, CGI responses can be document-response, local-redir-response, client-redir-response, client-redirdoc-response, but our implementation is limited to document-response.
+ */
+
+
 #include <cstdlib>
 #include <unistd.h>
 #include <cerrno>
 #include <vector>
 #include <cstring>
 #include <iostream>
+#include <cstdarg>
+#include <cstdio>
 #include <sys/socket.h>
 #include <cstdio>
 #include <sys/wait.h>
@@ -22,20 +29,30 @@ Cgi::Cgi() {
  *
  * TODO: We must build this function
  * - set environment
+ *
+ * https://datatracker.ietf.org/doc/html/rfc3875#section-4-1
+ * http://bashhp.web.fc2.com/WWW/header.html
  */
 void Cgi::CreateEnvMap(std::string &request_method) {
   cgi_env_val_["SERVER_SOFTWARE"] = "42";
   cgi_env_val_["GATEWAY_INTERFACE"] = "CGI/1.1";
-  cgi_env_val_["SERVER_PROTOCOL"] = "HTTP/1.1";
-  cgi_env_val_["SERVER_PORT"] = "80";
-  cgi_env_val_["SERVER_NAME"] = "webserv";
-  cgi_env_val_["REQUEST_METHOD"] = "GET";
-  cgi_env_val_["QUERY_STRING"] = "query_string";
-  cgi_env_val_["SCRIPT_NAME"] = "script_name"; // ?
-  cgi_env_val_["CONTENT_LENGTH"] = "42";
-  cgi_env_val_["CONTENT_TYPE"] = "html";
+  cgi_env_val_["SERVER_PROTOCOL"] = "HTTP/1.1"; // tmp
+  cgi_env_val_["SERVER_PORT"] = "80"; // tmp 不要かも
+  cgi_env_val_["SERVER_NAME"] = "webserv"; //tmp
+  cgi_env_val_["REQUEST_METHOD"] = request_method;
+  cgi_env_val_["SCRIPT_NAME"] = "script_name"; // tmp TODO: get_script_name()
+
+  // POST によってフォームを受信する場合に、標準入力から読み込む必要のあるbyte数
+  cgi_env_val_["CONTENT_LENGTH"] = "42"; // TODO: get_content_length()
+
+  // POST によってフォームを受信する場合
+  cgi_env_val_["CONTENT_TYPE"] = "html"; // tmp
+
+  // for GET
+  cgi_env_val_["QUERY_STRING"] = "query_string"; // tmp TODO: get_query_string()
   cgi_env_val_["PATH_INFO"] = "";
-  cgi_env_val_["REQUEST_URI"] = "";
+
+  cgi_env_val_["REQUEST_URI"] = ""; // 不要かも
 }
 
 /**

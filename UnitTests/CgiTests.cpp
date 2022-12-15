@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "../srcs/cgi/cgi.hpp"
+#include "../srcs/cgi/Cgi.hpp"
 #include "../srcs/server/server.hpp"
 
 namespace CgiTest{
