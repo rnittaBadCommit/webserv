@@ -26,4 +26,8 @@ int do_delete(const http_header_t& http_header,
               std::string &file_path,
               std::string &response_message_str);
 
+int do_CGI(std::string &response_message_str);
+
+int do_http();
+
 #endif //WEBSERV_SRCS_HTTPMETHOD_HTTPMETHOD_H_

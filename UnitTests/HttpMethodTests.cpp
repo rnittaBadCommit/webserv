@@ -159,6 +159,36 @@ TEST_F(DoDelete, SuccessCase) {
 }
 }
 
+namespace DoCGI{
+ class DoCGI : public ::testing::Test {
+  protected:
+   static void SetUpTestCase() {
+     // First function only
+     chdir("../.."); // Go to the project root directory
+   }
+
+   void SetUp() override {}
+ };
+
+TEST_F(DoCGI, Case1) {
+  std::string response_message_str;
+
+  do_CGI(response_message_str);
+
+  std::cout << response_message_str << std::endl;
+}
+}
+
+namespace DoHttp{
+ class DoHttp : public ::testing::Test {
+  protected:
+   void SetUp() override {}
+ };
+
+TEST_F(DoHttp, Case1) {
+  do_http();
+}
+}
 
 namespace MethodUtils{
 

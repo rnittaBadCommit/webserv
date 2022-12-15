@@ -15,6 +15,7 @@
 
 #include "../httpResponse/HttpResponse.hpp"
 #include "../HTTP/HTTPHead.hpp"
+#include "cgi/Cgi.hpp"
 
 
 /*
@@ -226,8 +227,87 @@ int do_delete(const http_header_t& http_header,
   return response_status;
 }
 
+
+/**
+ *
+ * @param response_message_str
+ * @return
+ */
+int do_CGI(std::string &response_message_str) {
+  int response_status;
+  std::stringstream response_message_stream;
+  Cgi cgi;
+  char *buf[1024];
+
+  /*
+   * Execute CGI
+   */
+  cgi.Execute();
+  int cgi_out_stream = cgi.GetCgiSocket();
+
+  /*
+   * Read CGI output
+   */
+  int n;
+  std::stringstream cgi_output;
+  while ((n = read(cgi_out_stream, buf, 1024)) > 0) {
+    cgi_output << std::string(reinterpret_cast<const char *>(buf));
+  }
+
+  /*
+   * Create response header
+   */
+  response_message_stream << "HTTP/1.1 200 OK" << CRLF;
+  response_status = 200;
+  response_message_stream << "Server: " << "42webserv" << "/1.0" << CRLF;
+  response_message_stream << "Date: " << CreateDate() << CRLF;
+  response_message_stream << "Last-Modified: " << CreateDate() << CRLF;
+  response_message_stream << "Content-Type: " << "text/html" << CRLF;
+  response_message_stream << "Content-Lenght: " << cgi_output.str().size() << CRLF;
+
+  // send body
+  response_message_stream << CRLF;
+
+  response_message_stream << cgi_output.str();
+
+  response_message_str = response_message_stream.str();
+  return response_status;
+}
+
+
+/**
+ *
+ * @param response_message_str
+ * @return
+ */
+int disallow_method(std::string &response_message_str) {
+  int response_status;
+  std::stringstream response_message_stream;
+
+  response_message_stream << "HTTP/1.1 500 Server Error" << CRLF;
+  response_status = 500;
+
+  response_message_stream << "Server: " << "42webserv" << "/1.0" << CRLF;
+  response_message_stream << "Date: " << CreateDate() << CRLF;
+
+  response_message_str = response_message_stream.str();
+}
+
 int do_http() {
   std::stringstream send_data;
+  std::string response_message_str;
+
+//  if (method == "GET" && /* not exist '?' */ true) {
+//    do_get(); // pure GET
+//  } else if (method == "PUT") {
+//    do_put();
+//  } else if (method == "DELETE") {
+//    do_delete();
+//  } else if (method == "POST" || method == "GET") {
+//    do_CGI();
+//  } else {
+    disallow_method(response_message_str);
+//  }
 
   return 0;
 }
