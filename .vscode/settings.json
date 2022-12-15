@@ -48,5 +48,6 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "cerrno": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false
 }
