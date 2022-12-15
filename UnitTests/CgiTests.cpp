@@ -20,5 +20,11 @@ TEST_F(CgiTest, SuccessCase1) {
 //  ft::Server::
   Cgi c;
   c.Execute();
+
+  // Print debug
+  std::cout << "CGI socket: " << c.GetCgiSocket() << std::endl;
+  char *buf[1024];
+  read(c.GetCgiSocket(), buf, 1024);
+  printf("%s\n", buf);
 }
 }

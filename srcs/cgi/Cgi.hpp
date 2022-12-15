@@ -11,12 +11,19 @@
 class Cgi {
  public:
   Cgi();
+  ~Cgi();
   void Execute();
+
+  /*
+   * Getter
+   */
+  int GetCgiSocket() const;
 
  private:
   std::string cgi_path_;
   std::string query_string_;
   std::map<std::string, std::string> cgi_env_val_;
+  int         cgi_socket_;
 
   void CreateEnvMap(std::string &request_method);
   void SetEnv();

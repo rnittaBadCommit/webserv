@@ -23,6 +23,10 @@
 Cgi::Cgi() {
 }
 
+Cgi::~Cgi() {
+  close(cgi_socket_);
+}
+
 /**
  *
  * @param request_method
@@ -154,8 +158,8 @@ void Cgi::Execute() {
       free(argv);
       exit(1);
     }
-//    argv[1] = strdup("test_utils/cgi/cgi-hello-python.cgi");
-    argv[1] = strdup("test_utils/cgi/new-file.py");
+    argv[1] = strdup("test_utils/cgi/cgi-hello-python.cgi");
+//    argv[1] = strdup("test_utils/cgi/new-file.py");
     if (argv[1] == NULL) {
       free(argv[0]);
       free(argv);
@@ -180,9 +184,13 @@ void Cgi::Execute() {
     exit(ret_val_child);
   }
 
+  // Set cgi socket
+  cgi_socket_ = parent_socket;
+
   int status;
   waitpid(pid, &status, 0);
 
+  // TODO: delete (This is debug)
   if (WEXITSTATUS(status) != 0) {
     std::cerr << "The child process exited with an error" << std::endl;
   } else {
@@ -193,3 +201,10 @@ void Cgi::Execute() {
 }
 
 //TODO: void  Cgi::MakeDocumentResponse
+
+/*
+ * Getter
+ */
+int Cgi::GetCgiSocket() const {
+  return cgi_socket_;
+}
