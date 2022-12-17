@@ -230,7 +230,7 @@ int do_CGI(std::string &response_message_str,
            ft::ServerChild server_child) {
   int response_status;
   std::stringstream response_message_stream;
-  Cgi cgi;
+  Cgi cgi(server_child);
   char *buf[1024];
 
   /*

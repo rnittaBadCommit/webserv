@@ -20,7 +20,8 @@
 #include <sys/wait.h>
 #include "Cgi.hpp"
 
-Cgi::Cgi() {
+Cgi::Cgi(ft::ServerChild server_child)
+    : request_method_(server_child.Get_HTTPHead().GetRequestMethod()), script_name_("hoge") {
 }
 
 Cgi::~Cgi() {
@@ -37,14 +38,14 @@ Cgi::~Cgi() {
  * https://datatracker.ietf.org/doc/html/rfc3875#section-4-1
  * http://bashhp.web.fc2.com/WWW/header.html
  */
-void Cgi::CreateEnvMap(std::string &request_method) {
+void Cgi::CreateEnvMap() {
   cgi_env_val_["SERVER_SOFTWARE"] = "42";
   cgi_env_val_["GATEWAY_INTERFACE"] = "CGI/1.1";
   cgi_env_val_["SERVER_PROTOCOL"] = "HTTP/1.1"; // tmp
   cgi_env_val_["SERVER_PORT"] = "80"; // tmp 不要かも
   cgi_env_val_["SERVER_NAME"] = "webserv"; //tmp
-  cgi_env_val_["REQUEST_METHOD"] = request_method;
-  cgi_env_val_["SCRIPT_NAME"] = "script_name"; // tmp TODO: get_script_name()
+  cgi_env_val_["REQUEST_METHOD"] = request_method_;
+  cgi_env_val_["SCRIPT_NAME"] = script_name_; // tmp TODO: get_script_name()
 
   // POST によってフォームを受信する場合に、標準入力から読み込む必要のあるbyte数
   cgi_env_val_["CONTENT_LENGTH"] = "42"; // TODO: get_content_length()
@@ -116,9 +117,8 @@ void Cgi::Execute() {
   }
   if (pid == 0) { // child
     int ret_val_child = 1;
-    std::string m = "method_name";
 
-    Cgi::CreateEnvMap(m);
+    Cgi::CreateEnvMap();
     Cgi::SetEnv();
 
     close(parent_socket);
