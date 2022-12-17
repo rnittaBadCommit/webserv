@@ -273,14 +273,9 @@ int do_CGI(std::string &response_message_str) {
  * @return
  */
 int disallow_method(std::string &response_message_str) {
-  int response_status;
-  std::stringstream response_message_stream;
+  int response_status = 405;
 
-  response_message_stream << "HTTP/1.1 500 Server Error" << CRLF;
-  response_status = 500;
+  response_message_str = CreateErrorSentence(response_status);
 
-  response_message_stream << "Server: " << "42webserv" << "/1.0" << CRLF;
-  response_message_stream << "Date: " << CreateDate() << CRLF;
-
-  response_message_str = response_message_stream.str();
+  return response_status;
 }
