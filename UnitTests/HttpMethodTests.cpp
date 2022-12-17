@@ -39,7 +39,7 @@ TEST_F(DoPut, NewAdd) {
   struct stat stat_buf = {};
   if (stat(new_add_path.c_str(), &stat_buf) == 0)
     remove(new_add_path.c_str());
-  EXPECT_EQ(do_put(http_head, content_body, new_add_path, response_message_str), 201);
+  EXPECT_EQ(do_put(content_body, new_add_path, response_message_str), 201);
 
   std::cout << response_message_str << std::endl;
 
@@ -49,7 +49,7 @@ TEST_F(DoPut, AlreadyExist) {
   ft::HTTPHead http_head;
   std::string response_message_str;
 
-  EXPECT_EQ(do_put(http_head, content_body, file_path, response_message_str), 204);
+  EXPECT_EQ(do_put( content_body, file_path, response_message_str), 204);
 
   std::cout << response_message_str << std::endl;
 
@@ -81,7 +81,7 @@ TEST_F(DoGet, SuccessCase1) {
   ft::HTTPHead http_request;
   std::string response_message_str;
 
-  EXPECT_EQ(do_get(http_request, file_path, response_message_str), 200);
+  EXPECT_EQ(do_get(file_path, response_message_str), 200);
   std::cout << "Server Error*****" << std::endl;
   std::cout << response_message_str << std::endl;
   std::cout << "*****" << std::endl;
@@ -93,7 +93,7 @@ TEST_F(DoGet, Case404_wrong_path) {
   ft::HTTPHead http_request;
   std::string response_message_str;
 
-  EXPECT_EQ(do_get(http_request, wrong_path, response_message_str), 404);
+  EXPECT_EQ(do_get(wrong_path, response_message_str), 404);
   std::cout << "Server Error*****" << std::endl;
   std::cout << response_message_str << std::endl;
   std::cout << "*****" << std::endl;
@@ -105,7 +105,7 @@ TEST_F(DoGet, Case404_dir_path) {
   ft::HTTPHead http_request;
   std::string response_message_str;
 
-  EXPECT_EQ(do_get(http_request, dir_path, response_message_str), 404);
+  EXPECT_EQ(do_get(dir_path, response_message_str), 404);
   std::cout << "Server Error*****" << std::endl;
   std::cout << response_message_str << std::endl;
   std::cout << "*****" << std::endl;
@@ -113,6 +113,7 @@ TEST_F(DoGet, Case404_dir_path) {
 }
 
 }
+
 
 namespace DoDelete{
  class DoDelete : public ::testing::Test {
@@ -136,7 +137,7 @@ TEST_F(DoDelete, ServerError500) {
   std::string response_message_str;
 
 
-  EXPECT_EQ(do_delete(http_header, wrong_path, response_message_str), 500);
+  EXPECT_EQ(do_delete(wrong_path, response_message_str), 500);
   std::cout << "Server Error*****" << std::endl;
   std::cout << response_message_str << std::endl;
   std::cout << "*****" << std::endl;
@@ -152,12 +153,13 @@ TEST_F(DoDelete, SuccessCase) {
   delete_test_file << "TEST" << std::endl;
   delete_test_file.close();
 
-  EXPECT_EQ(do_delete(http_header, delete_test_file_path, response_message_str), 204);
+  EXPECT_EQ(do_delete(delete_test_file_path, response_message_str), 204);
   std::cout << "Server Error*****" << std::endl;
   std::cout << response_message_str << std::endl;
   std::cout << "*****" << std::endl;
 }
 }
+
 
 namespace DoCGI{
  class DoCGI : public ::testing::Test {
@@ -179,16 +181,6 @@ TEST_F(DoCGI, Case1) {
 }
 }
 
-namespace DoHttp{
- class DoHttp : public ::testing::Test {
-  protected:
-   void SetUp() override {}
- };
-
-TEST_F(DoHttp, Case1) {
-  do_http();
-}
-}
 
 namespace MethodUtils{
 

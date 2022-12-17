@@ -19,18 +19,6 @@
 
 
 /*
- * @arg
- *  Socket:
- *  Method:
- *  Headers:
- *  PATH:
- *  Search:
- *  (CGI)
- *
- * @return
- *  status code
- *
- *
  * The following implementations are omitted
  *
  * -- Check Mod, Match, Range and each processing
@@ -89,9 +77,15 @@ std::string CreateErrorSentence(int status_code) {
 }
 
 
-int do_put(ft::HTTPHead &http_head,
-           std::string &http_body,
-           std::string &file_path,
+/**
+ *
+ * @param http_body
+ * @param file_path
+ * @param response_message_str
+ * @return
+ */
+int do_put(const std::string &http_body,
+           const std::string &file_path,
            std::string &response_message_str) {
   int response_status;
   std::stringstream response_message_stream;
@@ -136,8 +130,7 @@ int do_put(ft::HTTPHead &http_head,
  * @param response_message_str
  * @return
  */
-int do_get(ft::HTTPHead &http_request,
-           std::string &file_path,
+int do_get(const std::string &file_path,
            std::string &response_message_str) {
   int response_status;
   std::stringstream response_message_stream;
@@ -195,8 +188,7 @@ int do_get(ft::HTTPHead &http_request,
  * @param response_message_str
  * @return
  */
-int do_delete(const http_header_t& http_header,
-              std::string &file_path,
+int do_delete(const std::string &file_path,
               std::string &response_message_str) {
   int response_status;
   std::stringstream response_message_stream;
@@ -291,23 +283,4 @@ int disallow_method(std::string &response_message_str) {
   response_message_stream << "Date: " << CreateDate() << CRLF;
 
   response_message_str = response_message_stream.str();
-}
-
-int do_http() {
-  std::stringstream send_data;
-  std::string response_message_str;
-
-//  if (method == "GET" && /* not exist '?' */ true) {
-//    do_get(); // pure GET
-//  } else if (method == "PUT") {
-//    do_put();
-//  } else if (method == "DELETE") {
-//    do_delete();
-//  } else if (method == "POST" || method == "GET") {
-//    do_CGI();
-//  } else {
-    disallow_method(response_message_str);
-//  }
-
-  return 0;
 }
