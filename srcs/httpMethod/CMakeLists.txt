@@ -3,4 +3,5 @@ add_library(httpMethod
         HTTPMethod.cpp
         MethodUtils.cpp
         Redirection.cpp
+        HTTPProcess.cpp
         )
