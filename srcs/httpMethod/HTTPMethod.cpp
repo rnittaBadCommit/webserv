@@ -16,6 +16,7 @@
 #include "../httpResponse/HttpResponse.hpp"
 #include "../HTTP/HTTPHead.hpp"
 #include "cgi/Cgi.hpp"
+#include "server/serverChild.hpp"
 
 
 /*
@@ -225,7 +226,8 @@ int do_delete(const std::string &file_path,
  * @param response_message_str
  * @return
  */
-int do_CGI(std::string &response_message_str) {
+int do_CGI(std::string &response_message_str,
+           ft::ServerChild server_child) {
   int response_status;
   std::stringstream response_message_stream;
   Cgi cgi;
