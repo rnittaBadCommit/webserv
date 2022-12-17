@@ -13,6 +13,8 @@
 #include <sys/wait.h>
 #include "Cgi.hpp"
 
+extern char **environ;
+
 Cgi::Cgi() {
 }
 

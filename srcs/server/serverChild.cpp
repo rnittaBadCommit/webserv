@@ -72,7 +72,7 @@ namespace ft
 		// std::cout <<"url" <<url << std::endl;
 		// std::cout <<"url.dest" << redirectList_map_[url].dest_uri << std::endl;
 		// std::cout << redirectList_map_["/redirect/"].dest_uri << std::endl;
-		std::map<std::string, redirectConf>::const_iterator it = redirectList_map_.upper_bound(url);
+		redirMap::const_iterator it = redirectList_map_.upper_bound(url);
 		if (it == redirectList_map_.begin())
 			return (false);
 		--it;

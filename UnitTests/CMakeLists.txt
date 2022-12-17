@@ -6,10 +6,11 @@ include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 # add Test files
 add_executable(Google_Tests_run
         AutoIndexTests.cpp
-        CgiTests.cpp
+        #CgiTests.cpp
         HttpMethodTests.cpp
         HttpRequestTests.cpp
         UtilsTests.cpp
+        ServerChild.cpp
         )
 
 target_link_libraries(Google_Tests_run

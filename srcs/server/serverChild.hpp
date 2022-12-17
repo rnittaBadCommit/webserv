@@ -47,7 +47,8 @@ namespace ft
 		ServerConfig server_config_;
 		LocationConfig location_config_;
 		//std::map<const std::string, Location> location_map_;
-		std::map<const std::string, redirectConf> redirectList_map_;
+        typedef std::map<const std::string, redirectConf> redirMap;
+        redirMap redirectList_map_;
 
 		int			response_code_;
 		HTTPParseStatus	parse_status_;
