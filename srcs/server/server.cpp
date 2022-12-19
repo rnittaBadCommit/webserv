@@ -103,7 +103,7 @@ namespace ft
 				//std::cout << serverChild.Get_body() << std::endl;
 
               std::string response = http_process(serverChild);
-              std::cout << response << std::endl;
+              std::cout << response << std::endl; // Debug
               socket_.send_msg(recieved_msg.client_id, response);
 
 				// check status code
