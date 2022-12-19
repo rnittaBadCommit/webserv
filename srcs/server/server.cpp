@@ -102,13 +102,16 @@ namespace ft
 				//std::cout << "BODY RECEIVED: ";
 				//std::cout << serverChild.Get_body() << std::endl;
 
+              std::string response = http_process(serverChild);
+              std::cout << response << std::endl;
+              socket_.send_msg(recieved_msg.client_id, response);
+
 				// check status code
 
 				// complete request
 
 				// send response
 
-                std::string response = http_process(serverChild);
 
 				if (serverChild.Get_HTTPHead().GetRequestURI() == "/foo")
 					socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 12\nContent-Type: text/html\n\nHello Foooo\n");		
