@@ -31,21 +31,28 @@ std::string http_process(ft::ServerChild server_child) {
    * then execute CGI.
    */
   bool is_CGI = false;
-  get_uri_and_check_CGI(kFilePath, is_CGI);
+  std::string plane_filepath = get_uri_and_check_CGI(kFilePath, is_CGI);
+
+  // TODO: delete. for debug
+  std::cerr << "*************************" << std::endl;
+  std::cerr << "server_child.Get_path(): " << kFilePath << std::endl;
+  std::cerr << "plane_filepath:          " << plane_filepath << std::endl;
+  std::cerr << "*************************" << std::endl;
+  // ***
 
   if (kRequestMethod == "POST") {
     // Any POST request is CGI
-    do_CGI(response_message_str, server_child);
+    do_CGI(server_child, response_message_str, std::string());
   } else if (kRequestMethod == "GET") {
     if (is_CGI) {
-      do_CGI(response_message_str, server_child);
+      do_CGI(server_child, response_message_str, plane_filepath);
     } else {
-      do_get(kFilePath, response_message_str);
+      do_get(plane_filepath, response_message_str);
     }
   } else if (kRequestMethod == "PUT") {
-    do_put(kHttpBody, kFilePath, response_message_str);
+    do_put(kHttpBody, plane_filepath, response_message_str);
   } else if (kRequestMethod == "DELETE") {
-    do_delete(kFilePath, response_message_str);
+    do_delete(plane_filepath, response_message_str);
   } else {
     disallow_method(response_message_str);
   }

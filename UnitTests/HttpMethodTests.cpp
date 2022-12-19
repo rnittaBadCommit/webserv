@@ -178,7 +178,7 @@ TEST_F(DoCGI, Case1) {
 
   std::string response_message_str;
 
-  do_CGI(response_message_str, server_child);
+  do_CGI(server_child, response_message_str, std::string());
 
   std::cout << response_message_str << std::endl;
 }

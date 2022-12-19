@@ -226,13 +226,28 @@ int do_delete(const std::string &file_path,
  * @param response_message_str
  * @return
  */
-int do_CGI(std::string &response_message_str,
-           ft::ServerChild server_child) {
+int do_CGI(ft::ServerChild server_child,
+           std::string &response_message_str,
+           std::string file_path) {
   int response_status;
   std::stringstream response_message_stream;
   Cgi cgi(server_child);
   const int buf_size = 1024;
   char buf[buf_size];
+
+  /*
+   * Check to exist file
+   * FIXME: GETと同じことをしている．
+   */
+  int ret_val;
+  struct stat st = {};
+
+  ret_val = stat(file_path.c_str(), &st);
+  if (ret_val < 0 || !S_ISREG(st.st_mode)) {
+    response_message_stream << CreateErrorSentence(404);
+    response_message_str = response_message_stream.str();
+    return (404);
+  }
 
   /*
    * Execute CGI
