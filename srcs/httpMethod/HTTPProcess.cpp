@@ -42,17 +42,17 @@ std::string http_process(ft::ServerChild server_child) {
 
   if (kRequestMethod == "POST") {
     // Any POST request is CGI
-    do_CGI(server_child, response_message_str, std::string());
+    do_CGI(response_message_str, server_child, std::string());
   } else if (kRequestMethod == "GET") {
     if (is_CGI) {
-      do_CGI(server_child, response_message_str, plane_filepath);
+      do_CGI(response_message_str, server_child, plane_filepath);
     } else {
-      do_get(plane_filepath, response_message_str);
+      do_get(response_message_str, plane_filepath);
     }
   } else if (kRequestMethod == "PUT") {
-    do_put(kHttpBody, plane_filepath, response_message_str);
+    do_put(response_message_str, plane_filepath, kHttpBody);
   } else if (kRequestMethod == "DELETE") {
-    do_delete(plane_filepath, response_message_str);
+    do_delete(response_message_str, plane_filepath);
   } else {
     disallow_method(response_message_str);
   }

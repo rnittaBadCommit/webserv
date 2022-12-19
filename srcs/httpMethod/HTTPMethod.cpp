@@ -85,9 +85,9 @@ std::string CreateErrorSentence(int status_code) {
  * @param response_message_str
  * @return
  */
-int do_put(const std::string &http_body,
+int do_put(std::string &response_message_str,
            const std::string &file_path,
-           std::string &response_message_str) {
+           const std::string &http_body) {
   int response_status;
   std::stringstream response_message_stream;
 
@@ -131,8 +131,7 @@ int do_put(const std::string &http_body,
  * @param response_message_str
  * @return
  */
-int do_get(const std::string &file_path,
-           std::string &response_message_str) {
+int do_get(std::string &response_message_str, const std::string &file_path) {
   int response_status;
   std::stringstream response_message_stream;
 
@@ -189,8 +188,7 @@ int do_get(const std::string &file_path,
  * @param response_message_str
  * @return
  */
-int do_delete(const std::string &file_path,
-              std::string &response_message_str) {
+int do_delete(std::string &response_message_str, const std::string &file_path) {
   int response_status;
   std::stringstream response_message_stream;
   std::string delete_dir = "ok";
@@ -226,8 +224,8 @@ int do_delete(const std::string &file_path,
  * @param response_message_str
  * @return
  */
-int do_CGI(ft::ServerChild server_child,
-           std::string &response_message_str,
+int do_CGI(std::string &response_message_str,
+           ft::ServerChild server_child,
            std::string file_path) {
   int response_status;
   std::stringstream response_message_stream;
