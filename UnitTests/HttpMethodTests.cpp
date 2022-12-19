@@ -194,22 +194,30 @@ class MethodUtils : public ::testing::Test {
 
 TEST_F(MethodUtils, Case1) {
   std::string uri = "/42tokyo?a=100";
-  EXPECT_EQ(get_uri(uri), "/42tokyo");
+  bool is_cgi = false;
+  EXPECT_EQ(get_uri_and_check_CGI(uri, is_cgi), "/42tokyo");
+  EXPECT_EQ(is_cgi, true);
 }
 
 TEST_F(MethodUtils, Case2) {
   std::string uri = "/42tokyo";
-  EXPECT_EQ(get_uri(uri), "/42tokyo");
+  bool is_cgi = false;
+  EXPECT_EQ(get_uri_and_check_CGI(uri, is_cgi), "/42tokyo");
+  EXPECT_EQ(is_cgi, false);
 }
 
 TEST_F(MethodUtils, Case3) {
   std::string uri = "/42tokyo?";
-  EXPECT_EQ(get_uri(uri), "/42tokyo");
+  bool is_cgi = false;
+  EXPECT_EQ(get_uri_and_check_CGI(uri, is_cgi), "/42tokyo");
+  EXPECT_EQ(is_cgi, false);
 }
 
 TEST_F(MethodUtils, Case4) {
   std::string uri = "";
-  EXPECT_EQ(get_uri(uri), "");
+  bool is_cgi = false;
+  EXPECT_EQ(get_uri_and_check_CGI(uri, is_cgi), "");
+  EXPECT_EQ(is_cgi, false);
 }
 }
 

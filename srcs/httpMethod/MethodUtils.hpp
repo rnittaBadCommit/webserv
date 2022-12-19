@@ -7,6 +7,6 @@
 
 #include <string>
 
-std::string get_uri(std::string &szUri);
+std::string get_uri_and_check_CGI(const std::string &szUri, bool &is_cgi);
 
 #endif //WEBSERV_SRCS_HTTPMETHOD_METHODUTILS_HPP_

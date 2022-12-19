@@ -4,11 +4,16 @@
 
 #include "MethodUtils.hpp"
 
-#include <iostream>
+/**
+ *
+ * @param szUri
+ * @param is_cgi
+ * @return
+ *
+ * @brief
+ */
+std::string get_uri_and_check_CGI(const std::string &szUri, bool &is_cgi) {
 
-std::string get_uri(std::string &szUri) {
-
-  bool is_cgi = false;
   std::string uri;
 
   std::string::size_type urlPos = szUri.rfind('?');
@@ -22,9 +27,6 @@ std::string get_uri(std::string &szUri) {
   } else {
     uri = szUri;
   }
-
-  // TODO: remove debug
-  std::cerr << "is_cgi: " << is_cgi << std::endl;
 
   return uri;
 }

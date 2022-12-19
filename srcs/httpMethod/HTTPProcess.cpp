@@ -5,7 +5,7 @@
 #include <string>
 
 #include "HTTPMethod.hpp"
-#include "../server/serverChild.hpp"
+#include "MethodUtils.hpp"
 
 /**
  *
@@ -30,8 +30,8 @@ std::string http_process(ft::ServerChild server_child) {
    * If URI contains CGI-path defined in the config file and the request method is POST or GET,
    * then execute CGI.
    */
-  bool is_CGI = true;
-
+  bool is_CGI = false;
+  get_uri_and_check_CGI(kFilePath, is_CGI);
 
   if (kRequestMethod == "POST") {
     // Any POST request is CGI
