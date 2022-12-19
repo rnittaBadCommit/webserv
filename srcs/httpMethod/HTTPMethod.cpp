@@ -231,7 +231,8 @@ int do_CGI(std::string &response_message_str,
   int response_status;
   std::stringstream response_message_stream;
   Cgi cgi(server_child);
-  char *buf[1024];
+  const int buf_size = 1024;
+  char buf[buf_size];
 
   /*
    * Execute CGI
@@ -241,10 +242,13 @@ int do_CGI(std::string &response_message_str,
 
   /*
    * Read CGI output
+   *
+   * TODO: implement safe read
    */
-  int n;
+  ssize_t n;
   std::stringstream cgi_output;
-  while ((n = read(cgi_out_stream, buf, 1024)) > 0) {
+  while ((n = read(cgi_out_stream, buf, buf_size)) > 0) {
+    buf[n] = '\0';
     cgi_output << std::string(reinterpret_cast<const char *>(buf));
   }
 

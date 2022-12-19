@@ -7,6 +7,7 @@
 #include "../srcs/httpMethod/HTTPMethod.hpp"
 #include "../srcs/httpMethod/MethodUtils.hpp"
 #include "../srcs/HTTP/HTTPHead.hpp"
+#include "../srcs/cgi/Cgi.hpp"
 
 
 namespace DoPut {
@@ -173,9 +174,11 @@ namespace DoCGI{
  };
 
 TEST_F(DoCGI, Case1) {
+  ft::ServerChild server_child;
+
   std::string response_message_str;
 
-  do_CGI(response_message_str);
+  do_CGI(response_message_str, server_child);
 
   std::cout << response_message_str << std::endl;
 }

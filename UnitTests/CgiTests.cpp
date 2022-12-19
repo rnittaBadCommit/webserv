@@ -26,7 +26,7 @@ TEST_F(CgiTest, SuccessCase1) {
   const int buf_size = 1024;
   char buf[buf_size];
   ssize_t n;
-  n = read(c.GetCgiSocket(), buf, buf_size - 1);
+  n = read(c.GetCgiSocket(), buf, buf_size);
   buf[n] = '\0';
   std::cout << buf << std::endl;
 }
