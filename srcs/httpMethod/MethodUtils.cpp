@@ -23,5 +23,8 @@ std::string get_uri(std::string &szUri) {
     uri = szUri;
   }
 
+  // TODO: remove debug
+  std::cerr << "is_cgi: " << is_cgi << std::endl;
+
   return uri;
 }

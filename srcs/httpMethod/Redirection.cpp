@@ -7,4 +7,6 @@
 
 std::string generate_redirect_response() {
   std::stringstream redirect_response;
+
+  return "It is not done yet.";
 }

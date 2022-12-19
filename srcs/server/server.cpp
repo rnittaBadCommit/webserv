@@ -1,5 +1,5 @@
 #include "server.hpp"
-#include "../srcs/httpMethod/HTTPProcess.hpp"
+#include "../httpMethod/HTTPProcess.hpp"
 
 namespace ft
 {

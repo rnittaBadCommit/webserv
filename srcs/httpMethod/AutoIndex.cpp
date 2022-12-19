@@ -7,7 +7,7 @@
 #include <set>
 #include "AutoIndex.hpp"
 #include "HTTPMethod.hpp"
-#include "httpResponse/HttpResponse.hpp"
+#include "../httpResponse/HttpResponse.hpp"
 
 static std::string get_table_line(const std::string &path) {
   std::stringstream return_sentence;

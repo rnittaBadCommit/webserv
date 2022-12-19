@@ -9,8 +9,8 @@
 #include "status_code.hpp"
 
 
-HttpResponse::HttpResponse() {};
-HttpResponse::~HttpResponse() {};
+HttpResponse::HttpResponse() {}
+HttpResponse::~HttpResponse() {}
 
 
 /*

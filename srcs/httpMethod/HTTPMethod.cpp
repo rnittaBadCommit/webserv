@@ -15,8 +15,8 @@
 
 #include "../httpResponse/HttpResponse.hpp"
 #include "../HTTP/HTTPHead.hpp"
-#include "cgi/Cgi.hpp"
-#include "server/serverChild.hpp"
+#include "../cgi/Cgi.hpp"
+#include "../server/serverChild.hpp"
 
 
 /*

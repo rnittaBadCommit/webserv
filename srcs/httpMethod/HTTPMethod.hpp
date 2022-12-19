@@ -8,7 +8,7 @@
 #include <map>
 #include <string>
 #include "../HTTP/HTTPHead.hpp"
-#include "server/server.hpp"
+#include "../server/server.hpp"
 
 typedef std::map<std::string, std::string> http_header_t;
 
