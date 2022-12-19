@@ -1,4 +1,5 @@
 #include "server.hpp"
+#include "../srcs/httpMethod/HTTPProcess.hpp"
 
 namespace ft
 {
@@ -106,6 +107,8 @@ namespace ft
 				// complete request
 
 				// send response
+
+                std::string response = http_process(serverChild);
 
 				if (serverChild.Get_HTTPHead().GetRequestURI() == "/foo")
 					socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 12\nContent-Type: text/html\n\nHello Foooo\n");		
