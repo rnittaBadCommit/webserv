@@ -7,7 +7,7 @@
 
 #include <string>
 #include <map>
-#include "server/server.hpp"
+#include "server/serverChild.hpp"
 
 class Cgi {
  public:

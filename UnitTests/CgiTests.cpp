@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 #include "../srcs/cgi/Cgi.hpp"
-#include "../srcs/server/server.hpp"
 
 namespace CgiTest{
  class CgiTest : public ::testing::Test {
@@ -18,7 +17,8 @@ namespace CgiTest{
 TEST_F(CgiTest, SuccessCase1) {
 //  ft::Server s;
 //  ft::Server::
-  Cgi c;
+  ft::ServerChild server_child;
+  Cgi c(server_child);
   c.Execute();
 
   // Print debug

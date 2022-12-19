@@ -8,9 +8,11 @@ include_directories(srcs)
 include_directories(srcs/config)
 add_subdirectory(UnitTests)
 add_subdirectory(srcs/cgi)
+add_subdirectory(srcs/config)
 add_subdirectory(srcs/httpMethod)
 add_subdirectory(srcs/httpResponse)
 add_subdirectory(srcs/HTTP)
+add_subdirectory(srcs/server)
 add_subdirectory(srcs/utils)
 
 add_executable(webserv
