@@ -55,7 +55,7 @@ void ServerConfig::setClientMaxBodySize(const unsigned int client_max_body_size)
 	this->client_max_body_size = client_max_body_size;
 }
 
-void ServerConfig::addErrorPage(const std::map<unsigned int, std::string> &error_page)
+void ServerConfig::addErrorPage(const err_page_map &error_page)
 {
 	this->is_set.insert(ERROR_PAGE);
 	this->error_page.insert(error_page.begin(), error_page.end());
@@ -84,12 +84,12 @@ const unsigned int &ServerConfig::getClientMaxBodySize() const
 	return this->client_max_body_size;
 }
 
-const std::map<unsigned int, std::string> &ServerConfig::getErrorPage() const
+const ServerConfig::err_page_map &ServerConfig::getErrorPage() const
 {
 	return this->error_page;
 }
 
-const std::map<std::string, LocationConfig> &ServerConfig::getLocationConfig() const
+const ServerConfig::loc_conf_map &ServerConfig::getLocationConfig() const
 {
 	return this->location_config;
 }

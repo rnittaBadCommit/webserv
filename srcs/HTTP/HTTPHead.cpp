@@ -47,9 +47,10 @@ namespace ft {
         return (_parseStatus > headerFields ? 0 : 1);
     }
 
-    const std::string              HTTPHead::GetHost() const {
+    static const std::string empty = "";
+    const std::string&              HTTPHead::GetHost() const {
         header_type::const_iterator host = _headerFields.find("host");
-        return (host == _headerFields.end() ? "" : host->second);
+        return (host == _headerFields.end() ? empty : host->second);
     }
     const int&                      HTTPHead::GetResponseCode() const { return _responseCode;}
     const HTTPParseStatus&          HTTPHead::GetParseStatus() const { return _parseStatus; }

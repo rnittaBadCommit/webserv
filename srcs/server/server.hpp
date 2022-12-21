@@ -31,18 +31,14 @@ namespace ft
 		typedef std::map<in_port_t, ServerChild>	DefaultServerChildMap;
 		typedef std::pair<HTTPHead, ServerChild>	HTTPRequestPair;
 
-
-		~Server();
-		// Server(const std::string conf_path); // custom conf
-		Server(const std::vector<in_port_t> port_vec);
 		Server(const std::string config_path);
-		// Server(const ServerConfig server_config);
+		~Server();
 
 		void start_server();
 		void print_server_config();
 
 	private:
-		Server(); // default conf
+		Server();
 		Server(const Server& src);
 		Server& operator=(const Server&rhs);
 
@@ -54,9 +50,7 @@ namespace ft
 
 		void create_serverChild_map_();
 		void import_config_(const std::string config_path);
-		void setup_();
 		bool recieve_request_();
-		void run_cgi_();
 		ServerChild&	decide_serverChild_config_(const std::string& host, in_port_t port);
 	};
 

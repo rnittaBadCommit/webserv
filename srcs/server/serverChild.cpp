@@ -16,8 +16,8 @@ namespace ft
 		: server_config_(server_config), location_config_(), redirectList_map_(), response_code_(),
 		parse_status_(), HTTP_head_(), content_length_(), read_bytes_(), max_body_size_(), body_(), save_(), path_(), hex_bytes_()
 	{
-		std::map<std::string, LocationConfig>::const_iterator itend = server_config.getLocationConfig().end();
-		for (std::map<std::string, LocationConfig>::const_iterator it = server_config.getLocationConfig().begin(); it != itend; ++it)
+		ServerConfig::loc_conf_map::const_iterator itend = server_config.getLocationConfig().end();
+		for (ServerConfig::loc_conf_map::const_iterator it = server_config.getLocationConfig().begin(); it != itend; ++it)
 		{
 			LocationConfig location_config = (*it).second;
 			if (location_config.getRedirect().first != LocationConfig::NO_REDIRECT)
@@ -72,7 +72,7 @@ namespace ft
 		// std::cout <<"url" <<url << std::endl;
 		// std::cout <<"url.dest" << redirectList_map_[url].dest_uri << std::endl;
 		// std::cout << redirectList_map_["/redirect/"].dest_uri << std::endl;
-		std::map<std::string, redirectConf>::const_iterator it = redirectList_map_.upper_bound(url);
+		redir_map::const_iterator it = redirectList_map_.upper_bound(url);
 		if (it == redirectList_map_.begin())
 			return (false);
 		--it;
@@ -158,9 +158,9 @@ namespace ft
 
 	void    ServerChild::setUp_locationConfig_() {
         std::string     httpReqURI = HTTP_head_.GetRequestURI();	
-        std::map<std::string, LocationConfig>           serverLocMap = server_config_.getLocationConfig();
-        std::map<std::string, LocationConfig>::iterator locConfIt;
         std::string     pathParts;
+        ServerConfig::loc_conf_map				serverLocMap = server_config_.getLocationConfig();
+        ServerConfig::loc_conf_map::iterator	locConfIt;
 
         while ((locConfIt = serverLocMap.find(httpReqURI)) == serverLocMap.end() && !httpReqURI.empty()) {
             size_t i =  httpReqURI.find_last_of('/');
@@ -309,8 +309,7 @@ namespace ft
         }
 	    if (hex_bytes_ == 0) {	
 			response_code_ = 200;
-			parse_status_ = complete;
-			//HTTP_head_.GetHeaderFields()['transfer-encoding'] = "";
+			parse_status_ = complete;	
 		}
 	}
 

@@ -20,10 +20,6 @@ private:
 	LocationConfig location_config;
 
 	E_BlockType nowBlock;
-	bool isParamDelimiter(int c);
-	void throwIncorrectFormatError(const std::vector<std::string>& line, const std::string& directive);
-	unsigned int validateUnsignedInt(const std::string& number, const std::string& directive);
-	int validateInt(const std::string& number, const std::string& directive);
 
 public:
 	ConfigParser();
@@ -32,6 +28,8 @@ public:
 	ConfigParser& operator=(const ConfigParser& rhs);
 
 	Config readFile(const std::string &filepath);
+
+private:
 	std::vector<std::string> splitLine(const std::string line);
 	void setConfigFromParseLine();
 
@@ -51,18 +49,23 @@ public:
 	void setConfigCgiExtension(E_BlockType block_type, std::vector<std::string> line);
 	void setConfigUploadFilepath(E_BlockType block_type, std::vector<std::string> line);
 
-	void validateServerName(std::vector<std::string> line);
-	std::map<unsigned int, std::string> validateErrorPage(std::vector<std::string> line);
-	unsigned int validateListen(std::vector<std::string> line);
-	unsigned int validateClientMaxBodySize(std::vector<std::string> line);
-	std::set<std::string> validateAllowMethod(std::vector<std::string> line);
-	void validateAlias(std::vector<std::string> line);
-	void validateAutoIndex(std::vector<std::string> line);
-	std::vector<std::string> validateIndex(std::vector<std::string> line);
-	std::pair<std::string, std::string> validateCgiExtension(std::vector<std::string> line);
-	void validateUploadFilepath(std::vector<std::string> line);
-	std::pair<int, std::string> validateRedirect(std::vector<std::string> line);
+	void validateServerName(const std::vector<std::string> &line);
+	std::map<unsigned int, std::string> validateErrorPage(const std::vector<std::string> &line);
+	unsigned int validateListen(const std::vector<std::string> &line);
+	unsigned int validateClientMaxBodySize(const std::vector<std::string> &line);
+	std::set<std::string> validateAllowMethod(const std::vector<std::string> &line);
+	void validateAlias(const std::vector<std::string> &line);
+	void validateAutoIndex(const std::vector<std::string> &line);
+	std::vector<std::string> validateIndex(const std::vector<std::string> &line);
+	std::pair<std::string, std::string> validateCgiExtension(const std::vector<std::string> &line);
+	void validateUploadFilepath(const std::vector<std::string> &line);
+	std::pair<int, std::string> validateRedirect(const std::vector<std::string> &line);
 	void printParserLine();
+
+	bool isParamDelimiter(int c);
+	void throwIncorrectFormatError(const std::vector<std::string>& line, const std::string& directive);
+	unsigned int validateUnsignedInt(const std::string& number, const std::string& directive);
+	int validateInt(const std::string& number, const std::string& directive);
 };
 
 #endif

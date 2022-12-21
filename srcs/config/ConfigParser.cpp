@@ -439,7 +439,7 @@ void ConfigParser::setConfigUploadFilepath(E_BlockType block_type, std::vector<s
 	}
 }
 
-void ConfigParser::validateServerName(std::vector<std::string> line)
+void ConfigParser::validateServerName(const std::vector<std::string> &line)
 {
 	if (!(line.size() == 3 && line[0] == "server_name" && line[2] == ";"))
 	{
@@ -447,7 +447,7 @@ void ConfigParser::validateServerName(std::vector<std::string> line)
 	}
 }
 
-std::map<unsigned int, std::string> ConfigParser::validateErrorPage(std::vector<std::string> line)
+ServerConfig::err_page_map ConfigParser::validateErrorPage(const std::vector<std::string> &line)
 {	
 	std::cout << std::endl;
 	if (line.size() < 4 || line[line.size() - 1] != ";" || line[line.size() - 2][0] != '/') {
@@ -464,7 +464,7 @@ std::map<unsigned int, std::string> ConfigParser::validateErrorPage(std::vector<
 	return (error_page);
 }
 
-unsigned int ConfigParser::validateListen(std::vector<std::string> line)
+unsigned int ConfigParser::validateListen(const std::vector<std::string> &line)
 {
 	if (!(line.size() == 3 && line[2] == ";"))
 	{
@@ -477,7 +477,7 @@ unsigned int ConfigParser::validateListen(std::vector<std::string> line)
 	return (port);
 }
 
-unsigned int ConfigParser::validateClientMaxBodySize(std::vector<std::string> line)
+unsigned int ConfigParser::validateClientMaxBodySize(const std::vector<std::string> &line)
 {
 	if (!(line.size() == 3 && line[2] == ";"))
 	{
@@ -486,7 +486,7 @@ unsigned int ConfigParser::validateClientMaxBodySize(std::vector<std::string> li
 	return (validateUnsignedInt(line[1], "client_max_body_size"));
 }
 
-std::set<std::string> ConfigParser::validateAllowMethod(std::vector<std::string> line)
+std::set<std::string> ConfigParser::validateAllowMethod(const std::vector<std::string> &line)
 {
 	if (line.size() < 3 || line[line.size() - 1] != ";")
 	{
@@ -494,17 +494,17 @@ std::set<std::string> ConfigParser::validateAllowMethod(std::vector<std::string>
 	}
 
 	std::set<std::string> allow_method;
-	for (std::vector<std::string>::iterator it = ++line.begin(); it != --line.end(); ++it) {
-		if (*it != "GET" && *it != "POST" && *it != "DELETE") {
-			throw std::invalid_argument("Error: unkown allow method: " + *it);
+	for (size_t i = 1; i < line.size() - 1; ++i) { // ignore "allow_method" and ";"
+		if (line[i] != "GET" && line[i] != "POST" && line[i] != "DELETE" && line[i] != "PUT") {
+			throw std::invalid_argument("Error: unkown allow method: " + line[i]);
 		}
-		allow_method.insert(*it);
+		allow_method.insert(line[i]);
 	}
 
 	return (allow_method);
 }
 
-void ConfigParser::validateAlias(std::vector<std::string> line)
+void ConfigParser::validateAlias(const std::vector<std::string> &line)
 {
 	if (line.size() != 3 || line[2] != ";")
 	{
@@ -512,7 +512,7 @@ void ConfigParser::validateAlias(std::vector<std::string> line)
 	}
 }
 
-void ConfigParser::validateAutoIndex(std::vector<std::string> line)
+void ConfigParser::validateAutoIndex(const std::vector<std::string> &line)
 {
 	if (line.size() != 3 || line[2] != ";" || (line[1] != "on" && line[1] != "off"))
 	{
@@ -520,7 +520,7 @@ void ConfigParser::validateAutoIndex(std::vector<std::string> line)
 	}
 }
 
-std::vector<std::string> ConfigParser::validateIndex(std::vector<std::string> line)
+std::vector<std::string> ConfigParser::validateIndex(const std::vector<std::string> &line)
 {
 	if (line.size() < 3 || line[line.size() - 1] != ";")
 	{
@@ -534,23 +534,21 @@ std::vector<std::string> ConfigParser::validateIndex(std::vector<std::string> li
 	return (index);
 }
 
-std::pair<std::string, std::string> ConfigParser::validateCgiExtension(std::vector<std::string> line)
+std::pair<std::string, std::string> ConfigParser::validateCgiExtension(const std::vector<std::string> &line)
 {
 	if (line.size() != 4 || line[3] != ";")
 	{
 		throwIncorrectFormatError(line, "cgi_extension");
 	}
-	if (line[1] != "\".py\"")
+	if (line[1] != ".py")
 	{
 		throw std::invalid_argument("Error: Only .py extension available");
 	}
 
-	line[1].erase(line[1].begin());
-	line[1].erase(--line[1].end());
 	return (std::make_pair(line[1], line[2]));
 }
 
-void ConfigParser::validateUploadFilepath(std::vector<std::string> line)
+void ConfigParser::validateUploadFilepath(const std::vector<std::string> &line)
 {
 	if (line.size() != 3 || line[2] != ";")
 	{
@@ -558,7 +556,7 @@ void ConfigParser::validateUploadFilepath(std::vector<std::string> line)
 	}
 }
 
-std::pair<int, std::string> ConfigParser::validateRedirect(std::vector<std::string> line)
+std::pair<int, std::string> ConfigParser::validateRedirect(const std::vector<std::string> &line)
 {
 	if (line.size() != 4 || line[3] != ";")
 	{

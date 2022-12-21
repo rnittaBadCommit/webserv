@@ -14,15 +14,15 @@ namespace ft
 	{
 
 	public:
-		typedef std::map<std::string, std::string>		header_map;
-
 		typedef struct
 		{
 			std::string uri;
 			int status_code;
 			std::string dest_uri;
 		} redirectConf;
-		// typedef std::pair<const int, const std::string> redirectConf;
+		typedef std::map<std::string, std::string>		header_map;
+		typedef std::map<const std::string, redirectConf> redir_map;
+
 		ServerChild();
 		~ServerChild();
 		ServerChild(const ServerConfig &server_config);
@@ -46,8 +46,8 @@ namespace ft
 	private:
 		ServerConfig server_config_;
 		LocationConfig location_config_;
-		//std::map<const std::string, Location> location_map_;
-		std::map<const std::string, redirectConf> redirectList_map_;
+
+		redir_map redirectList_map_;
 
 		int			response_code_;
 		HTTPParseStatus	parse_status_;
