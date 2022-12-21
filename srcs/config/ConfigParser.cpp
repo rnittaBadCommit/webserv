@@ -1,10 +1,9 @@
 #include "ConfigParser.hpp"
-#include "../utils.hpp"
+#include "../utils/utils.hpp"
 #include <vector>
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include "../utils.hpp"
 
 ConfigParser::ConfigParser() : parser_line(), config(), server_config(), location_config(), nowBlock()
 {

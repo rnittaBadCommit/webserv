@@ -33,3 +33,7 @@
 
 # IDE specific settings files
 .idea
+cmake-build-debug
+/UnitTests/testroot/var/www/put-content.html
+/UnitTests/testroot/var/www/put_test.html
+/successHtmlFile01.html
