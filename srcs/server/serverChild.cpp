@@ -330,5 +330,5 @@ namespace ft
 		}
 	}
 
-	
+
 } // namespace ft
