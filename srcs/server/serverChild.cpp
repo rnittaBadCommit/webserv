@@ -160,7 +160,7 @@ namespace ft
     }
 
 	void    ServerChild::setUp_locationConfig_() {
-        std::string     httpReqURI = HTTP_head_.GetRequestURI();	
+        std::string     httpReqURI = HTTP_head_.GetRequestURI();
         std::string     pathParts;
         ServerConfig::loc_conf_map				serverLocMap = server_config_.getLocationConfig();
         ServerConfig::loc_conf_map::iterator	locConfIt;
@@ -315,7 +315,7 @@ namespace ft
         }
 	    if (hex_bytes_ == 0) {	
 			response_code_ = 200;
-			parse_status_ = complete;	
+			parse_status_ = complete;
 		}
 	}
 
