@@ -274,7 +274,7 @@ int do_CGI(std::string &response_message_str,
   response_message_stream << "Date: " << CreateDate() << CRLF;
   response_message_stream << "Last-Modified: " << CreateDate() << CRLF;
   response_message_stream << "Content-Type: " << "text/html" << CRLF;
-  response_message_stream << "Content-Lenght: " << cgi_output.str().size() << CRLF;
+  response_message_stream << "Content-Length: " << cgi_output.str().size() << CRLF;
 
   // send body
   response_message_stream << CRLF;
