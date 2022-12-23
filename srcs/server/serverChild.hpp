@@ -38,6 +38,7 @@ namespace ft
 		HTTPHead&			Get_HTTPHead();
 		const std::string&		Get_body() const;
 		const std::string&		Get_path() const;
+		const LocationConfig&	Get_location_config();
 
 		void	Set_parse_status(HTTPParseStatus parse_status);
 		void	Set_response_code(int response_code);

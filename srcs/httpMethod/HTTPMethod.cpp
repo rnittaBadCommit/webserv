@@ -165,7 +165,7 @@ int do_get(std::string &response_message_str, const std::string &file_path) {
   // Content-Type:
   response_message_stream << "Content-Type: " << "text/html" << CRLF;
   // Content-Length:
-  response_message_stream << "Content-Lenght: " << st.st_size << CRLF;
+  response_message_stream << "Content-Length: " << st.st_size << CRLF;
 
   // send body
   response_message_stream << CRLF;
