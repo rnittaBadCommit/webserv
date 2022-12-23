@@ -86,6 +86,7 @@ namespace ft
 	HTTPHead&			ServerChild::Get_HTTPHead() { return HTTP_head_; }
 	const std::string&		ServerChild::Get_body() const { return body_; }
 	const std::string&		ServerChild::Get_path() const { return path_; }
+LocationConfig ServerChild::Get_location_config() { return LocationConfig(); }
 
 	void	ServerChild::Set_parse_status(HTTPParseStatus parse_status) { parse_status_ = parse_status; }
 	void	ServerChild::Set_response_code(int response_code) { response_code_ = response_code; }
@@ -325,5 +326,4 @@ namespace ft
 		}
 	}
 
-	
 } // namespace ft
