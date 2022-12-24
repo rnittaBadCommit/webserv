@@ -60,7 +60,7 @@ void Cgi::CreateEnvMap() {
 
   cgi_env_val_["SERVER_NAME"] = server_name_;
   cgi_env_val_["REQUEST_METHOD"] = request_method_;
-  cgi_env_val_["SCRIPT_NAME"] = script_name_; // tmp TODO: get_script_name()
+  cgi_env_val_["SCRIPT_NAME"] = script_name_;
 
   // POST によってフォームを受信する場合に、標準入力から読み込む必要のあるbyte数
   cgi_env_val_["CONTENT_LENGTH"] = "42"; // TODO: get_content_length()
