@@ -47,7 +47,7 @@ void LocationConfig::setUri(const std::string &uri)
 
 void LocationConfig::setAlias(const std::string &alias)
 {
-	if (is_set.find(ALIAS) != is_set.end()) {
+	if (directiveSet(ALIAS)) {
 		throw std::runtime_error("Multiple alias directives");
 	}
 	this->is_set.insert(ALIAS);
@@ -56,7 +56,7 @@ void LocationConfig::setAlias(const std::string &alias)
 
 void LocationConfig::setAutoindex(const bool autoindex)
 {
-	if (is_set.find(AUTOINDEX) != is_set.end()) {
+	if (directiveSet(AUTOINDEX)) {
 		throw std::runtime_error("Multiple autoindex directives");
 	}
 	this->is_set.insert(AUTOINDEX);
@@ -65,8 +65,12 @@ void LocationConfig::setAutoindex(const bool autoindex)
 
 void LocationConfig::setAllowMethod(const std::set<std::string> &allow_method)
 {
-	if (is_set.find(ALLOW_METHOD) != is_set.end()) {
+	if (directiveSet(ALLOW_METHOD)) {
 		throw std::runtime_error("Multiple allow_method directives");
+	}
+	if (directiveSet(REDIRECT)
+		&& (allow_method.find("GET") == allow_method.end() || allow_method.size() > 1)) {
+			throw std::runtime_error("Redirect only allowed with GET");
 	}
 	this->is_set.insert(ALLOW_METHOD);
 	this->allow_method = allow_method;
@@ -80,7 +84,7 @@ void LocationConfig::addIndex(const std::vector<std::string> &index)
 
 void LocationConfig::setCgiExtension(const std::pair<std::string, std::string> &cgi_extension)
 {
-	if (is_set.find(CGI_EXTENSION) != is_set.end()) {
+	if (directiveSet(CGI_EXTENSION)) {
 		throw std::runtime_error("Multiple cgi_extension directives");
 	}
 	this->is_set.insert(CGI_EXTENSION);
@@ -89,8 +93,12 @@ void LocationConfig::setCgiExtension(const std::pair<std::string, std::string> &
 
 void LocationConfig::setRedirect(const std::pair<int, std::string>& redirect)
 {
-	if (is_set.find(REDIRECT) != is_set.end()) {
+	if (directiveSet(REDIRECT)) {
 		return;
+	}
+	if (directiveSet(ALLOW_METHOD)
+		&& (allow_method.find("GET") == allow_method.end() || allow_method.size() > 1)) {
+			throw std::runtime_error("Redirect only allowed with GET");
 	}
 	this->is_set.insert(REDIRECT);
 	this->redirect = redirect;
@@ -98,7 +106,7 @@ void LocationConfig::setRedirect(const std::pair<int, std::string>& redirect)
 
 void LocationConfig::setUploadFilepath(const std::string &upload_filepath)
 {
-	if (is_set.find(UPLOAD_FILEPATH) != is_set.end()) {
+	if (directiveSet(UPLOAD_FILEPATH)) {
 		throw std::runtime_error("Multiple upload_filepath directives");
 	}
 	this->is_set.insert(UPLOAD_FILEPATH);
@@ -115,7 +123,7 @@ const std::string &LocationConfig::getAlias() const
 	return this->alias;
 }
 
-const bool &LocationConfig::getAutoIndex() const
+bool LocationConfig::getAutoIndex() const
 {
 	return this->autoindex;
 }
@@ -162,4 +170,8 @@ void	LocationConfig::print() const {
 	std::cout << "cgi_extension: " << cgi_extension.first << " " << cgi_extension.second << std::endl;
 	std::cout << "redirect: " << redirect.first << " " << redirect.second << std::endl;
 	std::cout << "upload_filepath: " << upload_filepath << std::endl;
+}
+
+bool	LocationConfig::directiveSet(E_DirectiveType directive) {
+	return (is_set.find(directive) != is_set.end());
 }

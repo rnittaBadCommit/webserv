@@ -37,8 +37,8 @@ public:
 	void addLocationConfig(const std::string &path, const LocationConfig location_config);
 
 	const std::string &getServerName() const;
-	const unsigned int &getListen() const;
-	const unsigned int &getClientMaxBodySize() const;
+	unsigned int getListen() const;
+	unsigned int getClientMaxBodySize() const;
 	const err_page_map &getErrorPage() const;
 	const loc_conf_map &getLocationConfig() const;
 

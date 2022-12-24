@@ -52,7 +52,7 @@ namespace ft {
         header_type::const_iterator host = _headerFields.find("host");
         return (host == _headerFields.end() ? empty : host->second);
     }
-    const int&                      HTTPHead::GetResponseCode() const { return _responseCode;}
+    int                             HTTPHead::GetResponseCode() const { return _responseCode;}
     const HTTPParseStatus&          HTTPHead::GetParseStatus() const { return _parseStatus; }
     const std::string&              HTTPHead::GetRequestMethod() const { return _requestMethod; }
     std::string&                    HTTPHead::GetRequestURI() { return _requestURI; }

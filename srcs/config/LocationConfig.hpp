@@ -40,7 +40,7 @@ public:
 
 	const std::string &getUri() const;
 	const std::string &getAlias() const;
-	const bool &getAutoIndex() const;
+	bool  getAutoIndex() const;
 	const std::set<std::string> &getAllowMethod() const;
 	const std::vector<std::string> &getIndex() const;
 	const std::pair<std::string, std::string> &getCgiExtension() const;
@@ -48,6 +48,9 @@ public:
 	const std::string &getUploadFilepath() const;
 
 	void print() const;
+
+private:
+	bool	directiveSet(E_DirectiveType directive);
 };
 
 #endif

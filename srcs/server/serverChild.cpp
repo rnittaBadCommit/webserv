@@ -98,17 +98,19 @@ namespace ft
 		max_body_size_ = server_config_.getClientMaxBodySize();
 		response_code_ = head.GetResponseCode();
 
+		// validate good request headers
+		check_headers_();
+
 		// Find location conf
 		setUp_locationConfig_();
-
-		// validate request method and headers
-		check_method_();
-		check_headers_();
 
 		// return in case of redirect
 		if (parse_status_ == complete) {
 			return ;
 		}
+
+		// validate request method
+		check_method_();
 
 		/** check IS CGI? **/
 		/*if (HTTP_head_.GetRequestURI().find('?') != std::string::npos) {
@@ -181,6 +183,9 @@ namespace ft
 
         location_config_ = locConfIt->second;
 		if (location_config_.getRedirect().first != LocationConfig::NO_REDIRECT) {
+			if (HTTP_head_.GetRequestMethod() != "GET") {
+				throw_(400, "Redirect only allowed with GET");
+			}
 			parse_status_ = complete;
 			response_code_ = location_config_.getRedirect().first;
 			path_ = location_config_.getRedirect().second;

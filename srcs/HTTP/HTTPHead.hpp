@@ -54,7 +54,7 @@ namespace ft {
         void    ParseRequestURI();
     
         const std::string&      GetHost() const;
-        const int&              GetResponseCode() const;
+        int                     GetResponseCode() const;
         const HTTPParseStatus&  GetParseStatus() const;
         const std::string&      GetRequestMethod() const;
         std::string&            GetRequestURI();
