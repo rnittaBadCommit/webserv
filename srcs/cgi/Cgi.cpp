@@ -20,11 +20,14 @@
 #include <sys/wait.h>
 #include "Cgi.hpp"
 
-Cgi::Cgi(ft::ServerChild server_child, const std::string &file_path, const std::string &query_string)
+Cgi::Cgi(ft::ServerChild server_child,
+         const std::string &file_path,
+         const std::string &script_name,
+         const std::string &query_string)
     : cgi_path_(file_path),
       query_string_(query_string),
       request_method_(server_child.Get_HTTPHead().GetRequestMethod()),
-      script_name_("hoge"),
+      script_name_(script_name),
       cgi_extension_(server_child.Get_location_config().getCgiExtension().first),
       bin_path_(server_child.Get_location_config().getCgiExtension().second),
       server_name_(server_child.Get_server_config().getServerName()),

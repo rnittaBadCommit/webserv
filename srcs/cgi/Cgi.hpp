@@ -11,7 +11,10 @@
 
 class Cgi {
  public:
-  Cgi(ft::ServerChild server_child, const std::string &file_path, const std::string &query_string);
+  Cgi(ft::ServerChild server_child,
+      const std::string &file_path,
+      const std::string &script_name,
+      const std::string &query_string);
   ~Cgi();
   void Execute();
 
