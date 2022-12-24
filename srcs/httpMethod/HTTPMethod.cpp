@@ -230,7 +230,7 @@ int do_CGI(std::string &response_message_str,
            std::string query_string) {
   int response_status;
   std::stringstream response_message_stream;
-  Cgi cgi(server_child, query_string);
+  Cgi cgi(server_child, file_path, query_string);
   const int buf_size = 1024;
   char buf[buf_size];
 
