@@ -3,13 +3,19 @@
 # cgi-hello-python.cgi -- 簡単な CGI のプログラム (Pyton版)
 # ~yas/syspro/www/cgi-hello-python.cgi
 
+import os
+
 def main():
-    print_content()
+    cgi_env = os.environ
+    html = '<html><head><title>CGI ENVIRONMENT</title></head><body><h1>CGI ENVIRONMENT</h1><table>'
+    for key, value in cgi_env.items():
+        html += f'<tr><td>{key}</td><td>{value}</td></tr>'
+    html += '</table></body></html>'
+
+    print('Content-type: text/html\n')
+    print(html)
+
     exit(0)
 
-def print_content():
-    print("<HTML><HEAD></HEAD><BODY>")
-    print("hello.")
-    print("</BODY></HTML>")
 
 main()
