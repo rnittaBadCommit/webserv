@@ -33,6 +33,7 @@ class Cgi {
    */
   // PATH info
   std::string query_string_;
+  unsigned long content_length_;
 
   // Server child
   std::string request_method_;

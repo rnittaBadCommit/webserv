@@ -26,6 +26,7 @@ Cgi::Cgi(ft::ServerChild server_child,
          const std::string &query_string)
     : cgi_path_(file_path),
       query_string_(query_string),
+      content_length_(server_child.Get_body().size()), // The order is reversed, but that's OK.
       request_method_(server_child.Get_HTTPHead().GetRequestMethod()),
       script_name_(script_name),
       cgi_extension_(server_child.Get_location_config().getCgiExtension().first),
@@ -63,7 +64,10 @@ void Cgi::CreateEnvMap() {
   cgi_env_val_["SCRIPT_NAME"] = script_name_;
 
   // POST によってフォームを受信する場合に、標準入力から読み込む必要のあるbyte数
-  cgi_env_val_["CONTENT_LENGTH"] = "42"; // TODO: get_content_length()
+  // Therefore, for the GET method, CONTENT_LENGTH is 0.
+  std::stringstream content_length_string_;
+  content_length_string_ << content_length_;
+  cgi_env_val_["CONTENT_LENGTH"] = content_length_string_.str();
 
   // POST によってフォームを受信する場合
   cgi_env_val_["CONTENT_TYPE"] = "html"; // tmp
