@@ -167,8 +167,7 @@ void Cgi::Execute() {
       free(argv);
       exit(1);
     }
-    argv[1] = strdup("test_utils/cgi/cgi-hello-python.cgi");
-//    argv[1] = strdup("test_utils/cgi/new-file.py");
+    argv[1] = strdup("var/www/inception_server/cgi-bin/check-cgi-environ.py");
     if (argv[1] == NULL) {
       free(argv[0]);
       free(argv);
