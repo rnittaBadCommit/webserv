@@ -175,10 +175,11 @@ namespace DoCGI{
 
 TEST_F(DoCGI, Case1) {
   ft::ServerChild server_child;
+  std::string query_string_;
 
   std::string response_message_str;
 
-  do_CGI(response_message_str, server_child, std::string());
+  do_CGI(response_message_str, server_child, std::string(), query_string_);
 
   std::cout << response_message_str << std::endl;
 }

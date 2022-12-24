@@ -11,7 +11,7 @@
 
 class Cgi {
  public:
-  Cgi(ft::ServerChild server_child);
+  Cgi(ft::ServerChild server_child, const std::string& query_string);
   ~Cgi();
   void Execute();
 
@@ -22,9 +22,14 @@ class Cgi {
 
  private:
   std::string cgi_path_;
-  std::string query_string_;
   std::map<std::string, std::string> cgi_env_val_;
   int         cgi_socket_;
+
+  /*
+   * Environment
+   */
+  // PATH info
+  std::string query_string_;
 
   // Server child
   std::string request_method_;

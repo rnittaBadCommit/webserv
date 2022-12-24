@@ -20,13 +20,15 @@
 #include <sys/wait.h>
 #include "Cgi.hpp"
 
-Cgi::Cgi(ft::ServerChild server_child)
-    : request_method_(server_child.Get_HTTPHead().GetRequestMethod()),
+Cgi::Cgi(ft::ServerChild server_child, const std::string& query_string)
+    : query_string_(query_string),
+      request_method_(server_child.Get_HTTPHead().GetRequestMethod()),
       script_name_("hoge"),
       cgi_extension_(server_child.Get_location_config().getCgiExtension().first),
       bin_path_(server_child.Get_location_config().getCgiExtension().second),
       server_name_(server_child.Get_server_config().getServerName()),
-      server_port_(server_child.Get_server_config().getListen()) {
+      server_port_(server_child.Get_server_config().getListen())
+      {
 }
 
 Cgi::~Cgi() {
@@ -63,7 +65,7 @@ void Cgi::CreateEnvMap() {
   cgi_env_val_["CONTENT_TYPE"] = "html"; // tmp
 
   // for GET
-  cgi_env_val_["QUERY_STRING"] = "query_string"; // tmp TODO: get_query_string()
+  cgi_env_val_["QUERY_STRING"] = query_string_;
   cgi_env_val_["PATH_INFO"] = "";
 
   cgi_env_val_["REQUEST_URI"] = ""; // 不要かも
