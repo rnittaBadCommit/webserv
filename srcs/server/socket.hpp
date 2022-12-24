@@ -51,13 +51,9 @@ namespace ft
 		};
 
 		void setup(const std::vector<ServerConfig> &server_config);
-
 		RecievedMsg recieve_msg();
-
 		void send_msg(int fd, const std::string msg);
-
 		std::vector<int>& check_keep_time_and_close_fd();
-
 		void close_fd_(const int fd, const int i_poll_fd);
 
 		class SetUpFailException : public std::exception

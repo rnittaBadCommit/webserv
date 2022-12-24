@@ -47,7 +47,6 @@ public:
 	const std::pair<int, std::string> &getRedirect() const;
 	const std::string &getUploadFilepath() const;
 
-	const bool &isSet(E_DirectiveType type);
 	void print() const;
 };
 

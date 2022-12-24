@@ -41,11 +41,7 @@ namespace ft
 			if (default_serverChild_map_.count((in_port_t)(*it).getListen()) == 0)
 				default_serverChild_map_.insert(std::make_pair((in_port_t)(*it).getListen(), (*(serverChild_map_.find(key_to_insert))).second));
 		}
-	}
-
-	void setup_()
-	{
-	}
+	}	
 
 	bool Server::recieve_request_()
 	{
@@ -78,9 +74,9 @@ namespace ft
 			try {
 				if (head.GetParseStatus() != complete) {
 					if (head.Parse(recieved_msg.content) == 0) {
-						//std::cout << "HEADER RECIEVED\n";
+						std::cout << "HEADER RECIEVED\n";
 						head.ParseRequestURI();
-						//head.PrintRequest();
+						head.PrintRequest();
 						serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
 						serverChild.SetUp(head);
 						if (serverChild.Get_parse_status() != complete)
@@ -98,25 +94,15 @@ namespace ft
 			}
 
 			if (serverChild.Get_parse_status() == complete) {
-				//std::cout << "PATH: " << serverChild.Get_path() << std::endl;
-				//std::cout << "BODY RECEIVED: ";
-				//std::cout << serverChild.Get_body() << std::endl;
+				std::cout << "PATH: " << serverChild.Get_path() << std::endl;
+				std::cout << "BODY RECEIVED: ";
+				std::cout << serverChild.Get_body() << std::endl;
 
-              std::string response = http_process(serverChild);
-              std::cout << response << std::endl; // Debug
-              socket_.send_msg(recieved_msg.client_id, response);
+                std::string response = http_process(serverChild);
+                std::cout << response << std::endl; // Debug
+                socket_.send_msg(recieved_msg.client_id, response);
 
-				// check status code
-
-				// complete request
-
-				// send response
-
-
-				if (serverChild.Get_HTTPHead().GetRequestURI() == "/foo")
-					socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 12\nContent-Type: text/html\n\nHello Foooo\n");		
-				else
-					socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 12\nContent-Type: text/html\n\nHello World\n");		
+				//socket_.send_msg(recieved_msg.client_id, "HTTP/1.1 200 OK\nContent-Length: 12\nContent-Type: text/html\n\nHello World\n");		
 
 				httpRequest_pair_map_.erase(recieved_msg.client_id);
 
@@ -148,10 +134,6 @@ namespace ft
 		return (false);
 	}
 
-	void run_cgi()
-	{
-	}
-
 	ServerChild& Server::decide_serverChild_config_(const std::string& host, in_port_t port) {
         ServerChildMap::iterator confIt = serverChild_map_.find(std::make_pair(host, port));
 
@@ -172,7 +154,7 @@ namespace ft
 		for (std::vector<ServerConfig>::iterator it = server_config_.begin(); it != server_config_.end(); ++it) {
 			std::cout << "\t\t-----------SERVER-----------" << std::endl;
 			it->print();
-			for (std::map<std::string, LocationConfig>::const_iterator lIt = it->getLocationConfig().begin(); lIt != it->getLocationConfig().end(); ++lIt) {
+			for (ServerConfig::loc_conf_map::const_iterator lIt = it->getLocationConfig().begin(); lIt != it->getLocationConfig().end(); ++lIt) {
 				std::cout << "\t------loc: " << lIt->first << " ------" << std::endl;
 				lIt->second.print();
 			}

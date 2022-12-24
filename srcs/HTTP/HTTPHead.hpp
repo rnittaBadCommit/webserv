@@ -21,8 +21,6 @@ namespace ft {
 
     const static std::string    DELIM = "\r\n";
     const static std::string    BREAK = "\r\n\r\n";
-    //const static std::string    DELIM = "\n";
-    //const static std::string    BREAK = "\n\n";
     const static std::string    SP = " ";
     const static std::string    CN = ":";
     const static std::string    HTTPV = "HTTP/1.1";
@@ -55,7 +53,7 @@ namespace ft {
         int     Parse(const std::string& request);
         void    ParseRequestURI();
     
-        const std::string      GetHost() const;
+        const std::string&      GetHost() const;
         const int&              GetResponseCode() const;
         const HTTPParseStatus&  GetParseStatus() const;
         const std::string&      GetRequestMethod() const;
