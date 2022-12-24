@@ -43,10 +43,10 @@ std::string http_process(ft::ServerChild server_child) {
 
   if (kRequestMethod == "POST") {
     // Any POST request is CGI
-    do_CGI(response_message_str, server_child, std::string());
+    do_CGI(response_message_str, server_child, plane_filepath, query_string_);
   } else if (kRequestMethod == "GET") {
     if (is_CGI) {
-      do_CGI(response_message_str, server_child, plane_filepath);
+      do_CGI(response_message_str, server_child, plane_filepath, query_string_);
     } else {
       do_get(response_message_str, plane_filepath);
     }
