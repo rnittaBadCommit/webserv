@@ -30,6 +30,10 @@ class Cgi {
   std::string request_method_;
   std::string script_name_;
 
+  // Location config
+  std::string cgi_extension_;
+  std::string bin_path_;
+
   void CreateEnvMap();
   void SetEnv();
   static int change_fd(int from, int to);
