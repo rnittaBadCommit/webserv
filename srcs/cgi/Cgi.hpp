@@ -34,6 +34,10 @@ class Cgi {
   std::string cgi_extension_;
   std::string bin_path_;
 
+  // Server config
+  std::string server_name_;
+  unsigned int server_port_;
+
   void CreateEnvMap();
   void SetEnv();
   static int change_fd(int from, int to);

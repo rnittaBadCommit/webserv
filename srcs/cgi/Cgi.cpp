@@ -24,7 +24,9 @@ Cgi::Cgi(ft::ServerChild server_child)
     : request_method_(server_child.Get_HTTPHead().GetRequestMethod()),
       script_name_("hoge"),
       cgi_extension_(server_child.Get_location_config().getCgiExtension().first),
-      bin_path_(server_child.Get_location_config().getCgiExtension().second) {
+      bin_path_(server_child.Get_location_config().getCgiExtension().second),
+      server_name_(server_child.Get_server_config().getServerName()),
+      server_port_(server_child.Get_server_config().getListen()) {
 }
 
 Cgi::~Cgi() {
@@ -45,8 +47,12 @@ void Cgi::CreateEnvMap() {
   cgi_env_val_["SERVER_SOFTWARE"] = "42";
   cgi_env_val_["GATEWAY_INTERFACE"] = "CGI/1.1";
   cgi_env_val_["SERVER_PROTOCOL"] = "HTTP/1.1"; // tmp
-  cgi_env_val_["SERVER_PORT"] = "80"; // tmp 不要かも
-  cgi_env_val_["SERVER_NAME"] = "webserv"; //tmp
+
+  std::stringstream server_port_string_; // server_port_ is unsigned int.
+  server_port_string_ << server_port_;
+  cgi_env_val_["SERVER_PORT"] = server_port_string_.str();
+
+  cgi_env_val_["SERVER_NAME"] = server_name_;
   cgi_env_val_["REQUEST_METHOD"] = request_method_;
   cgi_env_val_["SCRIPT_NAME"] = script_name_; // tmp TODO: get_script_name()
 
