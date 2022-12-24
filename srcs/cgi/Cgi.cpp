@@ -21,7 +21,10 @@
 #include "Cgi.hpp"
 
 Cgi::Cgi(ft::ServerChild server_child)
-    : request_method_(server_child.Get_HTTPHead().GetRequestMethod()), script_name_("hoge") {
+    : request_method_(server_child.Get_HTTPHead().GetRequestMethod()),
+      script_name_("hoge"),
+      cgi_extension_(server_child.Get_location_config().getCgiExtension().first),
+      bin_path_(server_child.Get_location_config().getCgiExtension().second) {
 }
 
 Cgi::~Cgi() {
@@ -151,7 +154,7 @@ void Cgi::Execute() {
     if (argv == NULL) {
       exit(1);
     }
-    argv[0] = strdup("/bin/python3");
+    argv[0] = strdup(bin_path_.c_str());
     if (argv[0] == NULL) {
       free(argv);
       exit(1);
@@ -169,7 +172,7 @@ void Cgi::Execute() {
      * Execution CGI
      */
     errno = 0;
-    ret_val_child = execve("/bin/python3", argv, environ);
+    ret_val_child = execve(bin_path_.c_str(), argv, environ);
     perror("execve failed");
 
     free(argv[0]);
