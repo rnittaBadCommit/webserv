@@ -230,7 +230,6 @@ int do_CGI(std::string &response_message_str,
            std::string query_string) {
   int response_status;
   std::stringstream response_message_stream;
-  Cgi cgi(server_child, file_path, query_string);
   const int buf_size = 1024;
   char buf[buf_size];
 
@@ -249,8 +248,20 @@ int do_CGI(std::string &response_message_str,
   }
 
   /*
+   * If the file exists, assign the file name to script_name_.
+   */
+  std::string script_name;
+  std::size_t last_slash_pos = file_path.find_last_of('/');
+  if (last_slash_pos != std::string::npos) {
+    script_name = file_path.substr(last_slash_pos + 1);
+  } else {
+    script_name = file_path;
+  }
+
+  /*
    * Execute CGI
    */
+  Cgi cgi(server_child, file_path, script_name, query_string);
   cgi.Execute();
   int cgi_out_stream = cgi.GetCgiSocket();
 
