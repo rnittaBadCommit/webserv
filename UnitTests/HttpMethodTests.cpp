@@ -195,29 +195,55 @@ class MethodUtils : public ::testing::Test {
 TEST_F(MethodUtils, Case1) {
   std::string uri = "/42tokyo?a=100";
   bool is_cgi = false;
-  EXPECT_EQ(get_uri_and_check_CGI(uri, is_cgi), "/42tokyo");
+  std::string query_string_;
+  EXPECT_EQ(get_uri_and_check_CGI(uri, query_string_, is_cgi), "/42tokyo");
   EXPECT_EQ(is_cgi, true);
+  EXPECT_EQ(query_string_, "a=100");
 }
 
 TEST_F(MethodUtils, Case2) {
   std::string uri = "/42tokyo";
   bool is_cgi = false;
-  EXPECT_EQ(get_uri_and_check_CGI(uri, is_cgi), "/42tokyo");
+  std::string query_string_;
+  EXPECT_EQ(get_uri_and_check_CGI(uri, query_string_, is_cgi), "/42tokyo");
   EXPECT_EQ(is_cgi, false);
+  EXPECT_EQ(query_string_, "");
 }
 
 TEST_F(MethodUtils, Case3) {
   std::string uri = "/42tokyo?";
   bool is_cgi = false;
-  EXPECT_EQ(get_uri_and_check_CGI(uri, is_cgi), "/42tokyo");
+  std::string query_string_;
+  EXPECT_EQ(get_uri_and_check_CGI(uri, query_string_, is_cgi), "/42tokyo");
   EXPECT_EQ(is_cgi, false);
+  EXPECT_EQ(query_string_, "");
 }
 
 TEST_F(MethodUtils, Case4) {
   std::string uri = "";
   bool is_cgi = false;
-  EXPECT_EQ(get_uri_and_check_CGI(uri, is_cgi), "");
+  std::string query_string_;
+  EXPECT_EQ(get_uri_and_check_CGI(uri, query_string_, is_cgi), "");
   EXPECT_EQ(is_cgi, false);
+  EXPECT_EQ(query_string_, "");
+}
+
+TEST_F(MethodUtils, Case5) {
+  std::string uri = "/42tokyo?=";
+  bool is_cgi = false;
+  std::string query_string_;
+  EXPECT_EQ(get_uri_and_check_CGI(uri, query_string_, is_cgi), "/42tokyo");
+  EXPECT_EQ(is_cgi, true);
+  EXPECT_EQ(query_string_, "=");
+}
+
+TEST_F(MethodUtils, Case6) {
+  std::string uri = "/42tokyo?a=100&b=200&c=300";
+  bool is_cgi = false;
+  std::string query_string_;
+  EXPECT_EQ(get_uri_and_check_CGI(uri, query_string_, is_cgi), "/42tokyo");
+  EXPECT_EQ(is_cgi, true);
+  EXPECT_EQ(query_string_, "a=100&b=200&c=300");
 }
 }
 
