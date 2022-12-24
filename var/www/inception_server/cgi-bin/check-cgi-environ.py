@@ -1,7 +1,7 @@
 #!/usr/local3/coins/linux/bin/python3
 # -*- coding: utf-8 -*-
-# cgi-hello-python.cgi -- 簡単な CGI のプログラム (Pyton版)
-# ~yas/syspro/www/cgi-hello-python.cgi
+# check-cgi-environ.py -- 簡単な CGI のプログラム (Pyton版)
+# ~yas/syspro/www/check-cgi-environ.py
 
 import os
 
