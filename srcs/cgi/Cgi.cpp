@@ -20,8 +20,9 @@
 #include <sys/wait.h>
 #include "Cgi.hpp"
 
-Cgi::Cgi(ft::ServerChild server_child, const std::string& query_string)
-    : query_string_(query_string),
+Cgi::Cgi(ft::ServerChild server_child, const std::string &file_path, const std::string &query_string)
+    : cgi_path_(file_path),
+      query_string_(query_string),
       request_method_(server_child.Get_HTTPHead().GetRequestMethod()),
       script_name_("hoge"),
       cgi_extension_(server_child.Get_location_config().getCgiExtension().first),
@@ -68,7 +69,7 @@ void Cgi::CreateEnvMap() {
   cgi_env_val_["QUERY_STRING"] = query_string_;
   cgi_env_val_["PATH_INFO"] = "";
 
-  cgi_env_val_["REQUEST_URI"] = ""; // 不要かも
+  cgi_env_val_["REQUEST_URI"] = ""; // Not supported
 }
 
 /**
@@ -167,7 +168,7 @@ void Cgi::Execute() {
       free(argv);
       exit(1);
     }
-    argv[1] = strdup("var/www/inception_server/cgi-bin/check-cgi-environ.py");
+    argv[1] = strdup(cgi_path_.c_str());
     if (argv[1] == NULL) {
       free(argv[0]);
       free(argv);
