@@ -74,12 +74,12 @@ const std::string &ServerConfig::getServerName() const
 	return this->server_name;
 }
 
-const unsigned int &ServerConfig::getListen() const
+unsigned int ServerConfig::getListen() const
 {
 	return this->listen;
 }
 
-const unsigned int &ServerConfig::getClientMaxBodySize() const
+unsigned int ServerConfig::getClientMaxBodySize() const
 {
 	return this->client_max_body_size;
 }

@@ -52,6 +52,11 @@ namespace ft
 		void import_config_(const std::string config_path);
 		bool recieve_request_();
 		ServerChild&	decide_serverChild_config_(const std::string& host, in_port_t port);
+		void remove_timeout_clients_();
+		void process_msg_(ServerChild& serverChild, const Socket::RecievedMsg& recieved_msg);
+
+		void print_debug_(const Socket::RecievedMsg& recieved_msg);
+
 	};
 
 }

@@ -3,8 +3,8 @@
 
 namespace ft
 {
-	Server::Server(const std::string config_path) : server_config_(), socket_(), serverChild_map_(),
-		default_serverChild_map_(), httpRequest_pair_map_()
+	Server::Server(const std::string config_path) : server_config_(), socket_(),
+		serverChild_map_(), default_serverChild_map_(), httpRequest_pair_map_()
 	{
 		import_config_(config_path);
 		socket_.setup(server_config_);
@@ -49,49 +49,14 @@ namespace ft
 
 		try
 		{	
-			std::vector<int>& closedfd_vec = socket_.check_keep_time_and_close_fd();
-			for (std::vector<int>::iterator it = closedfd_vec.begin(); it != closedfd_vec.end(); ++it) {
-				httpRequest_pair_map_.erase(*it);
-			}
-			closedfd_vec.clear();	
-
-			std::cout << "httpRequest_pair_map_ size " << httpRequest_pair_map_.size() << std::endl;
-			for (std::map<int, HTTPRequestPair>::iterator it = httpRequest_pair_map_.begin(); it !=	httpRequest_pair_map_.end(); ++it) {
-				std::cout << it->first << " ";
-			}
-			std::cout << std::endl;
-
+			remove_timeout_clients_();
 			recieved_msg = socket_.recieve_msg();
-			std::cout << "===============================" << std::endl
-					  << "port " << recieved_msg.port
-					  << " - fd " << recieved_msg.client_id
-					  << " - msg " << recieved_msg.content << std::endl
-					  << "===============================" << std::endl;
+
+			print_debug_(recieved_msg);
 	
-			HTTPHead& head = httpRequest_pair_map_[recieved_msg.client_id].first;
 			ServerChild& serverChild = httpRequest_pair_map_[recieved_msg.client_id].second;
 
-			try {
-				if (head.GetParseStatus() != complete) {
-					if (head.Parse(recieved_msg.content) == 0) {
-						std::cout << "HEADER RECIEVED\n";
-						head.ParseRequestURI();
-						head.PrintRequest();
-						serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
-						serverChild.SetUp(head);
-						if (serverChild.Get_parse_status() != complete)
-							serverChild.Parse("");
-					}
-				} else if (serverChild.Get_parse_status() != complete) {
-					serverChild.Parse(recieved_msg.content);
-				}
-			} catch (const std::exception& e) {
-				if (head.GetParseStatus() != complete) {
-					serverChild.Set_response_code(head.GetResponseCode());
-				}
-				serverChild.Set_parse_status(complete);
-				std::cout << "error while parsing http request: " << e.what() << std::endl;
-			}
+			process_msg_(serverChild, recieved_msg);
 
 			if (serverChild.Get_parse_status() == complete) {
 				std::cout << "PATH: " << serverChild.Get_path() << std::endl;
@@ -106,7 +71,7 @@ namespace ft
 
 				httpRequest_pair_map_.erase(recieved_msg.client_id);
 
-				if (serverChild.Get_response_code() != 200) {
+				if (serverChild.Get_response_code() >= 400) { /* what to do for 100 - 299? */
 					std::cout << "socket.close_fd_ due to response code != 200" << std::endl;
 					socket_.close_fd_(recieved_msg.client_id, recieved_msg.i_poll_fd);	
 				}
@@ -134,6 +99,41 @@ namespace ft
 		return (false);
 	}
 
+	void Server::remove_timeout_clients_() {
+		std::vector<int>& closedfd_vec = socket_.check_keep_time_and_close_fd();
+		for (std::vector<int>::iterator it = closedfd_vec.begin(); it != closedfd_vec.end(); ++it) {
+			httpRequest_pair_map_.erase(*it);
+		}
+		closedfd_vec.clear();
+	}
+				
+	void	Server::process_msg_(ServerChild& serverChild, const Socket::RecievedMsg& recieved_msg) {
+
+		HTTPHead& head = httpRequest_pair_map_[recieved_msg.client_id].first;
+
+		try {
+			if (head.GetParseStatus() != complete) {
+				if (head.Parse(recieved_msg.content) == 0) {
+					std::cout << "HEADER RECIEVED\n";
+					head.ParseRequestURI();
+					head.PrintRequest();
+					serverChild = decide_serverChild_config_(head.GetHost(), recieved_msg.port);
+					serverChild.SetUp(head);
+					if (serverChild.Get_parse_status() != complete)
+						serverChild.Parse("");
+				}
+			} else if (serverChild.Get_parse_status() != complete) {
+				serverChild.Parse(recieved_msg.content);
+			}
+		} catch (const std::exception& e) {
+			if (head.GetParseStatus() != complete) {
+				serverChild.Set_response_code(head.GetResponseCode());
+			}
+			serverChild.Set_parse_status(complete);
+			std::cout << "error while parsing http request: " << e.what() << std::endl;
+		}	
+	}
+
 	ServerChild& Server::decide_serverChild_config_(const std::string& host, in_port_t port) {
         ServerChildMap::iterator confIt = serverChild_map_.find(std::make_pair(host, port));
 
@@ -159,5 +159,18 @@ namespace ft
 				lIt->second.print();
 			}
 		}
+	}
+
+	void Server::print_debug_(const Socket::RecievedMsg& recieved_msg) {
+		std::cout << "httpRequest_pair_map_ size " << httpRequest_pair_map_.size() << std::endl;
+		for (std::map<int, HTTPRequestPair>::iterator it = httpRequest_pair_map_.begin(); it !=	httpRequest_pair_map_.end(); ++it) {
+			std::cout << it->first << " ";
+		}
+		std::cout << std::endl;
+		std::cout << "===============================" << std::endl
+				  << "port " << recieved_msg.port
+				  << " - fd " << recieved_msg.client_id
+				  << " - msg " << recieved_msg.content << std::endl
+				  << "===============================" << std::endl;
 	}
 }
