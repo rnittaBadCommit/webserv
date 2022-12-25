@@ -18,7 +18,10 @@ TEST_F(CgiTest, SuccessCase1) {
 //  ft::Server s;
 //  ft::Server::
   ft::ServerChild server_child;
-  Cgi c(server_child);
+  std::string file_path;
+  std::string script_name_;
+  std::string query_string_;
+  Cgi c(server_child, file_path, script_name_, query_string_);
   c.Execute();
 
   // Print debug

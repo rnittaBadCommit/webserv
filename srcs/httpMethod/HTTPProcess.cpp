@@ -31,7 +31,8 @@ std::string http_process(ft::ServerChild server_child) {
    * then execute CGI.
    */
   bool is_CGI = false;
-  std::string plane_filepath = get_uri_and_check_CGI(kFilePath, is_CGI);
+  std::string query_string_;
+  std::string plane_filepath = get_uri_and_check_CGI(kFilePath, query_string_, is_CGI);
 
   // TODO: delete. for debug
   std::cerr << "*************************" << std::endl;
@@ -42,10 +43,10 @@ std::string http_process(ft::ServerChild server_child) {
 
   if (kRequestMethod == "POST") {
     // Any POST request is CGI
-    do_CGI(response_message_str, server_child, std::string());
+    do_CGI(response_message_str, server_child, plane_filepath, query_string_);
   } else if (kRequestMethod == "GET") {
     if (is_CGI) {
-      do_CGI(response_message_str, server_child, plane_filepath);
+      do_CGI(response_message_str, server_child, plane_filepath, query_string_);
     } else {
       do_get(response_message_str, plane_filepath);
     }

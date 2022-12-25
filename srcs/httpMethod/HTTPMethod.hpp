@@ -24,7 +24,8 @@ int do_delete(std::string &response_message_str, const std::string &file_path);
 
 int do_CGI(std::string &response_message_str,
            ft::ServerChild server_child,
-           std::string file_path);
+           std::string file_path,
+           std::string query_string);
 
 int disallow_method(std::string &response_message_str);
 

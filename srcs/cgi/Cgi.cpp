@@ -20,8 +20,20 @@
 #include <sys/wait.h>
 #include "Cgi.hpp"
 
-Cgi::Cgi(ft::ServerChild server_child)
-    : request_method_(server_child.Get_HTTPHead().GetRequestMethod()), script_name_("hoge") {
+Cgi::Cgi(ft::ServerChild server_child,
+         const std::string &file_path,
+         const std::string &script_name,
+         const std::string &query_string)
+    : cgi_path_(file_path),
+      query_string_(query_string),
+      content_length_(server_child.Get_body().size()), // The order is reversed, but that's OK.
+      request_method_(server_child.Get_HTTPHead().GetRequestMethod()),
+      script_name_(script_name),
+      cgi_extension_(server_child.Get_location_config().getCgiExtension().first),
+      bin_path_(server_child.Get_location_config().getCgiExtension().second),
+      server_name_(server_child.Get_server_config().getServerName()),
+      server_port_(server_child.Get_server_config().getListen())
+      {
 }
 
 Cgi::~Cgi() {
@@ -42,22 +54,29 @@ void Cgi::CreateEnvMap() {
   cgi_env_val_["SERVER_SOFTWARE"] = "42";
   cgi_env_val_["GATEWAY_INTERFACE"] = "CGI/1.1";
   cgi_env_val_["SERVER_PROTOCOL"] = "HTTP/1.1"; // tmp
-  cgi_env_val_["SERVER_PORT"] = "80"; // tmp 不要かも
-  cgi_env_val_["SERVER_NAME"] = "webserv"; //tmp
+
+  std::stringstream server_port_string_; // server_port_ is unsigned int.
+  server_port_string_ << server_port_;
+  cgi_env_val_["SERVER_PORT"] = server_port_string_.str();
+
+  cgi_env_val_["SERVER_NAME"] = server_name_;
   cgi_env_val_["REQUEST_METHOD"] = request_method_;
-  cgi_env_val_["SCRIPT_NAME"] = script_name_; // tmp TODO: get_script_name()
+  cgi_env_val_["SCRIPT_NAME"] = script_name_;
 
   // POST によってフォームを受信する場合に、標準入力から読み込む必要のあるbyte数
-  cgi_env_val_["CONTENT_LENGTH"] = "42"; // TODO: get_content_length()
+  // Therefore, for the GET method, CONTENT_LENGTH is 0.
+  std::stringstream content_length_string_;
+  content_length_string_ << content_length_;
+  cgi_env_val_["CONTENT_LENGTH"] = content_length_string_.str();
 
   // POST によってフォームを受信する場合
   cgi_env_val_["CONTENT_TYPE"] = "html"; // tmp
 
   // for GET
-  cgi_env_val_["QUERY_STRING"] = "query_string"; // tmp TODO: get_query_string()
+  cgi_env_val_["QUERY_STRING"] = query_string_;
   cgi_env_val_["PATH_INFO"] = "";
 
-  cgi_env_val_["REQUEST_URI"] = ""; // 不要かも
+  cgi_env_val_["REQUEST_URI"] = ""; // Not supported
 }
 
 /**
@@ -151,13 +170,12 @@ void Cgi::Execute() {
     if (argv == NULL) {
       exit(1);
     }
-    argv[0] = strdup("/bin/python3");
+    argv[0] = strdup(bin_path_.c_str());
     if (argv[0] == NULL) {
       free(argv);
       exit(1);
     }
-    argv[1] = strdup("test_utils/cgi/cgi-hello-python.cgi");
-//    argv[1] = strdup("test_utils/cgi/new-file.py");
+    argv[1] = strdup(cgi_path_.c_str());
     if (argv[1] == NULL) {
       free(argv[0]);
       free(argv);
@@ -169,7 +187,7 @@ void Cgi::Execute() {
      * Execution CGI
      */
     errno = 0;
-    ret_val_child = execve("/bin/python3", argv, environ);
+    ret_val_child = execve(bin_path_.c_str(), argv, environ);
     perror("execve failed");
 
     free(argv[0]);

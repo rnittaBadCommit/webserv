@@ -87,6 +87,7 @@ namespace ft
 	const std::string&		ServerChild::Get_body() const { return body_; }
 	const std::string&		ServerChild::Get_path() const { return path_; }
 	const LocationConfig&	ServerChild::Get_location_config() { return location_config_; }
+    const ServerConfig& ServerChild::Get_server_config() { return server_config_; }
 
 	void	ServerChild::Set_parse_status(HTTPParseStatus parse_status) { parse_status_ = parse_status; }
 	void	ServerChild::Set_response_code(int response_code) { response_code_ = response_code; }
@@ -160,7 +161,7 @@ namespace ft
     }
 
 	void    ServerChild::setUp_locationConfig_() {
-        std::string     httpReqURI = HTTP_head_.GetRequestURI();	
+        std::string     httpReqURI = HTTP_head_.GetRequestURI();
         std::string     pathParts;
         ServerConfig::loc_conf_map				serverLocMap = server_config_.getLocationConfig();
         ServerConfig::loc_conf_map::iterator	locConfIt;
@@ -315,7 +316,7 @@ namespace ft
         }
 	    if (hex_bytes_ == 0) {	
 			response_code_ = 200;
-			parse_status_ = complete;	
+			parse_status_ = complete;
 		}
 	}
 
@@ -330,5 +331,5 @@ namespace ft
 		}
 	}
 
-	
+
 } // namespace ft
